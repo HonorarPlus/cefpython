@@ -33,6 +33,12 @@ public:
                           const CefString& source,
                           int line) override;
 
+    bool OnCursorChange(CefRefPtr<CefBrowser> browser,
+                        CefCursorHandle cursor,
+                        cef_cursor_type_t type,
+                        const CefCursorInfo& custom_cursor_info
+                        ) override;
+
     bool OnAutoResize(CefRefPtr<CefBrowser> browser,
                       const CefSize& new_size) override;
 

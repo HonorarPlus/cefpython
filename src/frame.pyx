@@ -129,7 +129,7 @@ cdef class PyFrame:
             return self.cefFrame
         raise Exception("PyFrame.GetCefFrame() failed: CefFrame was destroyed")
 
-    def __init__(self, int browserId, int frameId):
+    def __init__(self, int browserId, object frameId):
         self.browserId = browserId
         self.frameId = frameId
 
@@ -203,14 +203,8 @@ cdef class PyFrame:
     cpdef py_bool IsMain(self):
         return self.GetCefFrame().get().IsMain()
 
-    cpdef py_void LoadString(self, py_string value, py_string url):
-        cdef CefString cefValue
-        cdef CefString cefUrl
-        PyToCefString(value, cefValue)
-        PyToCefString(url, cefUrl)
-        self.GetCefFrame().get().LoadString(cefValue, cefUrl)
-
     cpdef py_void LoadUrl(self, py_string url):
+        url = GetNavigateUrl(url)
         cdef CefString cefUrl
         PyToCefString(url, cefUrl)
         self.GetCefFrame().get().LoadURL(cefUrl)
@@ -229,3 +223,21 @@ cdef class PyFrame:
 
     cpdef py_void ViewSource(self):
         self.GetCefFrame().get().ViewSource()
+
+    cdef void SendProcessMessage(self, cef_process_id_t targetProcess,
+            object frameId, py_string messageName, list pyArguments
+            ) except *:
+        cdef CefRefPtr[CefProcessMessage] message = \
+                CefProcessMessage_Create(PyToCefStringValue(messageName))
+        # This does not work, no idea why, the CEF implementation
+        # seems not to allow it, both Assign() and swap() do not work:
+        # | message.get().GetArgumentList().Assign(arguments.get())
+        # | message.get().GetArgumentList().swap(arguments)
+        cdef CefRefPtr[CefListValue] messageArguments = \
+                message.get().GetArgumentList()
+        PyListToExistingCefListValue(self.GetBrowserIdentifier(), frameId,
+                pyArguments, messageArguments)
+        Debug("SendProcessMessage(): message=%s, arguments size=%d" % (
+                messageName,
+                message.get().GetArgumentList().get().GetSize()))
+        self.GetCefFrame().get().SendProcessMessage( targetProcess, message)

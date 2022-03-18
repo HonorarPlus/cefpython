@@ -9,6 +9,7 @@
 #endif
 
 #include "common/cefpython_public_api.h"
+#include "include/cef_request_context_handler.h"
 
 class RequestContextHandler :
         public CefRequestContextHandler
@@ -29,7 +30,6 @@ public:
         browser_ = browser;
     }
 
-    virtual CefRefPtr<CefCookieManager> GetCookieManager() OVERRIDE;
     virtual bool OnBeforePluginLoad(const CefString& mime_type,
                                   const CefString& plugin_url,
                                   bool is_main_frame,

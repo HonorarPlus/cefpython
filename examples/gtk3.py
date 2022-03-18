@@ -125,7 +125,9 @@ class Gtk3Example(Gtk.Application):
 
     def on_size_allocate(self, _, data):
         if self.browser:
-            if WINDOWS or LINUX:
+            if WINDOWS:
+                WindowUtils.OnSize(self.win32_handle, 0, 0, 0)
+            elif LINUX:
                 self.browser.SetBounds(data.x, data.y,
                                        data.width, data.height)
 

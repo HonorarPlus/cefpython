@@ -543,16 +543,20 @@ struct CefSettingsTraits {
   static inline void clear(struct_type* s) {
     cef_string_clear(&s->browser_subprocess_path);
     cef_string_clear(&s->framework_dir_path);
+    cef_string_clear(&s->main_bundle_path);
     cef_string_clear(&s->cache_path);
+    cef_string_clear(&s->root_cache_path);
     cef_string_clear(&s->user_data_path);
     cef_string_clear(&s->user_agent);
-    cef_string_clear(&s->product_version);
+    cef_string_clear(&s->user_agent_product);
     cef_string_clear(&s->locale);
     cef_string_clear(&s->log_file);
     cef_string_clear(&s->javascript_flags);
     cef_string_clear(&s->resources_dir_path);
     cef_string_clear(&s->locales_dir_path);
     cef_string_clear(&s->accept_language_list);
+    cef_string_clear(&s->cookieable_schemes_list);
+    cef_string_clear(&s->application_client_id_for_file_scanning);
   }
 
   static inline void set(const struct_type* src,
@@ -564,6 +568,9 @@ struct CefSettingsTraits {
                    &target->browser_subprocess_path, copy);
     cef_string_set(src->framework_dir_path.str, src->framework_dir_path.length,
                    &target->framework_dir_path, copy);
+    cef_string_set(src->main_bundle_path.str, src->main_bundle_path.length,
+                   &target->main_bundle_path, copy);
+    target->chrome_runtime = src->chrome_runtime;
     target->multi_threaded_message_loop = src->multi_threaded_message_loop;
     target->external_message_pump = src->external_message_pump;
     target->windowless_rendering_enabled = src->windowless_rendering_enabled;
@@ -571,6 +578,8 @@ struct CefSettingsTraits {
 
     cef_string_set(src->cache_path.str, src->cache_path.length,
                    &target->cache_path, copy);
+    cef_string_set(src->root_cache_path.str, src->root_cache_path.length,
+                   &target->root_cache_path, copy);
     cef_string_set(src->user_data_path.str, src->user_data_path.length,
                    &target->user_data_path, copy);
     target->persist_session_cookies = src->persist_session_cookies;
@@ -578,8 +587,8 @@ struct CefSettingsTraits {
 
     cef_string_set(src->user_agent.str, src->user_agent.length,
                    &target->user_agent, copy);
-    cef_string_set(src->product_version.str, src->product_version.length,
-                   &target->product_version, copy);
+    cef_string_set(src->user_agent_product.str, src->user_agent_product.length,
+                   &target->user_agent_product, copy);
     cef_string_set(src->locale.str, src->locale.length, &target->locale, copy);
 
     cef_string_set(src->log_file.str, src->log_file.length, &target->log_file,
@@ -596,13 +605,21 @@ struct CefSettingsTraits {
     target->remote_debugging_port = src->remote_debugging_port;
     target->uncaught_exception_stack_size = src->uncaught_exception_stack_size;
     target->ignore_certificate_errors = src->ignore_certificate_errors;
-    target->enable_net_security_expiration =
-        src->enable_net_security_expiration;
     target->background_color = src->background_color;
 
     cef_string_set(src->accept_language_list.str,
                    src->accept_language_list.length,
                    &target->accept_language_list, copy);
+
+    cef_string_set(src->cookieable_schemes_list.str,
+                   src->cookieable_schemes_list.length,
+                   &target->cookieable_schemes_list, copy);
+    target->cookieable_schemes_exclude_defaults =
+        src->cookieable_schemes_exclude_defaults;
+
+    cef_string_set(src->application_client_id_for_file_scanning.str,
+                   src->application_client_id_for_file_scanning.length,
+                   &target->application_client_id_for_file_scanning, copy);
   }
 };
 
@@ -619,6 +636,7 @@ struct CefRequestContextSettingsTraits {
   static inline void clear(struct_type* s) {
     cef_string_clear(&s->cache_path);
     cef_string_clear(&s->accept_language_list);
+    cef_string_clear(&s->cookieable_schemes_list);
   }
 
   static inline void set(const struct_type* src,
@@ -629,11 +647,15 @@ struct CefRequestContextSettingsTraits {
     target->persist_session_cookies = src->persist_session_cookies;
     target->persist_user_preferences = src->persist_user_preferences;
     target->ignore_certificate_errors = src->ignore_certificate_errors;
-    target->enable_net_security_expiration =
-        src->enable_net_security_expiration;
     cef_string_set(src->accept_language_list.str,
                    src->accept_language_list.length,
                    &target->accept_language_list, copy);
+
+    cef_string_set(src->cookieable_schemes_list.str,
+                   src->cookieable_schemes_list.length,
+                   &target->cookieable_schemes_list, copy);
+    target->cookieable_schemes_exclude_defaults =
+        src->cookieable_schemes_exclude_defaults;
   }
 };
 
@@ -698,7 +720,6 @@ struct CefBrowserSettingsTraits {
     target->universal_access_from_file_urls =
         src->universal_access_from_file_urls;
     target->file_access_from_file_urls = src->file_access_from_file_urls;
-    target->web_security = src->web_security;
     target->image_loading = src->image_loading;
     target->image_shrink_standalone_to_fit =
         src->image_shrink_standalone_to_fit;
@@ -737,6 +758,7 @@ struct CefURLPartsTraits {
     cef_string_clear(&s->origin);
     cef_string_clear(&s->path);
     cef_string_clear(&s->query);
+    cef_string_clear(&s->fragment);
   }
 
   static inline void set(const struct_type* src,
@@ -753,6 +775,8 @@ struct CefURLPartsTraits {
     cef_string_set(src->origin.str, src->origin.length, &target->origin, copy);
     cef_string_set(src->path.str, src->path.length, &target->path, copy);
     cef_string_set(src->query.str, src->query.length, &target->query, copy);
+    cef_string_set(src->fragment.str, src->fragment.length, &target->fragment,
+                   copy);
   }
 };
 
@@ -842,6 +866,8 @@ struct CefCookieTraits {
     target->last_access = src->last_access;
     target->has_expires = src->has_expires;
     target->expires = src->expires;
+    target->same_site = src->same_site;
+    target->priority = src->priority;
   }
 };
 
@@ -860,10 +886,7 @@ struct CefCursorInfoTraits {
   static inline void set(const struct_type* src,
                          struct_type* target,
                          bool copy) {
-    target->hotspot = src->hotspot;
-    target->image_scale_factor = src->image_scale_factor;
-    target->buffer = src->buffer;
-    target->size = src->size;
+    *target = *src;
   }
 };
 
@@ -936,23 +959,14 @@ typedef CefStructBase<CefBoxLayoutSettingsTraits> CefBoxLayoutSettings;
 struct CefCompositionUnderlineTraits {
   typedef cef_composition_underline_t struct_type;
 
-  static inline void init(struct_type* s) {
-    s->range.from = 0;
-    s->range.to = 0;
-    s->color = 0;
-    s->background_color = 0;
-    s->thick = 0;
-  }
+  static inline void init(struct_type* s) {}
 
   static inline void clear(struct_type* s) {}
 
   static inline void set(const struct_type* src,
                          struct_type* target,
                          bool copy) {
-    target->range = src->range;
-    target->color = src->color;
-    target->background_color = src->background_color;
-    target->thick = src->thick;
+    *target = *src;
   }
 };
 
@@ -960,5 +974,50 @@ struct CefCompositionUnderlineTraits {
 // Class representing IME composition underline.
 ///
 typedef CefStructBase<CefCompositionUnderlineTraits> CefCompositionUnderline;
+
+struct CefAudioParametersTraits {
+  typedef cef_audio_parameters_t struct_type;
+
+  static inline void init(struct_type* s) {}
+
+  static inline void clear(struct_type* s) {}
+
+  static inline void set(const struct_type* src,
+                         struct_type* target,
+                         bool copy) {
+    *target = *src;
+  }
+};
+
+///
+// Class representing CefAudioParameters settings
+///
+typedef CefStructBase<CefAudioParametersTraits> CefAudioParameters;
+
+struct CefMediaSinkDeviceInfoTraits {
+  typedef cef_media_sink_device_info_t struct_type;
+
+  static inline void init(struct_type* s) {}
+
+  static inline void clear(struct_type* s) {
+    cef_string_clear(&s->ip_address);
+    cef_string_clear(&s->model_name);
+  }
+
+  static inline void set(const struct_type* src,
+                         struct_type* target,
+                         bool copy) {
+    cef_string_set(src->ip_address.str, src->ip_address.length,
+                   &target->ip_address, copy);
+    target->port = src->port;
+    cef_string_set(src->model_name.str, src->model_name.length,
+                   &target->model_name, copy);
+  }
+};
+
+///
+// Class representing MediaSink device info.
+///
+typedef CefStructBase<CefMediaSinkDeviceInfoTraits> CefMediaSinkDeviceInfo;
 
 #endif  // CEF_INCLUDE_INTERNAL_CEF_TYPES_WRAPPERS_H_

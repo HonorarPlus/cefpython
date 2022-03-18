@@ -10,6 +10,7 @@ from cef_string cimport CefString
 from cef_ptr cimport CefRefPtr
 # noinspection PyUnresolvedReferences
 from cef_callback cimport CefCompletionCallback
+from cef_types cimport cef_cookie_same_site_t, cef_cookie_priority_t
 
 cdef extern from "include/cef_cookie.h":
     ctypedef struct CefCookie:
@@ -23,24 +24,14 @@ cdef extern from "include/cef_cookie.h":
         cef_time_t last_access
         cpp_bool has_expires
         cef_time_t expires
+        cef_cookie_same_site_t same_site
+        cef_cookie_priority_t priority
 
     cdef CefRefPtr[CefCookieManager] CefCookieManager_GetGlobalManager \
             "CefCookieManager::GetGlobalManager"(
                 CefRefPtr[CefCompletionCallback] callback)
 
-    cdef CefRefPtr[CefCookieManager] CefCookieManager_GetBlockingManager \
-            "CefCookieManager::GetBlockingManager"()
-
-
-    cdef CefRefPtr[CefCookieManager] CefCookieManager_CreateManager \
-            "CefCookieManager::CreateManager"(
-                const CefString& path,
-                cpp_bool persist_session_cookies,
-                CefRefPtr[CefCompletionCallback] callback)
-
     cdef cppclass CefCookieManager:
-        void SetSupportedSchemes(const cpp_vector[CefString]& schemes,
-                                 CefRefPtr[CefCompletionCallback] callback)
         cpp_bool VisitAllCookies(CefRefPtr[CefCookieVisitor] visitor)
         cpp_bool VisitUrlCookies(const CefString& url, 
                                  cpp_bool includeHttpOnly,
@@ -50,9 +41,6 @@ cdef extern from "include/cef_cookie.h":
         cpp_bool DeleteCookies(const CefString& url,
                                const CefString& cookie_name,
                                CefRefPtr[CefDeleteCookiesCallback] callback)
-        cpp_bool SetStoragePath(const CefString& path,
-                                cpp_bool persist_session_cookies,
-                                CefRefPtr[CefCompletionCallback] callback)
         cpp_bool FlushStore(CefRefPtr[CefCompletionCallback] callback)
 
     cdef cppclass CefCookieVisitor:

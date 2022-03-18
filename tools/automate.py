@@ -147,6 +147,11 @@ def main():
     setup_options(docopt.docopt(__doc__))
 
     if Options.build_cef:
+        if not sys.version_info[:2] == (2, 7):
+            print("ERROR: To build CEF from sources you need Python 2.7.")
+            print("       Upstream automate-git.py works only with that")
+            print("       version of python.")
+            sys.exit(1)
         build_cef()
     elif Options.prebuilt_cef:
         prebuilt_cef()
@@ -270,21 +275,16 @@ def prebuilt_cef():
     #       eg. tag 'upstream-cef47'.
 
     # Find cef_binary directory in the build directory
-    postfix2 = CEF_POSTFIX2
-    if Options.x86:
-        postfix2 = get_cef_postfix2_for_arch("32bit")
     if Options.cef_version:
         cef_binary = os.path.join(Options.build_dir,
                                   "cef_binary_{cef_version}_{os}{sep}"
                                   .format(cef_version=Options.cef_version,
-                                          os=postfix2,
+                                          os=CEF_POSTFIX2,
                                           sep=os.sep))
     else:
-        cef_binary = os.path.join(Options.build_dir,
-                                  "cef_binary_3.{cef_branch}.*_{os}{sep}"
-                                  .format(cef_branch=Options.cef_branch,
-                                          os=postfix2,
-                                          sep=os.sep))
+        print("ERROR: Could not find prebuilt binaries: CEF version not defined.")
+        sys.exit(1)
+
     dirs = glob.glob(cef_binary)
     if len(dirs) == 1:
         Options.cef_binary = dirs[0]
@@ -454,12 +454,13 @@ def build_cef_projects():
 
 
 def build_all_wrapper_libraries_windows():
-    python_compilers = get_available_python_compilers()
-    if not len(python_compilers):
+    python_compiler = get_available_compiler()
+    if not len(python_compiler):
         print("[automate.py] ERROR: Visual Studio compiler not found")
         sys.exit(1)
-    for msvs in python_compilers:
-        vcvars = python_compilers[msvs]
+    
+    for msvs in python_compiler:
+        vcvars = python_compiler[msvs]
         print("[automate.py] Build libcef_dll_wrapper libraries for"
               " VS{msvs}".format(msvs=msvs))
         build_wrapper_library_windows(runtime_library=RUNTIME_MT,
@@ -781,7 +782,8 @@ def create_prebuilt_binaries():
             "build_cefclient", "tests", "ceftests",
             Options.build_type,
             "ceftests" + APP_EXT)
-
+    if not MAC:
+        assert os.path.exists(ceftests)
     if LINUX:
         # On Windows resources/*.html files are embedded inside exe
         ceftests_files = os.path.join(
@@ -805,7 +807,7 @@ def create_prebuilt_binaries():
         # additional space (cefsimple is 157 MB).
         copy_app(cefclient)
         copy_app(cefsimple)
-        #copy_app(ceftests)
+        copy_app(ceftests)
 
     # END: Copy cefclient, cefsimple, ceftests
 
@@ -813,7 +815,7 @@ def create_prebuilt_binaries():
     if platform.system() == "Windows":
         # libcef.lib and cef_sandbox.lib
         mvfiles(bindir, libdir, ".lib")
-        python_compilers = get_available_python_compilers()
+        python_compilers = get_available_compiler()
         for msvs in python_compilers:
             vs_subdir = os.path.join(libdir, "VS{msvs}".format(msvs=msvs))
             os.makedirs(vs_subdir)
@@ -864,21 +866,22 @@ def create_prebuilt_binaries():
     print("[automate.py] OK prebuilt binaries created in '%s/'" % dst)
 
 
-def get_available_python_compilers():
+def get_available_compiler():
     all_python_compilers = OrderedDict([
-        #("2008", VS2008_VCVARS),
-        #("2010", VS2010_VCVARS),
-        #("2015", VS2015_VCVARS),
-        ("2019", VS2019_VCVARS)
+        ("2019", VS2019_VCVARS),
+        ("2015", VS2015_VCVARS),
+        ("2013", VS2013_VCVARS),
+        ("2010", VS2010_VCVARS),
+        ("2008", VS2008_VCVARS),
     ])
+
     ret_compilers = OrderedDict()
     for msvs in all_python_compilers:
         vcvars = all_python_compilers[msvs]
         if os.path.exists(vcvars):
             ret_compilers[msvs] = vcvars
-        else:
-            print("[automate.py] INFO: Visual Studio compiler not found:"
-                  " {vcvars}".format(vcvars=vcvars))
+            break
+    
     return ret_compilers
 
 

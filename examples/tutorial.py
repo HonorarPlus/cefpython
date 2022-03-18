@@ -60,11 +60,11 @@ HTML_code = """
 def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
-    # To change user agent use either "product_version"
+    # To change user agent use either "user_agent_product"
     # or "user_agent" options. Explained in Tutorial in
     # "Change user agent string" section.
     settings = {
-        # "product_version": "MyProduct/10.00",
+        # "user_agent_product": "MyProduct/10.00",
         # "user_agent": "MyAgent/20.00 MyProduct/10.00",
     }
     cef.Initialize(settings=settings)

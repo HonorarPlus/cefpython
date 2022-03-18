@@ -22,6 +22,7 @@ LOGSEVERITY_WARNING = cef_types.LOGSEVERITY_WARNING
 LOGSEVERITY_ERROR = cef_types.LOGSEVERITY_ERROR
 # keep for BC
 LOGSEVERITY_ERROR_REPORT = cef_types.LOGSEVERITY_ERROR
+LOGSEVERITY_FATAL = cef_types.LOGSEVERITY_FATAL
 LOGSEVERITY_DISABLE = cef_types.LOGSEVERITY_DISABLE
 
 
@@ -49,8 +50,24 @@ cdef void SetApplicationSettings(
             cefString = new CefString(&cefAppSettings.accept_language_list)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
+        elif key == "application_client_id_for_file_scanning":
+            cefString = new CefString(&cefAppSettings.application_client_id_for_file_scanning)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
         elif key == "cache_path":
             cefString = new CefString(&cefAppSettings.cache_path)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "cookieable_schemes_list":
+            cefString = new CefString(&cefAppSettings.cookieable_schemes_list)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "cookieable_schemes_exclude_defaults":
+            cefAppSettings.cookieable_schemes_exclude_defaults = int(appSettings[key])
+        elif key == "chrome_runtime":
+            cefAppSettings.chrome_runtime = int(appSettings[key])
+        elif key == "root_cache_path":
+            cefString = new CefString(&cefAppSettings.root_cache_path)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
         elif key == "persist_session_cookies":
@@ -59,8 +76,8 @@ cdef void SetApplicationSettings(
             cefString = new CefString(&cefAppSettings.user_agent)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
-        elif key == "product_version":
-            cefString = new CefString(&cefAppSettings.product_version)
+        elif key == "user_agent_product":
+            cefString = new CefString(&cefAppSettings.user_agent_product)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
         elif key == "log_file":
@@ -75,9 +92,6 @@ cdef void SetApplicationSettings(
             cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
         elif key == "multi_threaded_message_loop":
             cefAppSettings.multi_threaded_message_loop = int(appSettings[key])
-        elif key == "net_security_expiration_enabled":
-            cefAppSettings.enable_net_security_expiration =\
-                    int(appSettings[key])
         elif key == "release_dcheck_enabled":
             # Keep for BC, just log info - no error
             Debug("DEPRECATED: 'release_dcheck_enabled' setting")
@@ -125,6 +139,10 @@ cdef void SetApplicationSettings(
                     int(appSettings[key])
         elif key == "framework_dir_path":
             cefString = new CefString(&cefAppSettings.framework_dir_path)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "main_bundle_path":
+            cefString = new CefString(&cefAppSettings.main_bundle_path)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
         else:
@@ -244,11 +262,6 @@ cdef void SetBrowserSettings(
             else:
                 cefBrowserSettings.file_access_from_file_urls = (
                         cef_types.STATE_DISABLED)
-        elif key == "web_security_disabled":
-            if browserSettings[key]:
-                cefBrowserSettings.web_security = cef_types.STATE_DISABLED
-            else:
-                cefBrowserSettings.web_security = cef_types.STATE_ENABLED
         elif key == "image_load_disabled":
             if browserSettings[key]:
                 cefBrowserSettings.image_loading = cef_types.STATE_DISABLED

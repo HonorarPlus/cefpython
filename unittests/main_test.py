@@ -136,7 +136,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
             settings["log_severity"] = cef.LOGSEVERITY_WARNING
         if "--debug" in sys.argv:
             settings["debug"] = True
-            settings["log_severity"] = cef.LOGSEVERITY_INFO
+            settings["log_severity"] = cef.LOGSEVERITY_VERBOSE
         if "--debug-warning" in sys.argv:
             settings["debug"] = True
             settings["log_severity"] = cef.LOGSEVERITY_WARNING
@@ -192,25 +192,17 @@ class MainTest_IsolatedTest(unittest.TestCase):
         browser = cef.CreateBrowserSync(url=g_datauri,
                                         settings=browser_settings)
         self.assertIsNotNone(browser, "Browser object")
-        subtest_message("cef.CreateBrowserSync() ok")
-
-        if WINDOWS or LINUX:
-            browser.SetBounds(0, 0, 800, 600)
-            subtest_message('Browser.SetBounds() ok')
-
         browser.SetFocus(True)
-        subtest_message("Browser.SetFocus() ok")
+        subtest_message("cef.CreateBrowserSync() ok")
 
         # Client handlers
         display_handler2 = DisplayHandler2(self)
-        v8context_handler = V8ContextHandler(self)
         client_handlers = [LoadHandler(self, g_datauri),
                            DisplayHandler(self),
-                           display_handler2,
-                           v8context_handler]
+                           display_handler2]
         for handler in client_handlers:
             browser.SetClientHandler(handler)
-        subtest_message("Browser.SetClientHandler() ok")
+        subtest_message("browser.SetClientHandler() ok")
 
         # Javascript bindings
         external = External(self)
@@ -229,20 +221,21 @@ class MainTest_IsolatedTest(unittest.TestCase):
         bindings.SetProperty("cefpython_version", cef.GetVersion())
         bindings.SetObject("external", external)
         browser.SetJavascriptBindings(bindings)
-        subtest_message("Browser.SetJavascriptBindings() ok")
+        subtest_message("browser.SetJavascriptBindings() ok")
 
         # Set auto resize. Call it after js bindings were set.
         browser.SetAutoResizeEnabled(enabled=True,
                                      min_size=[800, 600],
                                      max_size=[1024, 768])
-        subtest_message("Browser.SetAutoResizeEnabled() ok")
+        subtest_message("browser.SetAutoResizeEnabled() ok")
 
         # Test Request.SetPostData(list)
         # noinspection PyArgumentList
         req = cef.Request.CreateRequest()
         req_file = os.path.dirname(os.path.abspath(__file__))
         req_file = os.path.join(req_file, "main_test.py")
-        req_file = req_file.encode("utf-8")
+        if sys.version_info.major > 2:
+            req_file = req_file.encode("utf-8")
         req_data = [b"--key=value", b"@"+req_file]
         req.SetMethod("POST")
         req.SetPostData(req_data)
@@ -259,11 +252,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         subtest_message("cef.Request.SetPostData(dict) ok")
 
         # Cookie manager
-        self.assertIsInstance(cef.CookieManager.CreateManager(path=""),
-                              cef.PyCookieManager)
         self.assertIsInstance(cef.CookieManager.GetGlobalManager(),
-                              cef.PyCookieManager)
-        self.assertIsInstance(cef.CookieManager.GetBlockingManager(),
                               cef.PyCookieManager)
         subtest_message("cef.CookieManager ok")
 
@@ -272,6 +261,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
             hwnd = 1  # When using 0 getting issues with OnautoResize
             self.assertFalse(cef.WindowUtils.IsWindowHandle(hwnd))
             cef.WindowUtils.OnSetFocus(hwnd, 0, 0, 0)
+            cef.WindowUtils.OnSize(hwnd, 0, 0, 0)
             cef.WindowUtils.OnEraseBackground(hwnd, 0, 0, 0)
             cef.WindowUtils.GetParentHandle(hwnd)
             cef.WindowUtils.SetTitle(browser, "Main test")
@@ -297,7 +287,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # Close browser and clean reference
         browser.CloseBrowser(True)
         del browser
-        subtest_message("Browser.CloseBrowser() ok")
+        subtest_message("browser.CloseBrowser() ok")
 
         # Give it some time to close before checking asserts
         # and calling shutdown.
@@ -341,35 +331,6 @@ class DisplayHandler2(object):
         self.OnLoadingProgressChange_True = True
         self.OnLoadingProgressChange_Progress = progress
 
-
-class V8ContextHandler(object):
-    def __init__(self, test_case):
-        self.test_case = test_case
-        self.OnContextCreatedFirstCall_True = False
-        self.OnContextCreatedSecondCall_True = False
-        self.OnContextReleased_True = False
-
-    def OnContextCreated(self, browser, frame):
-        """CEF creates one context when creating browser and this one is
-           released immediately. Then when it loads url another context is
-           created."""
-        if not self.OnContextCreatedFirstCall_True:
-            self.OnContextCreatedFirstCall_True = True
-        else:
-            self.test_case.assertFalse(self.OnContextCreatedSecondCall_True)
-            self.OnContextCreatedSecondCall_True = True
-        self.test_case.assertEqual(browser.GetIdentifier(), MAIN_BROWSER_ID)
-        self.test_case.assertEqual(frame.GetIdentifier(), 3)
-
-    def OnContextReleased(self, browser, frame):
-        """This gets called only for the initial empty context, see comment
-           in OnContextCreated. This should never get called for the main frame
-           of the main browser, because it happens during app exit and there
-           isn't enough time for the IPC messages to go through."""
-        self.test_case.assertFalse(self.OnContextReleased_True)
-        self.OnContextReleased_True = True
-        self.test_case.assertEqual(browser.GetIdentifier(), MAIN_BROWSER_ID)
-        self.test_case.assertEqual(frame.GetIdentifier(), 3)
 
 class External(object):
     """Javascript 'window.external' object."""

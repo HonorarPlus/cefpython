@@ -28,7 +28,6 @@ Table of contents:
   * [text_area_resize_disabled](#text_area_resize_disabled)
   * [universal_access_from_file_urls_allowed](#universal_access_from_file_urls_allowed)
   * [user_style_sheet_location](#user_style_sheet_location)
-  * [web_security_disabled](#web_security_disabled)
   * [webgl_disabled](#webgl_disabled)
   * [windowless_frame_rate](#windowless_frame_rate)
 
@@ -190,11 +189,6 @@ switch.
 (string) Location of the user style sheet that will be used for all pages. This must be a data URL of the form `data:text/css;charset=utf-8;base64,content` where "content" is the base64 encoded contents of the CSS file. Also configurable using the "user-style-sheet-location" command-line switch.
 
 This setting was removed in Chrome 33. Soon it will be removed from cefpython as well.
-
-
-### web_security_disabled
-
-(bool) Controls whether web security restrictions (same-origin policy) will be enforced. Disabling this setting is not recommend as it will allow risky security behavior such as cross-site scripting (XSS). Also configurable using the --disable-web-security switch.
 
 
 ### webgl_disabled

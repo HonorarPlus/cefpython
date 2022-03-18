@@ -34,13 +34,17 @@ cdef extern from "include/internal/cef_types.h":
 
     ctypedef struct CefSettings:
         cef_string_t accept_language_list
+        cef_string_t application_client_id_for_file_scanning
         cef_string_t browser_subprocess_path
         int command_line_args_disabled
         cef_string_t cache_path
-        int enable_net_security_expiration
+        int chrome_runtime
+        cef_string_t cookieable_schemes_list
+        int cookieable_schemes_exclude_defaults
+        cef_string_t root_cache_path
         int persist_session_cookies
         cef_string_t user_agent
-        cef_string_t product_version
+        cef_string_t user_agent_product
         cef_string_t locale
         cef_string_t log_file
         int log_severity
@@ -60,28 +64,7 @@ cdef extern from "include/internal/cef_types.h":
         int no_sandbox
         int external_message_pump
         cef_string_t framework_dir_path
-
-    ctypedef enum cef_pdf_print_margin_type_t:
-        PDF_PRINT_MARGIN_DEFAULT,
-        PDF_PRINT_MARGIN_NONE,
-        PDF_PRINT_MARGIN_MINIMUM,
-        PDF_PRINT_MARGIN_CUSTOM,
-
-    ctypedef struct CefPdfPrintSettings:
-        cef_string_t header_footer_title
-        cef_string_t header_footer_url
-        int page_width
-        int page_height
-        int scale_factor
-        double margin_top
-        double margin_right
-        double margin_bottom
-        double margin_left
-        cef_pdf_print_margin_type_t margin_type
-        int header_footer_enabled
-        int selection_only
-        int landscape
-        int backgrounds_enabled
+        cef_string_t main_bundle_path
 
     ctypedef struct CefBrowserSettings:
         cef_string_t accept_language_list
@@ -105,7 +88,6 @@ cdef extern from "include/internal/cef_types.h":
         cef_state_t plugins
         cef_state_t universal_access_from_file_urls
         cef_state_t file_access_from_file_urls
-        cef_state_t web_security
         cef_state_t image_loading
         cef_state_t image_shrink_standalone_to_fit
         cef_state_t text_area_resize
@@ -140,6 +122,7 @@ cdef extern from "include/internal/cef_types.h":
         LOGSEVERITY_INFO,
         LOGSEVERITY_WARNING,
         LOGSEVERITY_ERROR,
+        LOGSEVERITY_FATAL,
         LOGSEVERITY_DISABLE = 99,
 
     ctypedef enum cef_thread_id_t:
@@ -148,6 +131,7 @@ cdef extern from "include/internal/cef_types.h":
         TID_FILE,
         TID_FILE_USER_VISIBLE,
         TID_FILE_USER_BLOCKING,
+        TID_PROCESS_LAUNCHER,
         TID_IO,
         TID_RENDERER
 
@@ -185,11 +169,12 @@ cdef extern from "include/internal/cef_types.h":
         UR_FLAG_NONE = 0,
         UR_FLAG_SKIP_CACHE = 1 << 0,
         UR_FLAG_ONLY_FROM_CACHE = 1 << 1,
-        UR_FLAG_ALLOW_STORED_CREDENTIALS = 1 << 2,
-        UR_FLAG_REPORT_UPLOAD_PROGRESS = 1 << 3,
-        UR_FLAG_NO_DOWNLOAD_DATA = 1 << 4,
-        UR_FLAG_NO_RETRY_ON_5XX = 1 << 5,
-        UR_FLAG_STOP_ON_REDIRECT = 1 << 6,
+        UR_FLAG_DISABLE_CACHE = 1 << 2,
+        UR_FLAG_ALLOW_STORED_CREDENTIALS = 1 << 3,
+        UR_FLAG_REPORT_UPLOAD_PROGRESS = 1 << 4,
+        UR_FLAG_NO_DOWNLOAD_DATA = 1 << 5,
+        UR_FLAG_NO_RETRY_ON_5XX = 1 << 6,
+        UR_FLAG_STOP_ON_REDIRECT = 1 << 7,
 
     # CefListValue, CefDictionaryValue - types.
     ctypedef enum cef_value_type_t:
@@ -235,12 +220,27 @@ cdef extern from "include/internal/cef_types.h":
         EVENTFLAG_IS_KEY_PAD          = 1 << 9,
         EVENTFLAG_IS_LEFT             = 1 << 10,
         EVENTFLAG_IS_RIGHT            = 1 << 11,
+        EVENTFLAG_ALTGR_DOWN          = 1 << 12,
+
+    # Cookie priority values.
+    ctypedef enum cef_cookie_priority_t:
+        CEF_COOKIE_PRIORITY_LOW = -1,
+        CEF_COOKIE_PRIORITY_MEDIUM = 0,
+        CEF_COOKIE_PRIORITY_HIGH = 1,
+
+    # Cookie same site values.
+    ctypedef enum cef_cookie_same_site_t:
+        CEF_COOKIE_SAME_SITE_UNSPECIFIED,
+        CEF_COOKIE_SAME_SITE_NO_RESTRICTION,
+        CEF_COOKIE_SAME_SITE_LAX_MODE,
+        CEF_COOKIE_SAME_SITE_STRICT_MODE,
 
     # LoadHandler
     ctypedef enum cef_termination_status_t:
         TS_ABNORMAL_TERMINATION,
         TS_PROCESS_WAS_KILLED,
         TS_PROCESS_CRASHED,
+        TS_PROCESS_OOM,
 
     ctypedef enum cef_errorcode_t:
         ERR_NONE = 0,

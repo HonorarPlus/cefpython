@@ -2,12 +2,20 @@
 
 Table of contents:
 * [Introduction](#introduction)
+* [Sponsors](#sponsors)
 * [Install](#install)
 * [Tutorial](#tutorial)
 * [Examples](#examples)
 * [Support](#support)
 * [Releases](#releases)
+  * [Next release](#next-release)
   * [Latest release](#latest-release)
+  * [v49 release (WinXP/Vista)](#v49-release-winxpvista)
+  * [v31 release (old systems)](#v31-release-old-systems)
+* [Support development](#support-development)
+  * [Thanks to sponsors](#thanks-to-sponsors)
+  * [Thanks to all](#thanks-to-all)
+* [Seeking new sponsors](#seeking-new-sponsors)
 * [Other READMEs](#other-readmes)
 * [Quick links](#quick-links)
 
@@ -15,7 +23,7 @@ Table of contents:
 ## Introduction
 
 CEF Python is an open source project founded by
-[Czarek Tomczak](https://www.linkedin.com/in/czarektomczak/)
+[Czarek Tomczak](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)
 in 2012 to provide Python bindings for the
 [Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef) (CEF).
 The Chromium project focuses mainly on Google Chrome application
@@ -41,13 +49,49 @@ frameworks such as PyQt, wxPython, PyGTK, PyGObject, Tkinter, Kivy, Panda3D,
 PyGame, PyOpenGL, PyWin32, PySide and PySDL2.
 
 
+## Sponsors
+
+<table border="0"><tr>
+<td width="50%" valign="top">
+
+<p align="center">
+ <a href="https://lampix.com/">
+  <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix360.png">
+ </a>
+</p>
+
+Many Thanks to Lampix for sponsoring the
+[v66 release](../../releases/tag/v66.0). Lampix is the first hardware
+and software solution that turns any surface into a smart, augmented reality
+or interactive surface. Please visit their website:
+<a href="https://lampix.com/">Lampix.com</a>
+
+</td><td width="50%" valign="top">
+
+<p align="center">
+ <a href="https://www.fivestars.com/">
+  <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/fivestars360.png">
+ </a>
+</p>
+
+Many thanks to Fivestars for sponsoring the
+[v49 legacy release](../../releases/tag/v49.0). Fivestars helps local
+communities thrive by empowering small
+businesses with cutting edge marketing technology. Please visit their website:
+<a href="https://www.fivestars.com/">Fivestars.com</a>
+
+</tr></table>
+
+
 ## Install
 
-You can also packages for offline installation available on the
+You can install [pypi/cefpython3](https://pypi.python.org/pypi/cefpython3)
+package using pip tool. On Linux pip 8.1+ is required. You can
+also download packages for offline installation available on the
 [GitHub Releases](../../releases) pages. Command to install with pip:
 
 ```
-pip install <release.whl>
+pip install cefpython3==66.0
 ```
 
 
@@ -87,25 +131,198 @@ See the [README-examples.md](examples/README-examples.md) and
   in the issue. See
   [Most popular issues](../../issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc)
   sorted by reactions.
+- Wiki pages are deprecated and for v31 only
 
 
 ## Releases
 
 Information on planned new and current releases, supported platforms,
-python versions, architectures and requirements. 
+python versions, architectures and requirements. If you want to
+support old operating systems then choose the v31 release.
 
+### Next release
+
+- To see planned new features or bugs to be fixed in the near future in one of
+  next releases, see the
+  [next release](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22next+release%22)
+  label in the tracker
+- To see planned new features or bugs to be fixed in further future, see the
+  [next release 2](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22next+release+2%22)
+  label in the tracker
 
 ### Latest release
 
-OS | Py3 | 32bit | 64bit | Requirements
---- | --- | --- | --- | ---
-Windows |3.4 / 3.5 / 3.6 / 3.7 / 3.8 / 3.9 / 3.10 | Yes | Yes | Windows 7+
-Linux | 3.4 / 3.5 / 3.6 / 3.7 / 3.8 / 3.9 / 3.10 | Yes | Yes | Debian 8+, Ubuntu 14.04+,<br> Fedora 24+, openSUSE 13.3+
-Mac | 3.4 / 3.5 / 3.6 / 3.7 / 3.8 / 3.9 / 3.10 | No | Yes | MacOS 10.9+
+OS | Py2 | Py3 | 32bit | 64bit | Requirements
+--- | --- | --- | --- | --- | ---
+Windows | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | Yes | Yes | Windows 7+
+Linux | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | Yes | Yes | Debian 8+, Ubuntu 14.04+,<br> Fedora 24+, openSUSE 13.3+
+Mac | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | No | Yes | MacOS 10.9+
 
 These platforms are not supported yet:
 - ARM - see [Issue #267](../../issues/267)
 - Android - see [Issue #307](../../issues/307)
+
+
+### v49 release (WinXP/Vista)
+
+OS | Py2 | Py3 | 32bit | 64bit | Requirements
+--- | --- | --- | --- | --- | ---
+Windows | 2.7 | 3.4 | Yes | Yes | Windows XP+
+
+- Install with command: `pip --no-cache-dir install cefpython3==49.0`.
+    - Please note that if you were previously installing cefpython3
+      package it is required to use the `--no-cache-dir` flag,
+      otherwise pip will end up with error message
+      `No matching distribution found for cefpython3==49.0`.
+      This happens because 49.0 release occured after 57.0 and 66.0
+      releases.
+- Downloads are available on GitHub Releases tagged
+    [v49.0](../../releases/tag/v49.0).
+- See [Migration guide](docs/Migration-guide.md) document for changes
+  in this release
+- Documentation is available in the [docs/](../../tree/cefpython49-winxp/docs)
+  directory in the `cefpython49-winxp` branch
+- API reference is available in the [api/](../../tree/cefpython49-winxp/api)
+  directory in the `cefpython49-winxp` branch
+
+
+### v31 release (old systems)
+
+OS | Py2 | Py3 | 32bit | 64bit | Requirements
+--- | --- | --- | --- | --- | ---
+Windows | 2.7 | No | Yes | Yes | Windows XP+
+Linux | 2.7 | No | Yes | Yes | Debian 7+ / Ubuntu 12.04+
+Mac | 2.7 | No | Yes | Yes | MacOS 10.7+
+
+Additional information for v31.2 release:
+- On Windows/Mac you can install with command: `pip install cefpython3==31.2`
+- Downloads are available on [wiki pages](../../wiki#downloads)
+  and on GitHub Releases tagged [v31.2](../../releases/tag/v31.2).
+- Documentation is on [wiki pages](../../wiki)
+- API reference is available in revision [169a1b2](../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
+
+
+## Support development
+
+If you would like to support general CEF Python development efforts
+by making a donation then please click the Paypal Donate button below.
+If you would like to see a specific feature implemented then you can make
+a comment about that when making a donation and that will give it a higher
+priority.
+
+<a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=V7LU7PD4N4GGG'>
+<img src='https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/donate.gif' />
+</a><br><br>
+
+### Thanks to sponsors
+
+<table>
+ <tr>
+  <td>
+   <div align="center">
+    <a href="https://www.fivestars.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/fivestars200.png">
+    </a><br>
+    <a href="https://www.fivestars.com/">www.fivestars.com</a>
+   </div>
+  </td>
+  <td>
+   <div align="center">
+    <a href="https://lampix.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix200.png">
+    </a><br>
+    <a href="https://lampix.com/">www.lampix.com</a>
+   </div>
+  </td>
+  <td>
+   <div align="center">
+    <a href="http://www.blueplanet.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/cyan.png">
+    </a><br>
+    <a href="http://www.blueplanet.com/">www.blueplanet.com</a>
+   </div>
+  </td>
+ </tr>
+ <tr>
+  <td>
+   <div align="center">
+    <a href="https://clearchat.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/clearchat.png">
+    </a><br>
+    <a href="https://clearchat.com/">www.clearchat.com</a>
+   <div align="center">
+  </td>
+  <td>
+   <div align="center">
+    <a href="http://www.rentouch.ch/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/rentouch.png">
+    </a><br>
+    <a href="http://www.rentouch.ch/">www.rentouch.ch</a>
+   </div>
+  </td>
+  <td>
+   <div align="center">
+    <a href="https://www.jetbrains.com/pycharm/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/pycharm.png">
+    </a><br>
+    <a href="https://www.jetbrains.com/pycharm/">www.jetbrains.com</a>
+   </div>
+  </td>
+ <tr>
+</table>
+
+
+### Thanks to all
+
+* [2018] Thanks to [Fivestars](https://www.fivestars.com/) for sponsoring
+  the v49 release for legacy systems (WinXP/Vista)
+* [2018] Many thanks to [Lampix](https://lampix.com/) for sponsoring the v66
+  release for all platforms
+* [2017] Many thanks to [ClearChat Inc.](https://clearchat.com/) for sponsoring
+  the v55/v56 releases for all platforms
+* [2016-2018] Thanks to JetBrains for providing an Open Source license for
+  [PyCharm](https://www.jetbrains.com/pycharm/)
+* [2014] Thanks to Adam Duston for donating a Macbook to aid the development
+  of Mac port
+* [2013-2015] Lots of thanks goes to [Cyan Inc.](http://www.blueplanet.com/)
+  for sponsoring this project for a long time, making CEF Python 3 mature
+* [2013] Thanks to [Rentouch GmbH](http://www.rentouch.ch/) for sponsoring the
+  development of the off-screen rendering support
+* [2013] Thanks to Thomas Wusatiuk for sponsoring the development of the web
+  response reading features
+* [2012-2018] Thanks to those who have made a Paypal donation:
+  [Rentouch GmbH](http://www.rentouch.ch/), Walter Purvis, Rokas Stupuras,
+  Alex Rattray, Greg Kacy, Paul Korzhyk, Tomasz Tomanek.
+* [2012-2017] Thanks to those who have donated their time through code
+  contributions, they are listed in the [Authors](Authors) file
+
+
+## Seeking new sponsors
+
+CEF Python is seeking companies to sponsor further development of the project.
+There are many proposals for new features submitted in the issue tracker. Most
+notable are:
+
+* Monthly releases with latest Chromium
+* An automated build system similar to upstream CEF Spotify Automated Builds
+* ARM and Android support
+* Multi-threaded support for increased performance
+* Proprietary codecs support in build tools: H264, H265,AC3, EAC3, MPEG-4
+* More CEF API exposed, only about 50% is exposed so far
+* Hundreds of new settings and Chromium preferences not yet exposed
+* Easier integration with popular GUI toolkits in just a few lines of code
+  and support for more third party GUI frameworks
+* More examples of implementing various advanced features and more snippets
+  as well
+
+If your company would like to sponsor CEF Python development efforts then
+please contact
+[Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view).
+Long term sponsorships are welcome and Czarek is open to ideas about
+the project. He would love to spend more time on developing this project,
+but he can't afford doing so in his free time. Currently there is no company
+supporting this project actively on a daily basis.
+
 
 ## Other READMEs
 
@@ -161,7 +378,6 @@ These platforms are not supported yet:
 #### Client handlers (interfaces)
 
  * [AccessibilityHandler](api/AccessibilityHandler.md#accessibilityhandler-interface)
- * [DevToolsHandler](api/DevToolsHandler.md#devtoolshandler-interface)
  * [DisplayHandler](api/DisplayHandler.md#displayhandler-interface)
  * [DownloadHandler](api/DownloadHandler.md#downloadhandler)
  * [FocusHandler](api/FocusHandler.md#focushandler-interface)
@@ -190,15 +406,20 @@ These platforms are not supported yet:
 * [Application settings](api/ApplicationSettings.md#application-settings)
   * [accept_language_list](api/ApplicationSettings.md#accept_language_list)
   * [app_user_model_id](api/ApplicationSettings.md#app_user_model_id)
+  * [application_client_id_for_file_scanning](api/ApplicationSettings.md#application_client_id_for_file_scanning)
   * [auto_zooming](api/ApplicationSettings.md#auto_zooming)
   * [background_color](api/ApplicationSettings.md#background_color)
   * [browser_subprocess_path](api/ApplicationSettings.md#browser_subprocess_path)
   * [cache_path](api/ApplicationSettings.md#cache_path)
+  * [chrome_runtime](api/ApplicationSettings.md#chrome_runtime)
+  * [cookieable_schemes_list](api/ApplicationSettings.md#cookieable_schemes_list)
+  * [root_cache_path](api/ApplicationSettings.md#root_cache_path)
   * [command_line_args_disabled](api/ApplicationSettings.md#command_line_args_disabled)
   * [context_menu](api/ApplicationSettings.md#context_menu)
   * [downloads_enabled](api/ApplicationSettings.md#downloads_enabled)
   * [external_message_pump](api/ApplicationSettings.md#external_message_pump)
   * [framework_dir_path](api/ApplicationSettings.md#framework_dir_path)
+  * [main_bundle_path](api/ApplicationSettings.md#main_bundle_path)
   * [ignore_certificate_errors](api/ApplicationSettings.md#ignore_certificate_errors)
   * [javascript_flags](api/ApplicationSettings.md#javascript_flags)
   * [locale](api/ApplicationSettings.md#locale)
@@ -207,11 +428,10 @@ These platforms are not supported yet:
   * [log_file](api/ApplicationSettings.md#log_file)
   * [log_severity](api/ApplicationSettings.md#log_severity)
   * [multi_threaded_message_loop](api/ApplicationSettings.md#multi_threaded_message_loop)
-  * [net_security_expiration_enabled](api/ApplicationSettings.md#net_security_expiration_enabled)
   * [pack_loading_disabled](api/ApplicationSettings.md#pack_loading_disabled)
   * [persist_session_cookies](api/ApplicationSettings.md#persist_session_cookies)
   * [persist_user_preferences](api/ApplicationSettings.md#persist_user_preferences)
-  * [product_version](api/ApplicationSettings.md#product_version)
+  * [user_agent_product](api/ApplicationSettings.md#user_agent_product)
   * [remote_debugging_port](api/ApplicationSettings.md#remote_debugging_port)
   * [resources_dir_path](api/ApplicationSettings.md#resources_dir_path)
   * [string_encoding](api/ApplicationSettings.md#string_encoding)
@@ -220,6 +440,8 @@ These platforms are not supported yet:
   * [user_agent](api/ApplicationSettings.md#user_agent)
   * [user_data_path](api/ApplicationSettings.md#user_data_path)
   * [windowless_rendering_enabled](api/ApplicationSettings.md#windowless_rendering_enabled)
+  * [shared_texture_enabled](api/ApplicationSettings.md#shared_texture_enabled)
+  * [external_begin_frame_enabled](api/ApplicationSettings.md#external_begin_frame_enabled)
 * [Browser (object)](api/Browser.md#browser-object)
   * [AddWordToDictionary](api/Browser.md#addwordtodictionary)
   * [CanGoBack](api/Browser.md#cangoback)
@@ -265,7 +487,6 @@ These platforms are not supported yet:
   * [Invalidate](api/Browser.md#invalidate)
   * [IsFullscreen](api/Browser.md#isfullscreen)
   * [IsLoading](api/Browser.md#isloading)
-  * [IsMouseCursorChangeDisabled](api/Browser.md#ismousecursorchangedisabled)
   * [IsPopup](api/Browser.md#ispopup)
   * [IsWindowRenderingDisabled](api/Browser.md#iswindowrenderingdisabled)
   * [LoadUrl](api/Browser.md#loadurl)
@@ -279,6 +500,7 @@ These platforms are not supported yet:
   * [ReplaceMisspelling](api/Browser.md#replacemisspelling)
   * [SetAutoResizeEnabled](api/Browser.md#setautoresizeenabled)
   * [SetBounds](api/Browser.md#setbounds)
+  * [SendExternalBeginFrame](api/Browser.md#SendExternalBeginFrame)
   * [SendKeyEvent](api/Browser.md#sendkeyevent)
   * [SendMouseClickEvent](api/Browser.md#sendmouseclickevent)
   * [SendMouseMoveEvent](api/Browser.md#sendmousemoveevent)
@@ -289,7 +511,6 @@ These platforms are not supported yet:
   * [SetClientCallback](api/Browser.md#setclientcallback)
   * [SetClientHandler](api/Browser.md#setclienthandler)
   * [SetFocus](api/Browser.md#setfocus)
-  * [SetMouseCursorChangeDisabled](api/Browser.md#setmousecursorchangedisabled)
   * [SetJavascriptBindings](api/Browser.md#setjavascriptbindings)
   * [SetUserData](api/Browser.md#setuserdata)
   * [SetZoomLevel](api/Browser.md#setzoomlevel)
@@ -323,7 +544,6 @@ These platforms are not supported yet:
   * [text_area_resize_disabled](api/BrowserSettings.md#text_area_resize_disabled)
   * [universal_access_from_file_urls_allowed](api/BrowserSettings.md#universal_access_from_file_urls_allowed)
   * [user_style_sheet_location](api/BrowserSettings.md#user_style_sheet_location)
-  * [web_security_disabled](api/BrowserSettings.md#web_security_disabled)
   * [webgl_disabled](api/BrowserSettings.md#webgl_disabled)
   * [windowless_frame_rate](api/BrowserSettings.md#windowless_frame_rate)
 * [Callback (object)](api/Callback.md#callback-object)
@@ -382,25 +602,24 @@ These platforms are not supported yet:
   * [GetHasExpires](api/Cookie.md#gethasexpires)
   * [SetExpires](api/Cookie.md#setexpires)
   * [GetExpires](api/Cookie.md#getexpires)
+  * [SetSameSite](api/Cookie.md#setsamesite)
+  * [GetSameSite](api/Cookie.md#getsamesite)
+  * [SetPriority](api/Cookie.md#setpriority)
+  * [GetPriority](api/Cookie.md#getpriority)
 * [CookieManager (class)](api/CookieManager.md#cookiemanager-class)
   * [GetGlobalManager](api/CookieManager.md#getglobalmanager)
-  * [GetBlockingManager](api/CookieManager.md#getblockingmanager)
-  * [CreateManager](api/CookieManager.md#createmanager)
-  * [SetSupportedSchemes](api/CookieManager.md#setsupportedschemes)
   * [VisitAllCookies](api/CookieManager.md#visitallcookies)
   * [VisitUrlCookies](api/CookieManager.md#visiturlcookies)
   * [SetCookie](api/CookieManager.md#setcookie)
   * [DeleteCookies](api/CookieManager.md#deletecookies)
-  * [SetStoragePath](api/CookieManager.md#setstoragepath)
   * [FlushStore](api/CookieManager.md#flushstore)
 * [CookieVisitor (interface)](api/CookieVisitor.md#cookievisitor-interface)
   * [Visit](api/CookieVisitor.md#visit)
-* [DevToolsHandler (interface)](api/DevToolsHandler.md#devtoolshandler-interface)
-  * [ShowDevTools](api/DevToolsHandler.md#showdevtools)
 * [DisplayHandler (interface)](api/DisplayHandler.md#displayhandler-interface)
   * [OnAddressChange](api/DisplayHandler.md#onaddresschange)
   * [OnAutoResize](api/DisplayHandler.md#onautoresize)
   * [OnConsoleMessage](api/DisplayHandler.md#onconsolemessage)
+  * [OnCursorChange](api/DisplayHandler.md#oncursorchange)
   * [OnLoadingProgressChange](api/DisplayHandler.md#onloadingprogresschange)
   * [OnStatusMessage](api/DisplayHandler.md#onstatusmessage)
   * [OnTitleChange](api/DisplayHandler.md#ontitlechange)
@@ -445,7 +664,6 @@ These platforms are not supported yet:
   * [IsFocused](api/Frame.md#isfocused)
   * [IsMain](api/Frame.md#ismain)
   * [IsValid](api/Frame.md#isvalid)
-  * [LoadString](api/Frame.md#loadstring)
   * [LoadUrl](api/Frame.md#loadurl)
   * [Paste](api/Frame.md#paste)
   * [Redo](api/Frame.md#redo)
@@ -550,7 +768,7 @@ These platforms are not supported yet:
   * [OnPopupShow](api/RenderHandler.md#onpopupshow)
   * [OnPopupSize](api/RenderHandler.md#onpopupsize)
   * [OnPaint](api/RenderHandler.md#onpaint)
-  * [OnCursorChange](api/RenderHandler.md#oncursorchange)
+  * [OnAcceleratedPaint](api/RenderHandler.md#onacceleratedpaint)
   * [OnScrollOffsetChanged](api/RenderHandler.md#onscrolloffsetchanged)
   * [OnTextSelectionChanged](api/RenderHandler.md#ontextselectionchanged)
   * [StartDragging](api/RenderHandler.md#startdragging)
@@ -575,8 +793,6 @@ These platforms are not supported yet:
   * [GetResourceType](api/Request.md#getresourcetype)
   * [GetTransitionType](api/Request.md#gettransitiontype)
 * [RequestHandler (interface)](api/RequestHandler.md#requesthandler-interface)
-  * [CanGetCookies](api/RequestHandler.md#cangetcookies)
-  * [CanSetCookie](api/RequestHandler.md#cansetcookie)
   * [GetAuthCredentials](api/RequestHandler.md#getauthcredentials)
   * [GetCookieManager](api/RequestHandler.md#getcookiemanager)
   * [GetResourceHandler](api/RequestHandler.md#getresourcehandler)
@@ -586,7 +802,6 @@ These platforms are not supported yet:
   * [_OnCertificateError](api/RequestHandler.md#_oncertificateerror)
   * [OnQuotaRequest](api/RequestHandler.md#onquotarequest)
   * [OnResourceRedirect](api/RequestHandler.md#onresourceredirect)
-  * [OnResourceResponse](api/RequestHandler.md#onresourceresponse)
   * [OnPluginCrashed](api/RequestHandler.md#onplugincrashed)
   * [OnProtocolExecution](api/RequestHandler.md#onprotocolexecution)
   * [OnRendererProcessTerminated](api/RequestHandler.md#onrendererprocessterminated)
@@ -605,7 +820,8 @@ These platforms are not supported yet:
   * [SetStatusText](api/Response.md#setstatustext)
   * [GetMimeType](api/Response.md#getmimetype)
   * [SetMimeType](api/Response.md#setmimetype)
-  * [GetHeader](api/Response.md#getheader)
+  * [GetHeaderByName](api/Response.md#getheaderbyname)
+  * [SetHeaderByName](api/Response.md#setheaderbyname)
   * [GetHeaderMap](api/Response.md#getheadermap)
   * [GetHeaderMultimap](api/Response.md#getheadermultimap)
   * [SetHeaderMap](api/Response.md#setheadermap)

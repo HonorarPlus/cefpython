@@ -160,7 +160,9 @@ class Gtk2Example:
             y = data.y + self.menubar_height
             width = data.width
             height = data.height - self.menubar_height
-            if WINDOWS or LINUX:
+            if WINDOWS:
+                WindowUtils.OnSize(self.get_window_handle(), 0, 0, 0)
+            elif LINUX:
                 self.browser.SetBounds(x, y, width, height)
 
     def on_menubar_size_allocate(self, _, data):

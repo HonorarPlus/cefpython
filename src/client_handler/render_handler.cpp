@@ -69,13 +69,14 @@ void RenderHandler::OnPaint(CefRefPtr<CefBrowser> browser,
 }
 
 
-void RenderHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
-                                   CefCursorHandle cursor,
-                                   CursorType type,
-                                   const CefCursorInfo& custom_cursor_info)
+void RenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
+                                       PaintElementType type,
+                                       const RectList& dirtyRects,
+                                       void* shared_handle)
 {
     REQUIRE_UI_THREAD();
-    RenderHandler_OnCursorChange(browser, cursor);
+    RenderHandler_OnAcceleratedPaint(browser, type, const_cast<RectList&>(dirtyRects),
+                                     shared_handle);
 }
 
 

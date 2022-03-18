@@ -191,7 +191,6 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         # Close browser (force=True) and free CEF reference
         if self.cef_widget.browser:
-            self.cef_widget.browser.SetUserData("closing-browser", True)
             self.cef_widget.browser.CloseBrowser(True)
             self.clear_browser_references()
 
@@ -213,22 +212,16 @@ class CefWidget(CefWidgetParent):
     def focusInEvent(self, event):
         # This event seems to never get called on Linux, as CEF is
         # stealing all focus due to Issue #284.
-        if cef.GetAppSetting("debug"):
-            print("[qt.py] CefWidget.focusInEvent")
         if self.browser:
             if WINDOWS:
                 WindowUtils.OnSetFocus(self.getHandle(), 0, 0, 0)
             self.browser.SetFocus(True)
-        super(CefWidget, self).focusInEvent(event)
 
     def focusOutEvent(self, event):
         # This event seems to never get called on Linux, as CEF is
         # stealing all focus due to Issue #284.
-        if cef.GetAppSetting("debug"):
-            print("[qt.py] CefWidget.focusOutEvent")
         if self.browser:
             self.browser.SetFocus(False)
-        super(CefWidget, self).focusOutEvent(event)
 
     def embedBrowser(self):
         if (PYSIDE2 or PYQT5) and LINUX:
@@ -269,24 +262,27 @@ class CefWidget(CefWidgetParent):
                 return ctypes.pythonapi.PyCapsule_GetPointer(
                         self.winId(), None)
 
-    def moveEvent(self, event):
+    def moveEvent(self, _):
         self.x = 0
         self.y = 0
         if self.browser:
-            if WINDOWS or LINUX:
+            if WINDOWS:
+                WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
+            elif LINUX:
                 self.browser.SetBounds(self.x, self.y,
                                        self.width(), self.height())
             self.browser.NotifyMoveOrResizeStarted()
-        super(CefWidget, self).moveEvent(event)
 
     def resizeEvent(self, event):
         size = event.size()
         if self.browser:
-            if WINDOWS or LINUX:
+            if WINDOWS:
+                WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
+            elif LINUX:
                 self.browser.SetBounds(self.x, self.y,
                                        size.width(), size.height())
             self.browser.NotifyMoveOrResizeStarted()
-        super(CefWidget, self).resizeEvent(event)
+
 
 class CefApplication(QApplication):
     def __init__(self, args):
@@ -340,23 +336,14 @@ class FocusHandler(object):
     def __init__(self, cef_widget):
         self.cef_widget = cef_widget
 
-    def OnTakeFocus(self, **_):
-        if cef.GetAppSetting("debug"):
-            print("[qt.py] FocusHandler.OnTakeFocus")
-
     def OnSetFocus(self, **_):
-        if cef.GetAppSetting("debug"):
-            print("[qt.py] FocusHandler.OnSetFocus")
+        pass
 
     def OnGotFocus(self, browser, **_):
-        if cef.GetAppSetting("debug"):
-            print("[qt.py] FocusHandler.OnGotFocus")
-        # Check if browser is not closing otherwise error occurs in PySide:
-        # > RuntimeError: Internal C++ object (CefWidget) already deleted.
-        if not browser.GetUserData("closing-browser") and self.cef_widget:
-            self.cef_widget.setFocus()
         # Temporary fix no. 1 for focus issues on Linux (Issue #284)
         if LINUX:
+            print("[qt.py] FocusHandler.OnGotFocus:"
+                  " keyboard focus fix no. 1 (Issue #284)")
             browser.SetFocus(True)
 
 

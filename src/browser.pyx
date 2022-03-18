@@ -236,7 +236,7 @@ cdef class PyBrowser:
             self.allowedClientCallbacks += [
                     "OnAddressChange", "OnTitleChange", "OnTooltip",
                     "OnStatusMessage", "OnConsoleMessage", "OnAutoResize",
-                    "OnLoadingProgressChange"]
+                    "OnLoadingProgressChange", "OnCursorChange"]
             # KeyboardHandler
             self.allowedClientCallbacks += ["OnPreKeyEvent", "OnKeyEvent"]
             # RequestHandler
@@ -263,13 +263,10 @@ cdef class PyBrowser:
             self.allowedClientCallbacks += ["GetRootScreenRect",
                     "GetViewRect", "GetScreenPoint", "GetScreenInfo",
                     "GetScreenRect",
-                    "OnPopupShow", "OnPopupSize", "OnPaint", "OnCursorChange",
-                    "OnScrollOffsetChanged",
+                    "OnPopupShow", "OnPopupSize", "OnPaint",
+                    "OnAcceleratedPaint", "OnScrollOffsetChanged",
                     "StartDragging", "UpdateDragCursor",
                     "OnTextSelectionChanged"]
-            # V8ContextHandler
-            self.allowedClientCallbacks += ["OnContextCreated",
-                    "OnContextReleased"]
             # JavascriptDialogHandler
             self.allowedClientCallbacks += ["OnJavascriptDialog",
                     "OnBeforeUnloadJavascriptDialog",
@@ -278,11 +275,6 @@ cdef class PyBrowser:
             # FocusHandler
             self.allowedClientCallbacks += ["OnTakeFocus", "OnSetFocus",
                                             "OnGotFocus"]
-            # DevToolsHandler
-            self.allowedClientCallbacks += ["ShowDevTools"]
-
-            # Printing
-            self.allowedClientCallbacks += ["OnFileDialog",  "OnPdfPrintFinished"]
 
         if name not in self.allowedClientCallbacks:
             raise Exception("Browser.SetClientCallback() failed: unknown "
@@ -399,7 +391,7 @@ cdef class PyBrowser:
         # If using GetCookieManager to implement custom cookie managers
         # then flushing of cookies would need to be handled manually.
         self.GetCefBrowserHost().get().GetRequestContext().get() \
-                .GetDefaultCookieManager(
+                .GetCookieManager(
                         <CefRefPtr[CefCompletionCallback]?>NULL) \
                 .get().FlushStore(<CefRefPtr[CefCompletionCallback]?>NULL)
 
@@ -559,13 +551,12 @@ cdef class PyBrowser:
             CefSize(max_size[0], max_size[1])
         )
 
+
     cpdef py_void SetBounds(self, int x, int y, int width, int height):
         IF UNAME_SYSNAME == "Linux":
             x11.SetX11WindowBounds(self.GetCefBrowser(), x, y, width, height)
-        ELIF UNAME_SYSNAME == "Windows":
-            SetWindowPos(<HWND>self.GetWindowHandle(), <HWND>NULL,
-                         0, 0, width, height,
-                         SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE)
+        ELSE:
+            NonCriticalError("SetBounds() not implemented on this platform")
 
     cpdef py_void SetAccessibilityState(self, cef_state_t state):
         self.GetCefBrowserHost().get().SetAccessibilityState(state)
@@ -580,53 +571,22 @@ cdef class PyBrowser:
         self.GetCefBrowserHost().get().SetZoomLevel(zoomLevel)
 
     cpdef py_void ShowDevTools(self):
-        cdef object callback = self.GetClientCallback("ShowDevTools")
         cdef CefWindowInfo window_info
+        IF UNAME_SYSNAME == "Windows":
+            # On Windows with empty window_info structure the devtools
+            # window doesn't appear.
+            window_info.SetAsPopup(
+                    # TODO:
+                    # According to docs this returns NULL for non-popup
+                    # windows, so looks like we shouldn't use that and
+                    # either pass NULL or GetWindowHandle().
+                    <CefWindowHandle>self.GetOpenerWindowHandle(),
+                    PyToCefStringValue("DevTools"))
         cdef CefBrowserSettings settings
         cdef CefPoint inspect_element_at
-        if callback:
-            callback(self)
-        else:
-            IF UNAME_SYSNAME == "Windows":
-                window_info.SetAsPopup(<CefWindowHandle>self.GetWindowHandle(),
-                                    PyToCefStringValue("DevTools"))
-            self.GetCefBrowserHost().get().ShowDevTools(
-                    window_info, <CefRefPtr[CefClient]?>NULL, settings,
-                    inspect_element_at)
-
-    cpdef py_void PrintToPdf(self, py_string filepath, dict settings, object func = None):
-        self.SetClientCallback('OnPdfPrintFinished', func)
-        cdef CefPdfPrintSettings pdf_print_settings
-        pdf_print_settings.margin_type = settings.get('margin_type') or cef_types.PDF_PRINT_MARGIN_DEFAULT
-        pdf_print_settings.header_footer_enabled = int((bool(settings.get('header_footer_title') or
-                                                             settings.get('header_footer_url') or
-                                                             settings.get('header_footer_enabled', 0))))
-        pdf_print_settings.selection_only = settings.get('selection_only') or 0
-        pdf_print_settings.landscape = settings.get('landscape') or 0
-        pdf_print_settings.backgrounds_enabled = settings.get('backgrounds_enabled') or 0
-        pdf_print_settings.page_width = settings.get('page_width') or 0
-        pdf_print_settings.page_height = settings.get('page_height') or 0
-        if pdf_print_settings.margin_type == cef_types.PDF_PRINT_MARGIN_CUSTOM:
-            pdf_print_settings.margin_top = settings.get('margin_top')
-            pdf_print_settings.margin_right = settings.get('margin_right')
-            pdf_print_settings.margin_left = settings.get('margin_left')
-            pdf_print_settings.margin_bottom = settings.get('margin_bottom')
-        pdf_print_settings.scale_factor = settings.get('scale_factor') or 0
-        if settings.get('header_footer_title'):
-            header_footer_title = new CefString(&pdf_print_settings.header_footer_title)
-            PyToCefStringPointer(settings.get('header_footer_title'), header_footer_title)
-            del header_footer_title
-        if settings.get('header_footer_url'):
-            header_footer_url = new CefString(&pdf_print_settings.header_footer_url)
-            PyToCefStringPointer(settings.get('header_footer_url'), header_footer_url)
-            del header_footer_url
-        cdef CefString cef_file_path
-        PyToCefString(filepath, cef_file_path)
-
-        # cdef CefRefPtr[CefPdfPrintCallback] pdf_callback = <CefRefPtr[CefPdfPrintCallback]?> NULL
-        cdef CefRefPtr[CefPdfPrintCallback] pdf_callback = <CefRefPtr[
-            CefPdfPrintCallback]?> new PdfPrintCallback(self.cefBrowser)
-        self.GetCefBrowserHost().get().PrintToPDF(cef_file_path, pdf_print_settings, pdf_callback)
+        self.GetCefBrowserHost().get().ShowDevTools(
+                window_info, <CefRefPtr[CefClient]?>NULL, settings,
+                inspect_element_at)
 
     cpdef py_void StopLoad(self):
         self.GetCefBrowser().get().StopLoad()
@@ -782,13 +742,6 @@ cdef class PyBrowser:
         self.GetCefBrowserHost().get().StartDownload(PyToCefStringValue(
                 url))
 
-    cpdef py_void SetMouseCursorChangeDisabled(self, py_bool disabled):
-        self.GetCefBrowserHost().get().SetMouseCursorChangeDisabled(
-                bool(disabled))
-
-    cpdef py_bool IsMouseCursorChangeDisabled(self):
-        return self.GetCefBrowserHost().get().IsMouseCursorChangeDisabled()
-
     cpdef py_bool TryCloseBrowser(self):
         return self.GetCefBrowserHost().get().TryCloseBrowser()
 
@@ -801,28 +754,8 @@ cdef class PyBrowser:
     cpdef py_void NotifyScreenInfoChanged(self):
         self.GetCefBrowserHost().get().NotifyScreenInfoChanged()
 
-    cdef void SendProcessMessage(self, cef_process_id_t targetProcess,
-            object frameId, py_string messageName, list pyArguments
-            ) except *:
-        cdef CefRefPtr[CefProcessMessage] message = \
-                CefProcessMessage_Create(PyToCefStringValue(messageName))
-        # This does not work, no idea why, the CEF implementation
-        # seems not to allow it, both Assign() and swap() do not work:
-        # | message.get().GetArgumentList().Assign(arguments.get())
-        # | message.get().GetArgumentList().swap(arguments)
-        cdef CefRefPtr[CefListValue] messageArguments = \
-                message.get().GetArgumentList()
-        PyListToExistingCefListValue(self.GetIdentifier(), frameId,
-                pyArguments, messageArguments)
-        Debug("SendProcessMessage(): message=%s, arguments size=%d" % (
-                messageName,
-                message.get().GetArgumentList().get().GetSize()))
-        cdef cpp_bool success = \
-                self.GetCefBrowser().get().SendProcessMessage(
-                        targetProcess, message)
-        if not success:
-            raise Exception("Browser.SendProcessMessage() failed: "\
-                    "messageName=%s" % messageName)
+    cpdef py_void SendExternalBeginFrame(self):
+        self.GetCefBrowserHost().get().SendExternalBeginFrame()
 
     # -------------------------------------------------------------------------
     # OSR drag & drop

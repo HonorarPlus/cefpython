@@ -7,13 +7,11 @@
 # - wxPython 2.8 on Linux
 # - CEF Python v66.0+
 
-from cefpython3 import cefpython as cef
-import os
-import platform
-import subprocess
-import sys
-import webbrowser
 import wx
+from cefpython3 import cefpython as cef
+import platform
+import sys
+import os
 
 # Platforms
 WINDOWS = (platform.system() == "Windows")
@@ -31,13 +29,6 @@ if MAC:
               "pip install -U pyobjc")
         sys.exit(1)
 
-# DevTools port and url. This is needed to workaround keyboard issues
-# in DevTools popup on Windows (Issue #381).
-DEVTOOLS_PORT = 0  # By default a random port is generated.
-if WINDOWS:
-    DEVTOOLS_PORT = 54008
-    DEVTOOLS_URL = "http://127.0.0.1:{0}/".format(DEVTOOLS_PORT)
-
 # Configuration
 WIDTH = 900
 HEIGHT = 640
@@ -50,8 +41,6 @@ def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     settings = {}
-    if DEVTOOLS_PORT:
-        settings["remote_debugging_port"] = DEVTOOLS_PORT
     if MAC:
         # Issue #442 requires enabling message pump on Mac
         # and calling message loop work in a timer both at
@@ -175,25 +164,9 @@ class MainFrame(wx.Frame):
         filemenu = wx.Menu()
         filemenu.Append(1, "Some option")
         filemenu.Append(2, "Another option")
-        filemenu.Append(3, "PrintToPDF test1")
-        filemenu.Append(4, "PrintToPDF test2")
         menubar = wx.MenuBar()
         menubar.Append(filemenu, "&File")
         self.SetMenuBar(menubar)
-        self.Bind(wx.EVT_MENU, self.menu_handler)
-
-    def menu_handler(self, event):
-      id = event.GetId()
-      if id == 3:
-        self.browser.PrintToPdf('test1.pdf', {'backgrounds_enabled': 1, "header_footer_enabled": 1})
-      if id == 4:
-        self.browser.PrintToPdf('test2.pdf', {'backgrounds_enabled': 1}, func=self.OnPdfFinished)
-
-    def OnPdfFinished(self, path, ok):
-        if ok:
-            print("self.OnPdfPrintFinished: ok %s" % path)
-        else:
-            print("self.OnPdfPrintFinished: error")
 
     def embed_browser(self):
         window_info = cef.WindowInfo()
@@ -202,14 +175,8 @@ class MainFrame(wx.Frame):
         window_info.SetAsChild(self.browser_panel.GetHandle(),
                                [0, 0, width, height])
         self.browser = cef.CreateBrowserSync(window_info,
-                                             url="https://github.com/cztomczak/cefpython")
-        if WINDOWS:
-            # Override the Brower.ShowDevTools method to fix keyboard
-            # problems on Windows (Issue #381).
-            self.browser.SetClientHandler(DevToolsHandler())
+                                             url="https://www.google.com/")
         self.browser.SetClientHandler(FocusHandler())
-        self.browser.SetClientHandler(DialogHandler())
-        self.browser.SetClientHandler(PdfPrintCallback())
 
     def OnSetFocus(self, _):
         if not self.browser:
@@ -222,7 +189,10 @@ class MainFrame(wx.Frame):
     def OnSize(self, _):
         if not self.browser:
             return
-        if WINDOWS or LINUX:
+        if WINDOWS:
+            cef.WindowUtils.OnSize(self.browser_panel.GetHandle(),
+                                   0, 0, 0)
+        elif LINUX:
             (x, y) = (0, 0)
             (width, height) = self.browser_panel.GetSize().Get()
             self.browser.SetBounds(x, y, width, height)
@@ -261,29 +231,6 @@ class MainFrame(wx.Frame):
         self.browser = None
 
 
-class DevToolsHandler(object):
-    """This handler is set only on Windows platform."""
-
-    def ShowDevTools(self, browser, **_):
-        # Check if app was frozen with e.g. pyinstaller.
-        if getattr(sys, "frozen", None):
-            dir = os.path.dirname(os.path.realpath(__file__))
-            executable = os.path.join(dir, "devtools.exe");
-            if os.path.exists(executable):
-                # If making executable with pyinstaller then create
-                # executable for the devtools.py script as well.
-                subprocess.Popen([executable, DEVTOOLS_URL])
-            else:
-                # Another way to show DevTools is to open it in Google Chrome
-                # system browser.
-                webbrowser.open(DEVTOOLS_URL)
-        else:
-            # Use the devtools.py script to open DevTools popup.
-            dir = os.path.dirname(os.path.realpath(__file__))
-            script = os.path.join(dir, "devtools.py")
-            subprocess.Popen([sys.executable, script, DEVTOOLS_URL])
-
-
 class FocusHandler(object):
     def OnGotFocus(self, browser, **_):
         # Temporary fix for focus issues on Linux (Issue #284).
@@ -291,24 +238,6 @@ class FocusHandler(object):
             print("[wxpython.py] FocusHandler.OnGotFocus:"
                   " keyboard focus fix (Issue #284)")
             browser.SetFocus(True)
-
-
-class DialogHandler(object):
-    def OnFileDialog(self, browser, mode, title, default_file_path, accept_filters, selected_accept_filter, file_dialog_callback):
-      file_real_path = os.path.realpath('test1.pdf')
-      if os.path.exists(file_real_path):
-        file_dialog_callback.Continue(0, [file_real_path])
-        return True
-      else:
-        return False
-
-
-class PdfPrintCallback(object):
-    def OnPdfPrintFinished(self, path, ok):
-        if ok:
-            print("PdfPrintCallback.OnPdfPrintFinished: ok %s" % path)
-        else:
-            print("PdfPrintCallback.OnPdfPrintFinished: error")
 
 
 class CefApp(wx.App):
@@ -351,10 +280,7 @@ class CefApp(wx.App):
         self.timer.Start(10)  # 10ms timer
 
     def on_timer(self, _):
-        if MAC:
-            cef.MessageLoop()
-        else:
-            cef.MessageLoopWork()
+        cef.MessageLoopWork()
 
     def OnExit(self):
         self.timer.Stop()

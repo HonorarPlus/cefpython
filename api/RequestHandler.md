@@ -17,7 +17,6 @@ Available in upstream CEF, but not yet exposed to CEF Python:
 Table of contents:
 * [Callbacks](#callbacks)
   * [CanGetCookies](#cangetcookies)
-  * [CanSetCookie](#cansetcookie)
   * [GetAuthCredentials](#getauthcredentials)
   * [GetCookieManager](#getcookiemanager)
   * [GetResourceHandler](#getresourcehandler)
@@ -27,7 +26,6 @@ Table of contents:
   * [_OnCertificateError](#_oncertificateerror)
   * [OnQuotaRequest](#onquotarequest)
   * [OnResourceRedirect](#onresourceredirect)
-  * [OnResourceResponse](#onresourceresponse)
   * [OnPluginCrashed](#onplugincrashed)
   * [OnProtocolExecution](#onprotocolexecution)
   * [OnRendererProcessTerminated](#onrendererprocessterminated)
@@ -52,29 +50,12 @@ Description from upstream CEF:
 > modified in this callback.
 
 
-### CanSetCookie
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| frame | [Frame](Frame.md) |
-| request | [Request](Request.md) |
-| cookie | [Cookie](Cookie.md) |
-| __Return__ | bool |
-
-Description from upstream CEF:
-> Called on the IO thread when receiving a network request with a
-> "Set-Cookie" response header value represented by |cookie|. Return true to
-> allow the cookie to be stored or false to block the cookie. The |request|
-> object should not be modified in this callback.
-
-
 ### GetAuthCredentials
 
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| frame | [Frame](Frame.md) |
+| origin_url | string |
 | is_proxy | bool |
 | host | string |
 | port | int |
@@ -315,22 +296,6 @@ Description from upstream CEF:
 > callback.
 
 
-### OnResourceResponse
-
-| | |
-| --- | --- |
-| __Return__ | void |
-
-Available in upstream CEF, but not yet exposed to CEF Python.
-See Issue #229.
-
-You can implement this functionality by using
-[ResourceHandler](ResourceHandler.md) and [WebRequest](WebRequest.md)
-/ [WebRequestClient](WebRequestClient.md). For an example see the
-_OnResourceResponse() method in the old v31 [wxpython-response.py]
-example.
-
-
 ### OnPluginCrashed
 
 | Parameter | Type |
@@ -348,8 +313,8 @@ that crashed.
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| url | string |
-| allow_execution_out | list[bool] |
+| frame | [Frame](Frame.md) |
+| allow_execution_out | [Request](Request.md) |
 | __Return__ | void |
 
 Called on the UI thread to handle requests for URLs with an unknown
@@ -380,3 +345,4 @@ how the process terminated.
   * TS_ABNORMAL_TERMINATION - Non-zero exit status.
   * TS_PROCESS_WAS_KILLED - SIGKILL or task manager kill.
   * TS_PROCESS_CRASHED - Segmentation fault.
+  * TS_PROCESS_OOM - Out of memory. Some platforms may use TS_PROCESS_CRASHED instead.

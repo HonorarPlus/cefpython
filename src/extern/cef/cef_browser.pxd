@@ -12,13 +12,10 @@ from libcpp.vector cimport vector as cpp_vector
 from cef_frame cimport CefFrame
 cimport cef_types
 from cef_types cimport int64, cef_state_t, CefSize
-from cef_types cimport CefPdfPrintSettings
 from cef_types cimport CefBrowserSettings, CefPoint
 from cef_drag_data cimport CefDragData
 from cef_types cimport CefMouseEvent
 from cef_request_context cimport CefRequestContext
-
-from cef_process_message cimport CefProcessMessage, CefProcessId
 
 IF UNAME_SYSNAME == "Windows":
     from cef_win cimport CefWindowHandle, CefWindowInfo
@@ -28,10 +25,6 @@ ELIF UNAME_SYSNAME == "Darwin":
     from cef_mac cimport CefWindowHandle, CefWindowInfo
 
 cdef extern from "include/cef_browser.h":
-
-    cdef cppclass CefPdfPrintCallback:
-
-        void OnPdfPrintFinished(const CefString& path, cpp_bool ok)
 
     cdef cppclass CefBrowserHost:
 
@@ -43,12 +36,11 @@ cdef extern from "include/cef_browser.h":
         double GetZoomLevel()
         void SetZoomLevel(double zoomLevel)
         void StartDownload(const CefString& url)
-        void SetMouseCursorChangeDisabled(cpp_bool disabled)
-        cpp_bool IsMouseCursorChangeDisabled()
         cpp_bool IsWindowRenderingDisabled()
         void WasResized()
         void WasHidden(cpp_bool hidden)
         void NotifyScreenInfoChanged()
+        void SendExternalBeginFrame()
         void NotifyMoveOrResizeStarted()
 
         void SendKeyEvent(cef_types.CefKeyEvent)
@@ -75,9 +67,6 @@ cdef extern from "include/cef_browser.h":
                 cpp_bool matchCase, cpp_bool findNext)
         void StopFinding(cpp_bool clearSelection)
         void Print()
-        void PrintToPDF(const CefString& path,
-                        const CefPdfPrintSettings& settings,
-                        CefRefPtr[CefPdfPrintCallback] callback)
         cpp_bool TryCloseBrowser()
 
         # Drag & drop OSR
@@ -121,5 +110,3 @@ cdef extern from "include/cef_browser.h":
         void StopLoad()
         cpp_bool IsLoading()
         int GetIdentifier()
-        cpp_bool SendProcessMessage(CefProcessId target_process,
-                                    CefRefPtr[CefProcessMessage] message)

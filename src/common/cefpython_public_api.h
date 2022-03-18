@@ -21,6 +21,7 @@
 // Includes required by "cefpython_fixed.h".
 #include "include/cef_client.h"
 #include "include/cef_urlrequest.h"
+#include "include/cef_web_plugin.h"
 #include "include/cef_command_line.h"
 #include "util.h"
 
@@ -46,10 +47,6 @@
 #include "../../build/build_cefpython/cefpython_py36_fixed.h"
 #elif PY_MINOR_VERSION == 7
 #include "../../build/build_cefpython/cefpython_py37_fixed.h"
-#elif PY_MINOR_VERSION == 8
-#include "../../build/build_cefpython/cefpython_py38_fixed.h"
-#elif PY_MINOR_VERSION == 9
-#include "../../build/build_cefpython/cefpython_py39_fixed.h"
 #endif // PY_MINOR_VERSION
 #endif // PY_MAJOR_VERSION
 

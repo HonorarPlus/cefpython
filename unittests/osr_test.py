@@ -87,7 +87,7 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             settings["log_severity"] = cef.LOGSEVERITY_WARNING
         if "--debug" in sys.argv:
             settings["debug"] = True
-            settings["log_severity"] = cef.LOGSEVERITY_INFO
+            settings["log_severity"] = cef.LOGSEVERITY_VERBOSE
         if "--debug-warning" in sys.argv:
             settings["debug"] = True
             settings["log_severity"] = cef.LOGSEVERITY_WARNING
@@ -194,22 +194,38 @@ class AccessibilityHandler(object):
         self._OnAccessibilityTreeChange_True = False
         self._OnAccessibilityLocationChange_True = False
         self.loadComplete_True = False
+        self.loadCompleteFromPage_True = False
         self.layoutComplete_True = False
+        self.layoutCompleteFromPage_True = False
+        self.layoutCompleteFromUser_True = False
 
     def _OnAccessibilityTreeChange(self, value):
         self._OnAccessibilityTreeChange_True = True
-        for event in value:
-            if "event_type" in event:
-                if event["event_type"] == "loadComplete":
-                    # LoadHandler.OnLoadEnd is called after this event
-                    self.test_case.assertFalse(self.loadComplete_True)
-                    self.loadComplete_True = True
-                elif event["event_type"] == "layoutComplete":
-                    # layoutComplete event occurs twice, one when a blank
-                    # page is loaded and second time when loading datauri.
-                    if self.loadComplete_True:
-                        self.test_case.assertFalse(self.layoutComplete_True)
-                        self.layoutComplete_True = True
+        events = value.get("events")
+        if events is not None:
+            for event in events:
+                if "event_type" in event:
+                    if event["event_type"] == "loadComplete":
+                        # LoadHandler.OnLoadEnd is called after this event
+                        if "event_from" in event and event["event_from"] == "page":
+                            self.test_case.assertFalse(self.loadCompleteFromPage_True)
+                            self.loadCompleteFromPage_True = True
+                        else:
+                            self.test_case.assertFalse(self.loadComplete_True)
+                            self.loadComplete_True = True
+                    elif event["event_type"] == "layoutComplete":
+                        # layoutComplete event occurs twice, one when a blank
+                        # page is loaded and second time when loading datauri.
+                        if "event_from" in event:
+                            if event["event_from"] == "page":
+                                self.test_case.assertFalse(self.layoutCompleteFromPage_True)
+                                self.layoutCompleteFromPage_True = True
+                            elif event["event_from"] == "user":
+                                self.test_case.assertFalse(self.layoutCompleteFromUser_True)
+                                self.layoutCompleteFromUser_True = True
+                        elif self.loadComplete_True:
+                            self.test_case.assertFalse(self.layoutComplete_True)
+                            self.layoutComplete_True = True
 
     def _OnAccessibilityLocationChange(self, **_):
         self._OnAccessibilityLocationChange_True = True
@@ -240,12 +256,10 @@ class RenderHandler(object):
 
     def GetViewRect(self, rect_out, **_):
         """Called to retrieve the view rectangle which is relative
-        to screen coordinates. Return True if the rectangle was
-        provided."""
+        to screen coordinates."""
         # rect_out --> [x, y, width, height]
         self.GetViewRect_True = True
         rect_out.extend([0, 0, 800, 600])
-        return True
 
     def OnPaint(self, element_type, paint_buffer, **_):
         """Called when an element should be painted."""
