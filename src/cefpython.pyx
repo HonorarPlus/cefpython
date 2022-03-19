@@ -305,6 +305,7 @@ from main_message_loop cimport *
 from cef_views cimport *
 from cef_log cimport *
 from cef_file_util cimport *
+from print_callback cimport *
 
 # -----------------------------------------------------------------------------
 # GLOBAL VARIABLES
@@ -376,6 +377,7 @@ include "app.pyx"
 include "drag_data.pyx"
 include "helpers.pyx"
 include "image.pyx"
+include "pdf_print_handler.pyx"
 
 # Handlers
 include "handlers/accessibility_handler.pyx"
