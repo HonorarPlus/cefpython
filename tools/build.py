@@ -116,10 +116,17 @@ def main():
               .format(pyver=PYVERSION))
         global FIRST_RUN
         FIRST_RUN = True
+    print("[build.py]   ===== Clearing cache =====")
     clear_cache()
+
+    print("[build.py]   ===== Copy&Fix PYX =====")
     copy_and_fix_pyx_files()
-    build_cefpython_module()
+
+    print("[build.py]   ===== Build FIX HEADER module =====")
     fix_cefpython_api_header_file()
+
+    print("[build.py]   ===== Build CEFPYTHON module =====")
+    build_cefpython_module()
     install_and_run()
 
 
@@ -211,7 +218,8 @@ def check_cython_version():
         require_version = match.group(1)
     try:
         import Cython
-        version = Cython.__version__
+        version = Cython.__version__[:3]
+        print("Cython version: {0}".format(version))
     except ImportError:
         # noinspection PyUnusedLocal
         Cython = None

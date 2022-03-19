@@ -4,10 +4,8 @@
 
 """
 Create setup.py package installer.
-
 Usage:
     make_installer.py VERSION [--wheel] [--python-tag xx] [--universal]
-
 Options:
     VERSION  Version number eg. 50.0
     --wheel  Generate wheel package.
@@ -229,9 +227,9 @@ def perform_copy_operations(operations):
             assert base_dir
             assert base_dir == os.path.abspath(base_dir)
             paths = glob.glob(pattern)
-            if not len(paths):
-                raise Exception("No paths found in: {pattern}"
-                                .format(pattern=pattern))
+            #if not len(paths):
+            #    raise Exception("No paths found in: {pattern}"
+            #                    .format(pattern=pattern))
             for path in paths:
                 # "path" variable contains absolute path
                 assert path == os.path.abspath(path)
@@ -365,10 +363,14 @@ def copy_cpp_extension_dependencies_issue359(pkg_dir):
     # in the package. Thus if included, msvcpxx.dll dependency is
     # required as well.
 
-    # Python 3.5 / 3.6 / 3.7
+
+    # Python 3.5 / 3.6 / 3.7 / 3.8 / 3.9 / 3.10
     if os.path.exists(os.path.join(pkg_dir, "cefpython_py35.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py36.pyd")) \
-            or os.path.exists(os.path.join(pkg_dir, "cefpython_py37.pyd")):
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py37.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py38.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py39.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py310.pyd")):
         search_paths = [
             # This is where Microsoft Visual C++ 2015 Update 3 installs
             # (14.00.24212).
@@ -400,7 +402,7 @@ def copy_cpp_extension_dependencies_issue359(pkg_dir):
             ]
         root_search_paths.append(search_paths)
 
-    assert len(root_search_paths)
+    #assert len(root_search_paths)
 
     for search_paths in root_search_paths:
         found = False

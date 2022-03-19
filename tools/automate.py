@@ -4,25 +4,21 @@
 
 """
 Prepares CEF binaries and libraries for work with the build.py tool.
-
 Option 1 is to build CEF from sources with the CEF Python patches applied
 using the --build-cef flag. Building CEF from sources is supported only
 on 64-bit systems. 32-bit is also built on 64-bit using cross-compiling.
 Note that building CEF from sources was last tested with v56 on Linux
 and with v50 on Windows, so if there are issues report them on the Forum.
-
 Option 2 is to use CEF binaries from Spotify Automated Builds using
 the --prebuilt-cef flag. In such case check the cefpython/src/version/
 directory to know which version of CEF to download from Spotify:
 http://opensource.spotify.com/cefbuilds/index.html
 Download and extract it so that for example you have such a directory:
 cefpython/build/cef_binary_3.2883.1553.g80bd606_windows32/ .
-
 This tool generates CEF binaries and libraries that are ready for work
 with cefpython, with the build.py script. When automate.py tool completes
 job you should see a new subdirectory in the build/ directory, for example:
 cefpython/build/cef55_3.2883.1553.g80bd606_win32/ .
-
 Usage:
     automate.py (--prebuilt-cef | --build-cef | --make-distrib)
                 [--x86 X86]
@@ -39,7 +35,6 @@ Usage:
                 [--proprietary-codecs PROPRIETARY_CODECS]
                 [--no-depot-tools-update NO_DEPOT_TOOLS_UPDATE]
     automate.py (-h | --help) [type -h to show full description for options]
-
 Options:
     -h --help                Show this help message.
     --prebuilt-cef           Whether to use prebuilt CEF binaries. Prebuilt
@@ -78,7 +73,6 @@ Options:
                              building old unsupported versions of Chromium
                              you want to manually checkout an old version
                              of depot tools from the time of the release.
-
 """
 
 from common import *
@@ -147,11 +141,6 @@ def main():
     setup_options(docopt.docopt(__doc__))
 
     if Options.build_cef:
-        if not sys.version_info[:2] == (2, 7):
-            print("ERROR: To build CEF from sources you need Python 2.7.")
-            print("       Upstream automate-git.py works only with that")
-            print("       version of python.")
-            sys.exit(1)
         build_cef()
     elif Options.prebuilt_cef:
         prebuilt_cef()
@@ -275,16 +264,21 @@ def prebuilt_cef():
     #       eg. tag 'upstream-cef47'.
 
     # Find cef_binary directory in the build directory
+    postfix2 = CEF_POSTFIX2
+    if Options.x86:
+        postfix2 = get_cef_postfix2_for_arch("32bit")
     if Options.cef_version:
         cef_binary = os.path.join(Options.build_dir,
                                   "cef_binary_{cef_version}_{os}{sep}"
                                   .format(cef_version=Options.cef_version,
-                                          os=CEF_POSTFIX2,
+                                          os=postfix2,
                                           sep=os.sep))
     else:
-        print("ERROR: Could not find prebuilt binaries: CEF version not defined.")
-        sys.exit(1)
-
+        cef_binary = os.path.join(Options.build_dir,
+                                  "cef_binary_3.{cef_branch}.*_{os}{sep}"
+                                  .format(cef_branch=Options.cef_branch,
+                                          os=postfix2,
+                                          sep=os.sep))
     dirs = glob.glob(cef_binary)
     if len(dirs) == 1:
         Options.cef_binary = dirs[0]
@@ -326,7 +320,6 @@ def create_cef_directories():
 def update_cef_patches():
     """Update cef/patch/ directory with CEF Python patches.
     Issue73 is applied in getenv() by setting appropriate env var.
-
     Note that this modifies only cef_build_dir/cef/ directory. If the
     build was run previously then there is a copy of the cef/ directory
     in the cef_build_dir/chromium/ directory which is not being updated.
@@ -454,13 +447,13 @@ def build_cef_projects():
 
 
 def build_all_wrapper_libraries_windows():
-    python_compiler = get_available_compiler()
-    if not len(python_compiler):
+    python_compilers = get_available_python_compilers()
+    if not len(python_compilers):
         print("[automate.py] ERROR: Visual Studio compiler not found")
         sys.exit(1)
-    
-    for msvs in python_compiler:
-        vcvars = python_compiler[msvs]
+
+    for msvs in python_compilers:
+        vcvars = python_compilers[msvs]
         print("[automate.py] Build libcef_dll_wrapper libraries for"
               " VS{msvs}".format(msvs=msvs))
         build_wrapper_library_windows(runtime_library=RUNTIME_MT,
@@ -807,7 +800,7 @@ def create_prebuilt_binaries():
         # additional space (cefsimple is 157 MB).
         copy_app(cefclient)
         copy_app(cefsimple)
-        copy_app(ceftests)
+        #copy_app(ceftests)
 
     # END: Copy cefclient, cefsimple, ceftests
 
@@ -815,7 +808,7 @@ def create_prebuilt_binaries():
     if platform.system() == "Windows":
         # libcef.lib and cef_sandbox.lib
         mvfiles(bindir, libdir, ".lib")
-        python_compilers = get_available_compiler()
+        python_compilers = get_available_python_compilers()
         for msvs in python_compilers:
             vs_subdir = os.path.join(libdir, "VS{msvs}".format(msvs=msvs))
             os.makedirs(vs_subdir)
@@ -866,7 +859,7 @@ def create_prebuilt_binaries():
     print("[automate.py] OK prebuilt binaries created in '%s/'" % dst)
 
 
-def get_available_compiler():
+def get_available_python_compilers():
     all_python_compilers = OrderedDict([
         ("2019", VS2019_VCVARS),
         ("2015", VS2015_VCVARS),
@@ -874,14 +867,14 @@ def get_available_compiler():
         ("2010", VS2010_VCVARS),
         ("2008", VS2008_VCVARS),
     ])
-
     ret_compilers = OrderedDict()
     for msvs in all_python_compilers:
         vcvars = all_python_compilers[msvs]
         if os.path.exists(vcvars):
             ret_compilers[msvs] = vcvars
-            break
-    
+        else:
+            print("[automate.py] INFO: Visual Studio compiler not found:"
+                  " {vcvars}".format(vcvars=vcvars))
     return ret_compilers
 
 

@@ -55,12 +55,9 @@ if MAC:
         g_generate_extern_c_macro_definition_old(self, code)
         code.putln("// Added by: cefpython/tools/cython_setup.py")
         code.putln("#undef PyMODINIT_FUNC")
-        if sys.version_info[:2] == (2, 7):
-            code.putln("#define PyMODINIT_FUNC extern \"C\""
-                       " __attribute__((visibility(\"default\"))) void")
-        else:
-            code.putln("#define PyMODINIT_FUNC extern \"C\""
-                       " __attribute__((visibility(\"default\"))) PyObject*")
+
+        code.putln("#define PyMODINIT_FUNC extern \"C\""
+                   " __attribute__((visibility(\"default\"))) PyObject*")
     # Overwrite Cython function
     ModuleNode.generate_extern_c_macro_definition = (
             generate_extern_c_macro_definition)
@@ -154,6 +151,9 @@ def get_winsdk_lib():
             ]
         elif ARCH64:
             winsdk_libs = [
+                r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.17134.0\x64",
+                r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64",
+                r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib\\x64",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib\\x64",
                 # Visual Studio 2008 installation
@@ -318,6 +318,7 @@ def get_include_dirs():
             '/usr/include/gtk-unix-print-2.0',
             '/usr/include/cairo',
             '/usr/include/pango-1.0',
+            '/usr/include/harfbuzz',
             '/usr/include/gdk-pixbuf-2.0',
             '/usr/include/atk-1.0',
             # Fedora
@@ -337,6 +338,7 @@ def get_include_dirs():
             '/usr/include/gtk-unix-print-2.0',
             '/usr/include/cairo',
             '/usr/include/pango-1.0',
+            '/usr/include/harfbuzz',
             '/usr/include/gdk-pixbuf-2.0',
             '/usr/include/atk-1.0',
             # Ubuntu
@@ -431,6 +433,7 @@ def get_ext_modules(options):
         # > Unknown Extension options: 'cython_directives' warnings.warn(msg)
         cython_directives={
             # Any conversion to unicode must be explicit using .decode().
+            "language_level": 2,
             "c_string_type": "bytes",
             "c_string_encoding": "utf-8",
             "profile": ENABLE_PROFILING,
