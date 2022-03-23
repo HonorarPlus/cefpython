@@ -364,6 +364,9 @@ cdef class PyBrowser:
         PyToCefString(word, cef_word)
         self.GetCefBrowserHost().get().AddWordToDictionary(cef_word)
 
+    cpdef py_bool IsValid(self):
+        return self.GetCefBrowser().get().IsValid()
+
     cpdef py_bool CanGoBack(self):
         return self.GetCefBrowser().get().CanGoBack()
 

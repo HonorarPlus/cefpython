@@ -483,10 +483,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         cdef str py_module_dir = GetModuleDirectory()
         cdef CefString cef_module_dir
         PyToCefString(py_module_dir, cef_module_dir)
-        CefOverridePath(PK_DIR_EXE, cef_module_dir)\
-                or Debug("ERROR: CefOverridePath failed")
-        CefOverridePath(PK_DIR_MODULE, cef_module_dir)\
-                or Debug("ERROR: CefOverridePath failed")
+
     # END IF UNAME_SYSNAME == "Linux":
 
     if not application_settings:
