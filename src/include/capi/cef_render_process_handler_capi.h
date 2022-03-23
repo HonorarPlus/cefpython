@@ -33,7 +33,7 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=41339414bca54054046a8f7fbce402a0e0dd8020$
+// $hash=4ebf99611a11cc8714d710c37417fbd9f50f0618$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_RENDER_PROCESS_HANDLER_CAPI_H_
@@ -73,7 +73,7 @@ typedef struct _cef_render_process_handler_t {
   ///
   // Called after a browser has been created. When browsing cross-origin a new
   // browser will be created before the old browser with the same identifier is
-  // destroyed. |extra_info| is a read-only value originating from
+  // destroyed. |extra_info| is an optional read-only value originating from
   // cef_browser_host_t::cef_browser_host_create_browser(),
   // cef_browser_host_t::cef_browser_host_create_browser_sync(),
   // cef_life_span_handler_t::on_before_popup() or
@@ -150,8 +150,8 @@ typedef struct _cef_render_process_handler_t {
 
   ///
   // Called when a new message is received from a different process. Return true
-  // (1) if the message was handled or false (0) otherwise. Do not keep a
-  // reference to or attempt to access the message outside of this callback.
+  // (1) if the message was handled or false (0) otherwise. It is safe to keep a
+  // reference to |message| outside of this callback.
   ///
   int(CEF_CALLBACK* on_process_message_received)(
       struct _cef_render_process_handler_t* self,

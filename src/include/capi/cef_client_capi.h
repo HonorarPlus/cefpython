@@ -168,8 +168,8 @@ typedef struct _cef_client_t {
 
   ///
   // Called when a new message is received from a different process. Return true
-  // (1) if the message was handled or false (0) otherwise. Do not keep a
-  // reference to or attempt to access the message outside of this callback.
+  // (1) if the message was handled or false (0) otherwise.  It is safe to keep
+  // a reference to |message| outside of this callback.
   ///
   int(CEF_CALLBACK* on_process_message_received)(
       struct _cef_client_t* self,
