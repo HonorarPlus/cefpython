@@ -69,6 +69,12 @@ typedef struct _cef_browser_t {
   cef_base_ref_counted_t base;
 
   ///
+  // True if this object is currently valid. This will return false (0) after
+  // cef_life_span_handler_t::OnBeforeClose is called.
+  ///
+  int(CEF_CALLBACK* is_valid)(struct _cef_browser_t* self);
+
+  ///
   // Returns the browser host object. This function can only be called in the
   // browser process.
   ///

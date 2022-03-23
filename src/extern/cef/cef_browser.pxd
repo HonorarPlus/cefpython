@@ -104,6 +104,7 @@ cdef extern from "include/cef_browser.h":
     cdef cppclass CefBrowser:
 
         CefRefPtr[CefBrowserHost] GetHost()
+        cpp_bool IsValid()
         cpp_bool CanGoBack()
         cpp_bool CanGoForward()
         CefRefPtr[CefFrame] GetFocusedFrame()

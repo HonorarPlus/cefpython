@@ -61,6 +61,13 @@ class CefClient;
 class CefBrowser : public virtual CefBaseRefCounted {
  public:
   ///
+  // True if this object is currently valid. This will return false after
+  // CefLifeSpanHandler::OnBeforeClose is called.
+  ///
+  /*--cef()--*/
+  virtual bool IsValid() = 0;
+
+  ///
   // Returns the browser host object. This method can only be called in the
   // browser process.
   ///
@@ -130,7 +137,7 @@ class CefBrowser : public virtual CefBaseRefCounted {
   virtual bool IsSame(CefRefPtr<CefBrowser> that) = 0;
 
   ///
-  // Returns true if the window is a popup window.
+  // Returns true if the browser is a popup.
   ///
   /*--cef()--*/
   virtual bool IsPopup() = 0;
