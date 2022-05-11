@@ -55,9 +55,8 @@ class CefCookieAccessFilter;
 // indicated.
 ///
 /*--cef(source=client,no_debugct_check)--*/
-class CefResourceRequestHandler : public virtual CefBaseRefCounted
-{
-public:
+class CefResourceRequestHandler : public virtual CefBaseRefCounted {
+ public:
   typedef cef_return_value_t ReturnValue;
   typedef cef_urlrequest_status_t URLRequestStatus;
 
@@ -72,8 +71,7 @@ public:
   virtual CefRefPtr<CefCookieAccessFilter> GetCookieAccessFilter(
       CefRefPtr<CefBrowser> browser,
       CefRefPtr<CefFrame> frame,
-      CefRefPtr<CefRequest> request)
-  {
+      CefRefPtr<CefRequest> request) {
     return NULL;
   }
 
@@ -94,8 +92,7 @@ public:
       CefRefPtr<CefBrowser> browser,
       CefRefPtr<CefFrame> frame,
       CefRefPtr<CefRequest> request,
-      CefRefPtr<CefRequestCallback> callback)
-  {
+      CefRefPtr<CefRequestCallback> callback) {
     return RV_CONTINUE;
   }
 
@@ -111,8 +108,7 @@ public:
   virtual CefRefPtr<CefResourceHandler> GetResourceHandler(
       CefRefPtr<CefBrowser> browser,
       CefRefPtr<CefFrame> frame,
-      CefRefPtr<CefRequest> request)
-  {
+      CefRefPtr<CefRequest> request) {
     return NULL;
   }
 
@@ -131,7 +127,7 @@ public:
                                   CefRefPtr<CefFrame> frame,
                                   CefRefPtr<CefRequest> request,
                                   CefRefPtr<CefResponse> response,
-                                  CefString &new_url) {}
+                                  CefString& new_url) {}
 
   ///
   // Called on the IO thread when a resource response is received. The |browser|
@@ -150,8 +146,7 @@ public:
   virtual bool OnResourceResponse(CefRefPtr<CefBrowser> browser,
                                   CefRefPtr<CefFrame> frame,
                                   CefRefPtr<CefRequest> request,
-                                  CefRefPtr<CefResponse> response)
-  {
+                                  CefRefPtr<CefResponse> response) {
     return false;
   }
 
@@ -167,8 +162,7 @@ public:
       CefRefPtr<CefBrowser> browser,
       CefRefPtr<CefFrame> frame,
       CefRefPtr<CefRequest> request,
-      CefRefPtr<CefResponse> response)
-  {
+      CefRefPtr<CefResponse> response) {
     return NULL;
   }
 
@@ -209,7 +203,7 @@ public:
   virtual void OnProtocolExecution(CefRefPtr<CefBrowser> browser,
                                    CefRefPtr<CefFrame> frame,
                                    CefRefPtr<CefRequest> request,
-                                   bool &allow_os_execution) {}
+                                   bool& allow_os_execution) {}
 };
 
 ///
@@ -218,9 +212,8 @@ public:
 // unless otherwise indicated.
 ///
 /*--cef(source=client,no_debugct_check)--*/
-class CefCookieAccessFilter : public virtual CefBaseRefCounted
-{
-public:
+class CefCookieAccessFilter : public virtual CefBaseRefCounted {
+ public:
   ///
   // Called on the IO thread before a resource request is sent. The |browser|
   // and |frame| values represent the source of the request, and may be NULL for
@@ -232,8 +225,7 @@ public:
   virtual bool CanSendCookie(CefRefPtr<CefBrowser> browser,
                              CefRefPtr<CefFrame> frame,
                              CefRefPtr<CefRequest> request,
-                             const CefCookie &cookie)
-  {
+                             const CefCookie& cookie) {
     return true;
   }
 
@@ -249,10 +241,9 @@ public:
                              CefRefPtr<CefFrame> frame,
                              CefRefPtr<CefRequest> request,
                              CefRefPtr<CefResponse> response,
-                             const CefCookie &cookie)
-  {
+                             const CefCookie& cookie) {
     return true;
   }
 };
 
-#endif // CEF_INCLUDE_CEF_RESOURCE_REQUEST_HANDLER_H_
+#endif  // CEF_INCLUDE_CEF_RESOURCE_REQUEST_HANDLER_H_

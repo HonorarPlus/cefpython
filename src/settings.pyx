@@ -136,6 +136,10 @@ cdef void SetApplicationSettings(
             cefString = new CefString(&cefAppSettings.framework_dir_path)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
+        elif key == "main_bundle_path":
+            cefString = new CefString(&cefAppSettings.main_bundle_path)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
         else:
             raise Exception("Invalid appSettings key: %s" % key)
 

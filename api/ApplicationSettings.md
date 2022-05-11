@@ -20,6 +20,7 @@ Table of contents:
   * [downloads_enabled](#downloads_enabled)
   * [external_message_pump](#external_message_pump)
   * [framework_dir_path](#framework_dir_path)
+  * [main_bundle_path](#main_bundle_path)
   * [ignore_certificate_errors](#ignore_certificate_errors)
   * [javascript_flags](#javascript_flags)
   * [locale](#locale)
@@ -254,6 +255,13 @@ Framework.framework" in the top-level app bundle. Also configurable using
 the "framework-dir-path" command-line switch.
 
 See also [Issue #304](../../../issues/304).
+
+
+### main_bundle_path
+
+The path to the main bundle on macOS. If this value is empty then it
+defaults to the top-level app bundle. Also configurable using
+the "main-bundle-path" command-line switch.
 
 
 ### ignore_certificate_errors

@@ -58,7 +58,7 @@ class CefCookieManager : public virtual CefBaseRefCounted {
   // CefSettings.cache_path if specified or in memory otherwise. If |callback|
   // is non-NULL it will be executed asnychronously on the UI thread after the
   // manager's storage has been initialized. Using this method is equivalent to
-  // calling CefRequestContext::GetGlobalContext()->GetCookieManager().
+  // calling CefRequestContext::GetGlobalContext()->GetDefaultCookieManager().
   ///
   /*--cef(optional_param=callback)--*/
   static CefRefPtr<CefCookieManager> GetGlobalManager(

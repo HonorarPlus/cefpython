@@ -19,6 +19,7 @@
   * [downloads_enabled](ApplicationSettings.md#downloads_enabled)
   * [external_message_pump](ApplicationSettings.md#external_message_pump)
   * [framework_dir_path](ApplicationSettings.md#framework_dir_path)
+  * [main_bundle_path](ApplicationSettings.md#main_bundle_path)
   * [ignore_certificate_errors](ApplicationSettings.md#ignore_certificate_errors)
   * [javascript_flags](ApplicationSettings.md#javascript_flags)
   * [locale](ApplicationSettings.md#locale)
