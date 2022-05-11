@@ -17,8 +17,6 @@ from cef_drag_data cimport CefDragData
 from cef_types cimport CefMouseEvent
 from cef_request_context cimport CefRequestContext
 
-from cef_process_message cimport CefProcessMessage, CefProcessId
-
 IF UNAME_SYSNAME == "Windows":
     from cef_win cimport CefWindowHandle, CefWindowInfo
 ELIF UNAME_SYSNAME == "Linux":
@@ -44,6 +42,7 @@ cdef extern from "include/cef_browser.h":
         void WasResized()
         void WasHidden(cpp_bool hidden)
         void NotifyScreenInfoChanged()
+        void SendExternalBeginFrame()
         void NotifyMoveOrResizeStarted()
 
         void SendKeyEvent(cef_types.CefKeyEvent)
@@ -113,5 +112,3 @@ cdef extern from "include/cef_browser.h":
         void StopLoad()
         cpp_bool IsLoading()
         int GetIdentifier()
-        cpp_bool SendProcessMessage(CefProcessId target_process,
-                                    CefRefPtr[CefProcessMessage] message)

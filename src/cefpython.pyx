@@ -137,12 +137,25 @@ import struct
 # noinspection PyUnresolvedReferences
 import base64
 
-
-# noinspection PyUnresolvedReferences
-from urllib import parse as urlparse
-from urllib.parse import quote as urlparse_quote
-# noinspection PyUnresolvedReferences
-from urllib.parse import urlencode as urllib_urlencode
+# Must use compile-time condition instead of checking sys.version_info.major
+# otherwise results in "ImportError: cannot import name urlencode" strange
+# error in Python 3.6.
+IF PY_MAJOR_VERSION == 2:
+    # noinspection PyUnresolvedReferences
+    import urlparse
+    # noinspection PyUnresolvedReferences
+    from urllib import pathname2url as urllib_pathname2url
+    # noinspection PyUnresolvedReferences
+    from urllib import urlencode as urllib_urlencode
+    from urllib import quote as urlparse_quote
+ELSE:
+    # noinspection PyUnresolvedReferences
+    from urllib import parse as urlparse
+    from urllib.parse import quote as urlparse_quote
+    # noinspection PyUnresolvedReferences
+    from urllib.request import pathname2url as urllib_pathname2url
+    # noinspection PyUnresolvedReferences
+    from urllib.parse import urlencode as urllib_urlencode
 
 # noinspection PyUnresolvedReferences
 from cpython.version cimport PY_MAJOR_VERSION
@@ -579,7 +592,10 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # ------------------------------------------------------------------------
     if not "cache_path" in application_settings:
         application_settings["cache_path"] = ""
-    if not application_settings["cache_path"]:
+    if not "root_cache_path" in application_settings:
+        application_settings["root_cache_path"] = ""
+    if not application_settings["cache_path"] and \
+       not application_settings["root_cache_path"]:
         g_commandLineSwitches["disable-gpu-shader-disk-cache"] = ""
 
 
@@ -724,6 +740,8 @@ def CreateBrowserSync(windowInfo=None,
     cdef CefWindowInfo cefWindowInfo
     SetCefWindowInfo(cefWindowInfo, windowInfo)
 
+    navigateUrl = GetNavigateUrl(navigateUrl)
+    Debug("navigateUrl: %s" % navigateUrl)
     cdef CefString cefNavigateUrl
     PyToCefString(navigateUrl, cefNavigateUrl)
 
@@ -734,6 +752,7 @@ def CreateBrowserSync(windowInfo=None,
 
     # Request context - part 1/2.
     createSharedRequestContext = bool(not g_shared_request_context.get())
+    cdef CefRefPtr[CefDictionaryValue] extraInfo
     cdef CefRefPtr[CefRequestContext] cefRequestContext
     cdef CefRefPtr[RequestContextHandler] requestContextHandler =\
             <CefRefPtr[RequestContextHandler]?>new RequestContextHandler(
@@ -755,7 +774,7 @@ def CreateBrowserSync(windowInfo=None,
         cefBrowser = cef_browser_static.CreateBrowserSync(
                 cefWindowInfo, <CefRefPtr[CefClient]?>clientHandler,
                 cefNavigateUrl, cefBrowserSettings,
-                cefRequestContext)
+                extraInfo, cefRequestContext)
 
     if <void*>cefBrowser == NULL or not cefBrowser.get():
         Debug("CefBrowser::CreateBrowserSync() failed")

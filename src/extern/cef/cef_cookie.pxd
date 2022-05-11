@@ -28,18 +28,9 @@ cdef extern from "include/cef_cookie.h":
             "CefCookieManager::GetGlobalManager"(
                 CefRefPtr[CefCompletionCallback] callback)
 
-    cdef CefRefPtr[CefCookieManager] CefCookieManager_GetBlockingManager \
-            "CefCookieManager::GetBlockingManager"()
-
-
-    cdef CefRefPtr[CefCookieManager] CefCookieManager_CreateManager \
-            "CefCookieManager::CreateManager"(
-                const CefString& path,
-                cpp_bool persist_session_cookies,
-                CefRefPtr[CefCompletionCallback] callback)
-
     cdef cppclass CefCookieManager:
         void SetSupportedSchemes(const cpp_vector[CefString]& schemes,
+                                 cpp_bool include_defaults,
                                  CefRefPtr[CefCompletionCallback] callback)
         cpp_bool VisitAllCookies(CefRefPtr[CefCookieVisitor] visitor)
         cpp_bool VisitUrlCookies(const CefString& url, 
@@ -50,9 +41,6 @@ cdef extern from "include/cef_cookie.h":
         cpp_bool DeleteCookies(const CefString& url,
                                const CefString& cookie_name,
                                CefRefPtr[CefDeleteCookiesCallback] callback)
-        cpp_bool SetStoragePath(const CefString& path,
-                                cpp_bool persist_session_cookies,
-                                CefRefPtr[CefCompletionCallback] callback)
         cpp_bool FlushStore(CefRefPtr[CefCompletionCallback] callback)
 
     cdef cppclass CefCookieVisitor:

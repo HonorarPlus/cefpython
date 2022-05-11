@@ -77,6 +77,7 @@ Table of contents:
   * [ReplaceMisspelling](#replacemisspelling)
   * [SetAutoResizeEnabled](#setautoresizeenabled)
   * [SetBounds](#setbounds)
+  * [SendExternalBeginFrame](#SendExternalBeginFrame)
   * [SendKeyEvent](#sendkeyevent)
   * [SendMouseClickEvent](#sendmouseclickevent)
   * [SendMouseMoveEvent](#sendmousemoveevent)
@@ -376,7 +377,7 @@ Returns the focused [Frame](Frame.md) for the browser window.
 | name | string |
 | __Return__ | Frame |
 
-Returns the [Frame](Frame.md) with the specified name, or NULL if not found.
+Returns the [Frame](Frame.md) with the specified name, or NULL if not found. 
 
 
 ### GetFrameByIdentifier
@@ -697,13 +698,6 @@ Returns true if window rendering is disabled.
 
 Load url in the main frame.
 
-If the url is a local path it needs to start with the `file://` prefix.
-If the url contains special characters it may need proper handling.
-Starting with v66.1+ it is required for the app code to encode the url
-properly. You can use the `pathlib.PurePath.as_uri` in Python 3
-or `urllib.pathname2url` in Python 2 (`urllib.request.pathname2url`
-in Python 3) depending on your case.
-
 
 ### Navigate
 
@@ -815,6 +809,16 @@ Description from upstream CEF:
 | __Return__ | void |
 
 Linux-only. Set window bounds.
+
+
+### SendExternalBeginFrame
+
+| | |
+| --- | --- |
+| __Return__ | void |
+
+Issue a BeginFrame request to Chromium.  Only valid when
+CefWindowInfo::external_begin_frame_enabled is set to true.
 
 
 ### SendKeyEvent

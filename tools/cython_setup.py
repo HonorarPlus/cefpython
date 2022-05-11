@@ -151,7 +151,9 @@ def get_winsdk_lib():
             ]
         elif ARCH64:
             winsdk_libs = [
+                r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.17134.0\x64",
                 r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64",
+                r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib\\x64",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib\\x64",
                 # Visual Studio 2008 installation
@@ -431,6 +433,7 @@ def get_ext_modules(options):
         # > Unknown Extension options: 'cython_directives' warnings.warn(msg)
         cython_directives={
             # Any conversion to unicode must be explicit using .decode().
+            "language_level": 2,
             "c_string_type": "bytes",
             "c_string_encoding": "utf-8",
             "profile": ENABLE_PROFILING,

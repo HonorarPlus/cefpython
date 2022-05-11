@@ -68,7 +68,8 @@ class CefPythonApp :
   void OnWebKitInitialized()
         override;
 
-  void OnBrowserCreated(CefRefPtr<CefBrowser> browser)
+  void OnBrowserCreated(CefRefPtr<CefBrowser> browser,
+                        CefRefPtr<CefDictionaryValue> extra_info)
         override;
 
   void OnBrowserDestroyed(CefRefPtr<CefBrowser> browser)
@@ -97,8 +98,9 @@ class CefPythonApp :
         override;
 
   bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
-                                        CefProcessId source_process,
-                                        CefRefPtr<CefProcessMessage> message)
+                                CefRefPtr<CefFrame> frame,
+                                CefProcessId source_process,
+                                CefRefPtr<CefProcessMessage> message)
         override;
 
   // ---------------------------------------------------------------------------

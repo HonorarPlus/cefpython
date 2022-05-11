@@ -1,3 +1,4 @@
+
 # Copyright (c) 2017 CEF Python, see the Authors file.
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
@@ -453,6 +454,12 @@ def get_cefpython_version():
     return get_version_from_file(header_file)
 
 
+def get_cefpython_api_hash():
+    """Get CEF API hash from the 'src/version/' directory."""
+    header_file = os.path.join(SRC_DIR, "version","cef_api_hash.h")
+    return get_version_from_file(header_file)
+
+
 def get_version_from_file(header_file):
     with open(header_file, "rU") as fp:
         contents = fp.read()  # no need to decode() as "rU" specified
@@ -477,6 +484,8 @@ def get_msvs_for_python(vs_prefix=False):
     elif sys.version_info[:2] == (3, 8):
         return "VS2019" if vs_prefix else "2019"
     elif sys.version_info[:2] == (3, 9):
+        return "VS2019" if vs_prefix else "2019"
+    elif sys.version_info[:2] == (3, 10):
         return "VS2019" if vs_prefix else "2019"
     else:
         print("ERROR: This version of Python is not supported")

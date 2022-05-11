@@ -600,7 +600,6 @@ callback information on viewport size will be provided to CEF:
 ```Python
 def GetViewRect(self, rect_out, **_):
     rect_out.extend([0, 0, VIEWPORT_SIZE[0], VIEWPORT_SIZE[1]])
-    return True
 ```
 
 In this callback viewport size is returned via |rect_out| which

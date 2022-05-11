@@ -500,7 +500,6 @@ class RenderHandler(object):
 
     def GetViewRect(self, rect_out, **_):
         rect_out.extend([0, 0, self.__width, self.__height])
-        return True
 
     def OnPaint(self, element_type, paint_buffer, **_):
         """

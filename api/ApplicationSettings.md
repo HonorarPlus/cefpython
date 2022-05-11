@@ -9,10 +9,12 @@ Table of contents:
 * [Settings](#settings)
   * [accept_language_list](#accept_language_list)
   * [app_user_model_id](#app_user_model_id)
+  * [application_client_id_for_file_scanning](#application_client_id_for_file_scanning)
   * [auto_zooming](#auto_zooming)
   * [background_color](#background_color)
   * [browser_subprocess_path](#browser_subprocess_path)
   * [cache_path](#cache_path)
+  * [root_cache_path](#root_cache_path)
   * [command_line_args_disabled](#command_line_args_disabled)
   * [context_menu](#context_menu)
   * [downloads_enabled](#downloads_enabled)
@@ -39,6 +41,8 @@ Table of contents:
   * [user_agent](#user_agent)
   * [user_data_path](#user_data_path)
   * [windowless_rendering_enabled](#windowless_rendering_enabled)
+  * [shared_texture_enabled](#shared_texture_enabled)
+  * [external_begin_frame_enabled](#external_begin_frame_enabled)
 
 
 ## Introduction
@@ -66,6 +70,15 @@ per-browser basis using the CefBrowserSettings.accept_language_list value.
 If both values are empty then "en-US,en" will be used. Can be overridden
 for individual CefRequestContext instances via the
 CefRequestContextSettings.accept_language_list value.
+
+
+### application_client_id_for_file_scanning
+
+(string)
+GUID string used for identifying the application. This is passed to the
+system AV function for scanning downloaded files. By default, the GUID
+will be an empty string and the file will be treated as an untrusted
+file when the GUID is empty.
 
 
 ### app_user_model_id
@@ -135,18 +148,31 @@ switch.
 ### cache_path
 
 (string)
-The location where cache data will be stored on disk. If empty then
-browsers will be created in "incognito mode" where in-memory caches are
-used for storage and no data is persisted to disk. HTML5 databases such as
-localStorage will only persist across sessions if a cache path is
-specified. Can be overridden for individual CefRequestContext instances via
-the CefRequestContextSettings.cache_path value.
+The location where data for the global browser cache will be stored on
+disk. If non-empty this must be either equal to or a child directory of
+CefSettings.root_cache_path. If empty then browsers will be created in
+"incognito mode" where in-memory caches are used for storage and no data is
+persisted to disk. HTML5 databases such as localStorage will only persist
+across sessions if a cache path is specified. Can be overridden for
+individual CefRequestContext instances via the
+CefRequestContextSettings.cache_path value.
 
 CEF flushes cookies or other cache data to disk every 30 seconds,
 or immediately when [cefpython](cefpython.md).Shutdown() is called.
 
 When this option is not set (empty string), a unique cache directory
 will be created in the user's temp directory for each run of the application.
+
+
+### root_cache_path
+
+(string)
+The root directory that all CefSettings.cache_path and
+CefRequestContextSettings.cache_path values must have in common. If this
+value is empty and CefSettings.cache_path is non-empty then this value will
+default to the CefSettings.cache_path value. Failure to set this value
+correctly may result in the sandbox blocking read/write access to the
+cache_path directory.
 
 
 ### command_line_args_disabled
@@ -316,16 +342,18 @@ is the name of the main app executable. Also configurable using the
 ### log_severity
 
 (int)
-The log severity. Only messages of this severity level or higher will be  
-logged. Also configurable using the --log-severity switch with  
-a value of "verbose", "info", "warning", "error", "error-report" or  
-"disable".
+The log severity. Only messages of this severity level or higher will be
+logged. When set to DISABLE no messages will be written to the log file,
+but FATAL messages will still be output to stderr. Also configurable using
+the "log-severity" command-line switch with a value of "verbose", "info",
+"warning", "error", "fatal" or "disable".
 
 Accepted values - constants available in the cefpython module:
 * LOGSEVERITY_VERBOSE
 * LOGSEVERITY_INFO
 * LOGSEVERITY_WARNING
 * LOGSEVERITY_ERROR (default)
+* LOGSEVERITY_FATAL
 * LOGSEVERITY_DISABLE
 
 
@@ -423,7 +451,6 @@ the module directory on Windows/Linux or the app bundle Resources directory
 on Mac OS X. Also configurable using the --resources-dir-path switch.
 
 
-
 ### string_encoding
 
 (string)
@@ -493,3 +520,18 @@ profile directory on Windows).
 Set to true (1) to enable windowless (off-screen) rendering support. Do not
 enable this value if the application does not use windowless rendering as
 it may reduce rendering performance on some systems.
+
+
+### shared_texture_enabled
+
+(bool)
+Set to true (1) to enable shared textures for windowless rendering. Only
+valid if windowless_rendering_enabled above is also set to true. Currently
+only supported on Windows (D3D11).
+
+
+### external_begin_frame_enabled
+
+(bool)
+Set to true (1) to enable the ability to issue BeginFrame requests from the
+client application by calling CefBrowserHost::SendExternalBeginFrame.

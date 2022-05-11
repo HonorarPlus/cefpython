@@ -3,7 +3,7 @@
 
 # Response (object)
 
-This object is passed as parameter to [RequestHandler](RequestHandler.md).OnBeforeResourceLoad() and [RequestHandler](RequestHandler.md).OnResourceResponse().
+This object is passed as parameter to [RequestHandler](RequestHandler.md).OnBeforeResourceLoad().
 
 
 Table of contents:

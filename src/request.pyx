@@ -11,6 +11,7 @@ cimport cef_types
 UR_FLAG_NONE = cef_types.UR_FLAG_NONE
 UR_FLAG_SKIP_CACHE = cef_types.UR_FLAG_SKIP_CACHE
 UR_FLAG_ONLY_FROM_CACHE = cef_types.UR_FLAG_ONLY_FROM_CACHE
+UR_FLAG_DISABLE_CACHE = cef_types.UR_FLAG_DISABLE_CACHE
 UR_FLAG_ALLOW_STORED_CREDENTIALS = cef_types.UR_FLAG_ALLOW_STORED_CREDENTIALS
 UR_FLAG_REPORT_UPLOAD_PROGRESS = cef_types.UR_FLAG_REPORT_UPLOAD_PROGRESS
 UR_FLAG_NO_DOWNLOAD_DATA = cef_types.UR_FLAG_NO_DOWNLOAD_DATA
@@ -34,9 +35,9 @@ class Request:
         "NoRetryOn5xx": cef_types.UR_FLAG_NO_RETRY_ON_5XX,
         "StopOnRedirect": cef_types.UR_FLAG_STOP_ON_REDIRECT,
     }
-    
+
     def __init__(self):
-        # Request object is just a public API wrapper, 
+        # Request object is just a public API wrapper,
         # the real Request object is named PyRequest.
         raise Exception("Request object cannot be instantiated directly, "
                 "use static method Request.CreateRequest()")
@@ -149,7 +150,7 @@ cdef class PyRequest:
             for pyElement in pyPostData:
                 if pyElement.startswith(b'--'):
                     postDataElement = CefPostDataElement_Create()
-                    postDataElement.get().SetToBytes(len(pyElement), 
+                    postDataElement.get().SetToBytes(len(pyElement),
                             <char*>pyElement)
                 elif pyElement.startswith(b'@'):
                     postDataElement = CefPostDataElement_Create()
@@ -203,7 +204,7 @@ cdef class PyRequest:
 
     cpdef py_void SetHeaderMap(self, dict headerMap):
         assert len(headerMap) > 0, "headerMap param is empty"
-        cpdef list headerMultimap = []
+        cdef list headerMultimap = []
         cdef object key
         for key in headerMap:
             headerMultimap.append((str(key), str(headerMap[key])))

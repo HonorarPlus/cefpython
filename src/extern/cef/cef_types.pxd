@@ -34,9 +34,11 @@ cdef extern from "include/internal/cef_types.h":
 
     ctypedef struct CefSettings:
         cef_string_t accept_language_list
+        cef_string_t application_client_id_for_file_scanning
         cef_string_t browser_subprocess_path
         int command_line_args_disabled
         cef_string_t cache_path
+        cef_string_t root_cache_path
         int enable_net_security_expiration
         int persist_session_cookies
         cef_string_t user_agent
@@ -118,6 +120,7 @@ cdef extern from "include/internal/cef_types.h":
         LOGSEVERITY_INFO,
         LOGSEVERITY_WARNING,
         LOGSEVERITY_ERROR,
+        LOGSEVERITY_FATAL,
         LOGSEVERITY_DISABLE = 99,
 
     ctypedef enum cef_thread_id_t:
@@ -126,6 +129,7 @@ cdef extern from "include/internal/cef_types.h":
         TID_FILE,
         TID_FILE_USER_VISIBLE,
         TID_FILE_USER_BLOCKING,
+        TID_PROCESS_LAUNCHER,
         TID_IO,
         TID_RENDERER
 
@@ -163,11 +167,12 @@ cdef extern from "include/internal/cef_types.h":
         UR_FLAG_NONE = 0,
         UR_FLAG_SKIP_CACHE = 1 << 0,
         UR_FLAG_ONLY_FROM_CACHE = 1 << 1,
-        UR_FLAG_ALLOW_STORED_CREDENTIALS = 1 << 2,
-        UR_FLAG_REPORT_UPLOAD_PROGRESS = 1 << 3,
-        UR_FLAG_NO_DOWNLOAD_DATA = 1 << 4,
-        UR_FLAG_NO_RETRY_ON_5XX = 1 << 5,
-        UR_FLAG_STOP_ON_REDIRECT = 1 << 6,
+        UR_FLAG_DISABLE_CACHE = 1 << 2,
+        UR_FLAG_ALLOW_STORED_CREDENTIALS = 1 << 3,
+        UR_FLAG_REPORT_UPLOAD_PROGRESS = 1 << 4,
+        UR_FLAG_NO_DOWNLOAD_DATA = 1 << 5,
+        UR_FLAG_NO_RETRY_ON_5XX = 1 << 6,
+        UR_FLAG_STOP_ON_REDIRECT = 1 << 7,
 
     # CefListValue, CefDictionaryValue - types.
     ctypedef enum cef_value_type_t:
@@ -219,6 +224,7 @@ cdef extern from "include/internal/cef_types.h":
         TS_ABNORMAL_TERMINATION,
         TS_PROCESS_WAS_KILLED,
         TS_PROCESS_CRASHED,
+        TS_PROCESS_OOM,
 
     ctypedef enum cef_errorcode_t:
         ERR_NONE = 0,

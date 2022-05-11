@@ -1,3 +1,4 @@
+
 // Copyright (c) 2012 CEF Python, see the Authors file.
 // All rights reserved. Licensed under BSD 3-clause license.
 // Project website: https://github.com/cztomczak/cefpython
@@ -22,6 +23,7 @@
 #include "include/cef_client.h"
 #include "include/cef_urlrequest.h"
 #include "include/cef_command_line.h"
+#include "include/cef_web_plugin.h"
 #include "util.h"
 
 // cefpython_fixed.h declares public functions using DL_IMPORT and these
@@ -50,6 +52,8 @@
 #include "../../build/build_cefpython/cefpython_py38_fixed.h"
 #elif PY_MINOR_VERSION == 9
 #include "../../build/build_cefpython/cefpython_py39_fixed.h"
+#elif PY_MINOR_VERSION == 10
+#include "../../build/build_cefpython/cefpython_py310_fixed.h"
 #endif // PY_MINOR_VERSION
 #endif // PY_MAJOR_VERSION
 

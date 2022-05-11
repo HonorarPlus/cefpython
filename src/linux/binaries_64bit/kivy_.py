@@ -898,7 +898,6 @@ class ClientHandler:
         rect_out.append(0)
         rect_out.append(width)
         rect_out.append(height)
-        return True
 
     """
 

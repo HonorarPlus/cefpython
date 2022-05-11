@@ -264,12 +264,9 @@ cdef class PyBrowser:
                     "GetViewRect", "GetScreenPoint", "GetScreenInfo",
                     "GetScreenRect",
                     "OnPopupShow", "OnPopupSize", "OnPaint", "OnCursorChange",
-                    "OnScrollOffsetChanged",
+                    "OnAcceleratedPaint", "OnScrollOffsetChanged",
                     "StartDragging", "UpdateDragCursor",
                     "OnTextSelectionChanged"]
-            # V8ContextHandler
-            self.allowedClientCallbacks += ["OnContextCreated",
-                    "OnContextReleased"]
             # JavascriptDialogHandler
             self.allowedClientCallbacks += ["OnJavascriptDialog",
                     "OnBeforeUnloadJavascriptDialog",
@@ -394,7 +391,7 @@ cdef class PyBrowser:
         # If using GetCookieManager to implement custom cookie managers
         # then flushing of cookies would need to be handled manually.
         self.GetCefBrowserHost().get().GetRequestContext().get() \
-                .GetDefaultCookieManager(
+                .GetCookieManager(
                         <CefRefPtr[CefCompletionCallback]?>NULL) \
                 .get().FlushStore(<CefRefPtr[CefCompletionCallback]?>NULL)
 
@@ -576,8 +573,15 @@ cdef class PyBrowser:
     cpdef py_void ShowDevTools(self):
         cdef CefWindowInfo window_info
         IF UNAME_SYSNAME == "Windows":
-            window_info.SetAsPopup(<CefWindowHandle>self.GetWindowHandle(),
-                                   PyToCefStringValue("DevTools"))
+            # On Windows with empty window_info structure the devtools
+            # window doesn't appear.
+            window_info.SetAsPopup(
+                    # TODO:
+                    # According to docs this returns NULL for non-popup
+                    # windows, so looks like we shouldn't use that and
+                    # either pass NULL or GetWindowHandle().
+                    <CefWindowHandle>self.GetOpenerWindowHandle(),
+                    PyToCefStringValue("DevTools"))
         cdef CefBrowserSettings settings
         cdef CefPoint inspect_element_at
         self.GetCefBrowserHost().get().ShowDevTools(
@@ -757,28 +761,8 @@ cdef class PyBrowser:
     cpdef py_void NotifyScreenInfoChanged(self):
         self.GetCefBrowserHost().get().NotifyScreenInfoChanged()
 
-    cdef void SendProcessMessage(self, cef_process_id_t targetProcess,
-            object frameId, py_string messageName, list pyArguments
-            ) except *:
-        cdef CefRefPtr[CefProcessMessage] message = \
-                CefProcessMessage_Create(PyToCefStringValue(messageName))
-        # This does not work, no idea why, the CEF implementation
-        # seems not to allow it, both Assign() and swap() do not work:
-        # | message.get().GetArgumentList().Assign(arguments.get())
-        # | message.get().GetArgumentList().swap(arguments)
-        cdef CefRefPtr[CefListValue] messageArguments = \
-                message.get().GetArgumentList()
-        PyListToExistingCefListValue(self.GetIdentifier(), frameId,
-                pyArguments, messageArguments)
-        Debug("SendProcessMessage(): message=%s, arguments size=%d" % (
-                messageName,
-                message.get().GetArgumentList().get().GetSize()))
-        cdef cpp_bool success = \
-                self.GetCefBrowser().get().SendProcessMessage(
-                        targetProcess, message)
-        if not success:
-            raise Exception("Browser.SendProcessMessage() failed: "\
-                    "messageName=%s" % messageName)
+    cpdef py_void SendExternalBeginFrame(self):
+        self.GetCefBrowserHost().get().SendExternalBeginFrame()
 
     # -------------------------------------------------------------------------
     # OSR drag & drop

@@ -42,7 +42,7 @@ import subprocess
 import sys
 
 try:
-    from PIL import Image, PILLOW_VERSION
+    from PIL import Image, __version__ as PILLOW_VERSION
 except ImportError:
     print("[screenshot.py] Error: PIL module not available. To install"
           " type: pip install Pillow")
@@ -217,7 +217,6 @@ class RenderHandler(object):
         provided."""
         # rect_out --> [x, y, width, height]
         rect_out.extend([0, 0, VIEWPORT_SIZE[0], VIEWPORT_SIZE[1]])
-        return True
 
     def OnPaint(self, browser, element_type, paint_buffer, **_):
         """Called when an element should be painted."""

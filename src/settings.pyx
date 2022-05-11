@@ -22,6 +22,7 @@ LOGSEVERITY_WARNING = cef_types.LOGSEVERITY_WARNING
 LOGSEVERITY_ERROR = cef_types.LOGSEVERITY_ERROR
 # keep for BC
 LOGSEVERITY_ERROR_REPORT = cef_types.LOGSEVERITY_ERROR
+LOGSEVERITY_FATAL = cef_types.LOGSEVERITY_FATAL
 LOGSEVERITY_DISABLE = cef_types.LOGSEVERITY_DISABLE
 
 
@@ -49,8 +50,16 @@ cdef void SetApplicationSettings(
             cefString = new CefString(&cefAppSettings.accept_language_list)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
+        elif key == "application_client_id_for_file_scanning":
+            cefString = new CefString(&cefAppSettings.application_client_id_for_file_scanning)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
         elif key == "cache_path":
             cefString = new CefString(&cefAppSettings.cache_path)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "root_cache_path":
+            cefString = new CefString(&cefAppSettings.root_cache_path)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
         elif key == "persist_session_cookies":

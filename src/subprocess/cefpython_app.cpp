@@ -256,7 +256,8 @@ void CefPythonApp::OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info) {
 void CefPythonApp::OnWebKitInitialized() {
 }
 
-void CefPythonApp::OnBrowserCreated(CefRefPtr<CefBrowser> browser) {
+void CefPythonApp::OnBrowserCreated(CefRefPtr<CefBrowser> browser,
+                                    CefRefPtr<CefDictionaryValue> extra_info) {
 }
 
 void CefPythonApp::OnBrowserDestroyed(CefRefPtr<CefBrowser> browser) {
@@ -293,7 +294,7 @@ void CefPythonApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
     //       that number of frames will exceed int range, so
     //       casting it to int for now.
     arguments->SetInt(0, (int)(frame->GetIdentifier()));
-    browser->SendProcessMessage(PID_BROWSER, message);
+    frame->SendProcessMessage(PID_BROWSER, message);
     CefRefPtr<CefDictionaryValue> jsBindings = GetJavascriptBindings(browser);
     if (jsBindings.get()) {
         // Javascript bindings are most probably not yet set for
@@ -333,7 +334,7 @@ void CefPythonApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
     // Should we send the message using current "browser"
     // when this is not the main frame? It could fail, so
     // it is more reliable to always use the main browser.
-    browser->SendProcessMessage(PID_BROWSER, message);
+    frame->SendProcessMessage(PID_BROWSER, message);
     // ------------------------------------------------------------------------
     // 2. Remove python callbacks for a frame.
     // ------------------------------------------------------------------------
@@ -360,6 +361,7 @@ void CefPythonApp::OnFocusedNodeChanged(CefRefPtr<CefBrowser> browser,
 }
 
 bool CefPythonApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+                                        CefRefPtr<CefFrame> frame,
                                         CefProcessId source_process,
                                         CefRefPtr<CefProcessMessage> message) {
     std::string messageName = message->GetName().ToString();
