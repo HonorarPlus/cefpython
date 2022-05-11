@@ -33,7 +33,7 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=a7070419332ec8f6d6e4df898c8eb666b988970a$
+// $hash=4f4a0d76efaf87055ebf5e784f5d1b69fafdabc2$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_MEDIA_ROUTER_CAPI_H_
@@ -50,6 +50,7 @@ extern "C" {
 struct _cef_media_observer_t;
 struct _cef_media_route_create_callback_t;
 struct _cef_media_route_t;
+struct _cef_media_sink_device_info_callback_t;
 struct _cef_media_sink_t;
 struct _cef_media_source_t;
 
@@ -247,11 +248,6 @@ typedef struct _cef_media_sink_t {
   cef_string_userfree_t(CEF_CALLBACK* get_id)(struct _cef_media_sink_t* self);
 
   ///
-  // Returns true (1) if this sink is valid.
-  ///
-  int(CEF_CALLBACK* is_valid)(struct _cef_media_sink_t* self);
-
-  ///
   // Returns the name of this sink.
   ///
   // The resulting string must be freed by calling cef_string_userfree_free().
@@ -263,6 +259,19 @@ typedef struct _cef_media_sink_t {
   // The resulting string must be freed by calling cef_string_userfree_free().
   cef_string_userfree_t(CEF_CALLBACK* get_description)(
       struct _cef_media_sink_t* self);
+
+  ///
+  // Returns the icon type for this sink.
+  ///
+  cef_media_sink_icon_type_t(CEF_CALLBACK* get_icon_type)(
+      struct _cef_media_sink_t* self);
+
+  ///
+  // Asynchronously retrieves device info.
+  ///
+  void(CEF_CALLBACK* get_device_info)(
+      struct _cef_media_sink_t* self,
+      struct _cef_media_sink_device_info_callback_t* callback);
 
   ///
   // Returns true (1) if this sink accepts content via Cast.
@@ -282,6 +291,25 @@ typedef struct _cef_media_sink_t {
 } cef_media_sink_t;
 
 ///
+// Callback structure for cef_media_sink_t::GetDeviceInfo. The functions of this
+// structure will be called on the browser process UI thread.
+///
+typedef struct _cef_media_sink_device_info_callback_t {
+  ///
+  // Base structure.
+  ///
+  cef_base_ref_counted_t base;
+
+  ///
+  // Method that will be executed asyncronously once device information has been
+  // retrieved.
+  ///
+  void(CEF_CALLBACK* on_media_sink_device_info)(
+      struct _cef_media_sink_device_info_callback_t* self,
+      const struct _cef_media_sink_device_info_t* device_info);
+} cef_media_sink_device_info_callback_t;
+
+///
 // Represents a source from which media can be routed. Instances of this object
 // are retrieved via cef_media_router_t::GetSource. The functions of this
 // structure may be called on any browser process thread unless otherwise
@@ -298,11 +326,6 @@ typedef struct _cef_media_source_t {
   ///
   // The resulting string must be freed by calling cef_string_userfree_free().
   cef_string_userfree_t(CEF_CALLBACK* get_id)(struct _cef_media_source_t* self);
-
-  ///
-  // Returns true (1) if this source is valid.
-  ///
-  int(CEF_CALLBACK* is_valid)(struct _cef_media_source_t* self);
 
   ///
   // Returns true (1) if this source outputs its content via Cast.

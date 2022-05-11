@@ -14,6 +14,7 @@ Table of contents:
   * [background_color](#background_color)
   * [browser_subprocess_path](#browser_subprocess_path)
   * [cache_path](#cache_path)
+  * [chrome_runtime](#chrome_runtime)
   * [root_cache_path](#root_cache_path)
   * [command_line_args_disabled](#command_line_args_disabled)
   * [context_menu](#context_menu)
@@ -162,6 +163,14 @@ or immediately when [cefpython](cefpython.md).Shutdown() is called.
 
 When this option is not set (empty string), a unique cache directory
 will be created in the user's temp directory for each run of the application.
+
+
+### chrome_runtime
+
+(int)
+Set to true (1) to enable use of the Chrome runtime in CEF. This feature is
+considered experimental and is not recommended for most users at this time.
+See issue #2969 for details.
 
 
 ### root_cache_path

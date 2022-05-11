@@ -46,6 +46,7 @@ class CefMediaObserver;
 class CefMediaRoute;
 class CefMediaRouteCreateCallback;
 class CefMediaSink;
+class CefMediaSinkDeviceInfoCallback;
 class CefMediaSource;
 
 ///
@@ -221,17 +222,13 @@ class CefMediaRouteCreateCallback : public virtual CefBaseRefCounted {
 /*--cef(source=library)--*/
 class CefMediaSink : public virtual CefBaseRefCounted {
  public:
+  typedef cef_media_sink_icon_type_t IconType;
+
   ///
   // Returns the ID for this sink.
   ///
   /*--cef()--*/
   virtual CefString GetId() = 0;
-
-  ///
-  // Returns true if this sink is valid.
-  ///
-  /*--cef()--*/
-  virtual bool IsValid() = 0;
 
   ///
   // Returns the name of this sink.
@@ -244,6 +241,19 @@ class CefMediaSink : public virtual CefBaseRefCounted {
   ///
   /*--cef()--*/
   virtual CefString GetDescription() = 0;
+
+  ///
+  // Returns the icon type for this sink.
+  ///
+  /*--cef(default_retval=CEF_MSIT_GENERIC)--*/
+  virtual IconType GetIconType() = 0;
+
+  ///
+  // Asynchronously retrieves device info.
+  ///
+  /*--cef()--*/
+  virtual void GetDeviceInfo(
+      CefRefPtr<CefMediaSinkDeviceInfoCallback> callback) = 0;
 
   ///
   // Returns true if this sink accepts content via Cast.
@@ -265,6 +275,22 @@ class CefMediaSink : public virtual CefBaseRefCounted {
 };
 
 ///
+// Callback interface for CefMediaSink::GetDeviceInfo. The methods of this
+// class will be called on the browser process UI thread.
+///
+/*--cef(source=client)--*/
+class CefMediaSinkDeviceInfoCallback : public virtual CefBaseRefCounted {
+ public:
+  ///
+  // Method that will be executed asyncronously once device information has been
+  // retrieved.
+  ///
+  /*--cef()--*/
+  virtual void OnMediaSinkDeviceInfo(
+      const CefMediaSinkDeviceInfo& device_info) = 0;
+};
+
+///
 // Represents a source from which media can be routed. Instances of this object
 // are retrieved via CefMediaRouter::GetSource. The methods of this class may be
 // called on any browser process thread unless otherwise indicated.
@@ -277,12 +303,6 @@ class CefMediaSource : public virtual CefBaseRefCounted {
   ///
   /*--cef()--*/
   virtual CefString GetId() = 0;
-
-  ///
-  // Returns true if this source is valid.
-  ///
-  /*--cef()--*/
-  virtual bool IsValid() = 0;
 
   ///
   // Returns true if this source outputs its content via Cast.

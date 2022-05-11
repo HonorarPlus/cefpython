@@ -38,6 +38,7 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t browser_subprocess_path
         int command_line_args_disabled
         cef_string_t cache_path
+        int chrome_runtime
         cef_string_t root_cache_path
         int persist_session_cookies
         cef_string_t user_agent
@@ -218,6 +219,20 @@ cdef extern from "include/internal/cef_types.h":
         EVENTFLAG_IS_KEY_PAD          = 1 << 9,
         EVENTFLAG_IS_LEFT             = 1 << 10,
         EVENTFLAG_IS_RIGHT            = 1 << 11,
+        EVENTFLAG_ALTGR_DOWN          = 1 << 12,
+
+    # Cookie priority values.
+    ctypedef enum cef_cookie_priority_t:
+        CEF_COOKIE_PRIORITY_LOW = -1,
+        CEF_COOKIE_PRIORITY_MEDIUM = 0,
+        CEF_COOKIE_PRIORITY_HIGH = 1,
+
+    # Cookie same site values.
+    ctypedef enum cef_cookie_same_site_t:
+        CEF_COOKIE_SAME_SITE_UNSPECIFIED,
+        CEF_COOKIE_SAME_SITE_NO_RESTRICTION,
+        CEF_COOKIE_SAME_SITE_LAX_MODE,
+        CEF_COOKIE_SAME_SITE_STRICT_MODE,
 
     # LoadHandler
     ctypedef enum cef_termination_status_t:

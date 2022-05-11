@@ -4,15 +4,6 @@
 
 include "../cefpython.pyx"
 
-cdef public void BrowserProcessHandler_OnRenderProcessThreadCreated(
-        CefRefPtr[CefListValue] extra_info
-        ) except * with gil:
-    try:
-        pass
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
 cdef public void BrowserProcessHandler_OnBeforeChildProcessLaunch(
         CefRefPtr[CefCommandLine] cefCommandLine
         ) except * with gil:

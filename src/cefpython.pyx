@@ -532,6 +532,8 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     if "app_user_model_id" in application_settings:
         g_commandLineSwitches["app-user-model-id"] =\
                 application_settings["app_user_model_id"]
+    if "chrome_runtime" in application_settings:
+        application_settings["chrome_runtime"] = 1
 
     # ------------------------------------------------------------------------
     # Paths

@@ -199,24 +199,6 @@ void CefPythonApp::OnBeforeChildProcessLaunch(
     LOG(INFO) << logMessage.c_str();
 }
 
-void CefPythonApp::OnRenderProcessThreadCreated(
-        CefRefPtr<CefListValue> extra_info) {
-#ifdef BROWSER_PROCESS
-    // If you have an existing CefListValue that you would like
-    // to provide, do this:
-    // | extra_info = mylist.get()
-    // The equivalent in Cython is:
-    // | extra_info.Assign(mylist.get())
-    REQUIRE_IO_THREAD();
-    // Eg.:
-    // | extra_info->SetBool(0, false);
-    // | extra_info->SetString(1, "test");
-    // This is included only in the Browser process, when building
-    // the libcefpythonapp library.
-    BrowserProcessHandler_OnRenderProcessThreadCreated(extra_info);
-#endif // BROWSER_PROCESS
-}
-
 CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
 #ifdef BROWSER_PROCESS
 #if defined(OS_LINUX)
@@ -249,9 +231,6 @@ void CefPythonApp::OnScheduleMessagePumpWork(int64 delay_ms) {
 // -----------------------------------------------------------------------------
 // CefRenderProcessHandler
 // -----------------------------------------------------------------------------
-
-void CefPythonApp::OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info) {
-}
 
 void CefPythonApp::OnWebKitInitialized() {
 }

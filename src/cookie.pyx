@@ -4,6 +4,7 @@
 
 include "cefpython.pyx"
 
+cimport cef_types
 from task cimport *
 
 # ------------------------------------------------------------------------------
@@ -64,9 +65,13 @@ cdef class Cookie:
             elif key == "lastAccess":
                 self.SetLastAccess(cookie[key])
             elif key == "hasExpires":
-                    self.SetHasExpires(cookie[key])
+                self.SetHasExpires(cookie[key])
             elif key == "expires":
                 self.SetExpires(cookie[key])
+            elif key == "sameSite":
+                self.SetSameSite(cookie[key])
+            elif key == "priority":
+                self.SetPriority(cookie[key])
             else:
                 raise Exception("Invalid key: %s" % key)
 
@@ -82,6 +87,8 @@ cdef class Cookie:
             "lastAccess": self.GetLastAccess(),
             "hasExpires": self.GetHasExpires(),
             "expires": self.GetExpires(),
+            "sameSite": self.GetSameSite(),
+            "priority": self.GetPriority(),
         }
 
     cpdef py_void SetName(self, py_string name):
@@ -176,6 +183,18 @@ cdef class Cookie:
 
     cpdef object GetExpires(self):
         return CefTimeTToDatetime(self.cefCookie.expires)
+    
+    cpdef py_void SetSameSite(self, cef_cookie_same_site_t sameSite):
+        self.cefCookie.sameSite = sameSite
+
+    cpdef cef_cookie_same_site_t GetSameSite(self) except *:
+        return self.cefCookie.sameSite
+
+    cpdef py_void SetPriority(self, cef_cookie_priority_t priority):
+        self.cefCookie.priority = priority
+
+    cpdef cef_cookie_priority_t GetPriority(self) except *:
+        return self.cefCookie.priority
 
 # ------------------------------------------------------------------------------
 # CookieManager

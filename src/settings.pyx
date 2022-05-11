@@ -58,6 +58,8 @@ cdef void SetApplicationSettings(
             cefString = new CefString(&cefAppSettings.cache_path)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
+        elif key == "chrome_runtime":
+            cefAppSettings.chrome_runtime = int(appSettings[key])
         elif key == "root_cache_path":
             cefString = new CefString(&cefAppSettings.root_cache_path)
             PyToCefStringPointer(appSettings[key], cefString)
