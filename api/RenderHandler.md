@@ -21,7 +21,6 @@ Table of contents:
   * [OnPopupSize](#onpopupsize)
   * [OnPaint](#onpaint)
   * [OnAcceleratedPaint](#onacceleratedpaint)
-  * [OnCursorChange](#oncursorchange)
   * [OnScrollOffsetChanged](#onscrolloffsetchanged)
   * [OnTextSelectionChanged](#ontextselectionchanged)
   * [StartDragging](#startdragging)
@@ -172,20 +171,6 @@ to be repainted. |shared_handle| is the handle for a D3D11 Texture2D that
 can be accessed via ID3D11Device using the OpenSharedResource method. This
 method is only called when CefWindowInfo::shared_texture_enabled is set to
 true, and is currently only supported on Windows.
-
-
-### OnCursorChange
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| cursor | CursorHandle |
-| __Return__ | void |
-
-Called when the browser's cursor has changed. If |type| is CT_CUSTOM then
-|custom_cursor_info| will be populated with the custom cursor information.
-
-`CursorHandle` is an int pointer.
 
 
 ### OnScrollOffsetChanged

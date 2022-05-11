@@ -63,7 +63,6 @@ Table of contents:
   * [Invalidate](#invalidate)
   * [IsFullscreen](#isfullscreen)
   * [IsLoading](#isloading)
-  * [IsMouseCursorChangeDisabled](#ismousecursorchangedisabled)
   * [IsPopup](#ispopup)
   * [IsWindowRenderingDisabled](#iswindowrenderingdisabled)
   * [LoadUrl](#loadurl)
@@ -88,7 +87,6 @@ Table of contents:
   * [SetClientCallback](#setclientcallback)
   * [SetClientHandler](#setclienthandler)
   * [SetFocus](#setfocus)
-  * [SetMouseCursorChangeDisabled](#setmousecursorchangedisabled)
   * [SetJavascriptBindings](#setjavascriptbindings)
   * [SetUserData](#setuserdata)
   * [SetZoomLevel](#setzoomlevel)
@@ -660,17 +658,6 @@ Available only in CEF 3. Not yet implemented.
 Returns true if the browser is currently loading.
 
 
-### IsMouseCursorChangeDisabled
-
-| | |
-| --- | --- |
-| __Return__ | bool |
-
-Available only in CEF 3.
-
-Returns true if mouse cursor change is disabled.
-
-
 ### IsPopup
 
 | | |
@@ -991,16 +978,6 @@ LifespanHandler etc.
 | __Return__ | void |
 
 Set whether the browser is focused.
-
-
-### SetMouseCursorChangeDisabled
-
-| Parameter | Type |
-| --- | --- |
-| disabled | bool |
-| __Return__ | void |
-
-Set whether mouse cursor change is disabled.
 
 
 ### SetJavascriptBindings

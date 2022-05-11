@@ -36,8 +36,6 @@ cdef extern from "include/cef_browser.h":
         double GetZoomLevel()
         void SetZoomLevel(double zoomLevel)
         void StartDownload(const CefString& url)
-        void SetMouseCursorChangeDisabled(cpp_bool disabled)
-        cpp_bool IsMouseCursorChangeDisabled()
         cpp_bool IsWindowRenderingDisabled()
         void WasResized()
         void WasHidden(cpp_bool hidden)

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2021 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,7 +33,7 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=6cb00a0fa3631a46903abb3a783f315895511db2$
+// $hash=09b6ebd4116e983b4af634f1efa17b326a3fc517$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_BROWSER_CAPI_H_
@@ -561,19 +561,6 @@ typedef struct _cef_browser_host_t {
       struct _cef_browser_host_t* self,
       struct _cef_navigation_entry_visitor_t* visitor,
       int current_only);
-
-  ///
-  // Set whether mouse cursor change is disabled.
-  ///
-  void(CEF_CALLBACK* set_mouse_cursor_change_disabled)(
-      struct _cef_browser_host_t* self,
-      int disabled);
-
-  ///
-  // Returns true (1) if mouse cursor change is disabled.
-  ///
-  int(CEF_CALLBACK* is_mouse_cursor_change_disabled)(
-      struct _cef_browser_host_t* self);
 
   ///
   // If a misspelled word is currently selected in an editable node calling this

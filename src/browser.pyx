@@ -236,7 +236,7 @@ cdef class PyBrowser:
             self.allowedClientCallbacks += [
                     "OnAddressChange", "OnTitleChange", "OnTooltip",
                     "OnStatusMessage", "OnConsoleMessage", "OnAutoResize",
-                    "OnLoadingProgressChange"]
+                    "OnLoadingProgressChange", "OnCursorChange"]
             # KeyboardHandler
             self.allowedClientCallbacks += ["OnPreKeyEvent", "OnKeyEvent"]
             # RequestHandler
@@ -263,7 +263,7 @@ cdef class PyBrowser:
             self.allowedClientCallbacks += ["GetRootScreenRect",
                     "GetViewRect", "GetScreenPoint", "GetScreenInfo",
                     "GetScreenRect",
-                    "OnPopupShow", "OnPopupSize", "OnPaint", "OnCursorChange",
+                    "OnPopupShow", "OnPopupSize", "OnPaint",
                     "OnAcceleratedPaint", "OnScrollOffsetChanged",
                     "StartDragging", "UpdateDragCursor",
                     "OnTextSelectionChanged"]
@@ -741,13 +741,6 @@ cdef class PyBrowser:
     cpdef py_void StartDownload(self, py_string url):
         self.GetCefBrowserHost().get().StartDownload(PyToCefStringValue(
                 url))
-
-    cpdef py_void SetMouseCursorChangeDisabled(self, py_bool disabled):
-        self.GetCefBrowserHost().get().SetMouseCursorChangeDisabled(
-                bool(disabled))
-
-    cpdef py_bool IsMouseCursorChangeDisabled(self):
-        return self.GetCefBrowserHost().get().IsMouseCursorChangeDisabled()
 
     cpdef py_bool TryCloseBrowser(self):
         return self.GetCefBrowserHost().get().TryCloseBrowser()

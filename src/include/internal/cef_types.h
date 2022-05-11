@@ -1670,7 +1670,7 @@ typedef enum {
   MENU_ID_ADD_TO_DICTIONARY = 206,
 
   // Custom menu items originating from the renderer process. For example,
-  // plugin placeholder menu items or Flash menu items.
+  // plugin placeholder menu items.
   MENU_ID_CUSTOM_FIRST = 220,
   MENU_ID_CUSTOM_LAST = 250,
 
@@ -2366,22 +2366,6 @@ typedef enum {
   ///
   JSON_PARSER_ALLOW_TRAILING_COMMAS = 1 << 0,
 } cef_json_parser_options_t;
-
-///
-// Error codes that can be returned from CefParseJSONAndReturnError.
-///
-typedef enum {
-  JSON_NO_ERROR = 0,
-  JSON_INVALID_ESCAPE,
-  JSON_SYNTAX_ERROR,
-  JSON_UNEXPECTED_TOKEN,
-  JSON_TRAILING_COMMA,
-  JSON_TOO_MUCH_NESTING,
-  JSON_UNEXPECTED_DATA_AFTER_ROOT,
-  JSON_UNSUPPORTED_ENCODING,
-  JSON_UNQUOTED_DICTIONARY_KEY,
-  JSON_PARSE_ERROR_COUNT
-} cef_json_parser_error_t;
 
 ///
 // Options that can be passed to CefWriteJSON.
@@ -3155,8 +3139,9 @@ typedef enum {
   CEF_MRCR_NO_SUPPORTED_PROVIDER = 7,
   CEF_MRCR_CANCELLED = 8,
   CEF_MRCR_ROUTE_ALREADY_EXISTS = 9,
+  CEF_MRCR_ROUTE_ALREADY_TERMINATED = 11,
 
-  CEF_MRCR_TOTAL_COUNT = 11  // The total number of values.
+  CEF_MRCR_TOTAL_COUNT = 12  // The total number of values.
 } cef_media_route_create_result_t;
 
 ///

@@ -257,20 +257,6 @@ cdef public void RenderHandler_OnAcceleratedPaint(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public void RenderHandler_OnCursorChange(
-        CefRefPtr[CefBrowser] cefBrowser,
-        CefCursorHandle cursor
-        ) except * with gil:
-    cdef PyBrowser pyBrowser
-    try:
-        pyBrowser = GetPyBrowser(cefBrowser, "OnCursorChange")
-        callback = pyBrowser.GetClientCallback("OnCursorChange")
-        if callback:
-            callback(browser=pyBrowser, cursor=<uintptr_t>cursor)
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
 cdef public void RenderHandler_OnScrollOffsetChanged(
         CefRefPtr[CefBrowser] cefBrowser
         ) except * with gil:

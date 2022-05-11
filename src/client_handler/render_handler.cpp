@@ -80,16 +80,6 @@ void RenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
 }
 
 
-void RenderHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
-                                   CefCursorHandle cursor,
-                                   CursorType type,
-                                   const CefCursorInfo& custom_cursor_info)
-{
-    REQUIRE_UI_THREAD();
-    RenderHandler_OnCursorChange(browser, cursor);
-}
-
-
 void RenderHandler::OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser,
                                           double x,
                                           double y)
