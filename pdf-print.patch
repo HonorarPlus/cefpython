@@ -1,0 +1,235 @@
+diff --git a/examples/wxpython.py b/examples/wxpython.py
+index 92dd7d8..d5657ea 100644
+--- a/examples/wxpython.py
++++ b/examples/wxpython.py
+@@ -164,9 +164,25 @@ class MainFrame(wx.Frame):
+         filemenu = wx.Menu()
+         filemenu.Append(1, "Some option")
+         filemenu.Append(2, "Another option")
++        filemenu.Append(3, "PrintToPDF test1")
++        filemenu.Append(4, "PrintToPDF test2")
+         menubar = wx.MenuBar()
+         menubar.Append(filemenu, "&File")
+         self.SetMenuBar(menubar)
++        self.Bind(wx.EVT_MENU, self.menu_handler)
++
++    def menu_handler(self, event):
++      id = event.GetId()
++      if id == 3:
++        self.browser.PrintToPdf('test1.pdf', {'backgrounds_enabled': 1})
++      if id == 4:
++        self.browser.PrintToPdf('test2.pdf', {'backgrounds_enabled': 1}, func=self.OnPdfFinished)
++
++    def OnPdfFinished(self, path, ok):
++        if ok:
++            print("self.OnPdfPrintFinished: ok %s" % path)
++        else:
++            print("self.OnPdfPrintFinished: error")
+ 
+     def embed_browser(self):
+         window_info = cef.WindowInfo()
+@@ -175,8 +191,10 @@ class MainFrame(wx.Frame):
+         window_info.SetAsChild(self.browser_panel.GetHandle(),
+                                [0, 0, width, height])
+         self.browser = cef.CreateBrowserSync(window_info,
+-                                             url="https://www.google.com/")
++                                             url="https://github.com/cztomczak/cefpython")
+         self.browser.SetClientHandler(FocusHandler())
++        self.browser.SetClientHandler(DialogHandler())
++        self.browser.SetClientHandler(PdfPrintCallback())
+ 
+     def OnSetFocus(self, _):
+         if not self.browser:
+@@ -240,6 +258,24 @@ class FocusHandler(object):
+             browser.SetFocus(True)
+ 
+ 
++class DialogHandler(object):
++    def OnFileDialog(self, browser, mode, title, default_file_path, accept_filters, selected_accept_filter, file_dialog_callback):
++      file_real_path = os.path.realpath('test1.pdf')
++      if os.path.exists(file_real_path):
++        file_dialog_callback.Continue(0, [file_real_path])
++        return True
++      else:
++        return False
++
++
++class PdfPrintCallback(object):
++    def OnPdfPrintFinished(self, path, ok):
++        if ok:
++            print("PdfPrintCallback.OnPdfPrintFinished: ok %s" % path)
++        else:
++            print("PdfPrintCallback.OnPdfPrintFinished: error")
++
++
+ class CefApp(wx.App):
+ 
+     def __init__(self, redirect):
+@@ -280,7 +316,10 @@ class CefApp(wx.App):
+         self.timer.Start(10)  # 10ms timer
+ 
+     def on_timer(self, _):
+-        cef.MessageLoopWork()
++        if MAC:
++            cef.MessageLoop()
++        else:
++            cef.MessageLoopWork()
+ 
+     def OnExit(self):
+         self.timer.Stop()
+diff --git a/src/browser.pyx b/src/browser.pyx
+index 5294e1b..6353042 100644
+--- a/src/browser.pyx
++++ b/src/browser.pyx
+@@ -276,6 +276,12 @@ cdef class PyBrowser:
+             self.allowedClientCallbacks += ["OnTakeFocus", "OnSetFocus",
+                                             "OnGotFocus"]
+ 
++            # DevToolsHandler
++            self.allowedClientCallbacks += ["ShowDevTools"]
++
++            # Printing
++            self.allowedClientCallbacks += ["OnFileDialog",  "OnPdfPrintFinished"]
++
+         if name not in self.allowedClientCallbacks:
+             raise Exception("Browser.SetClientCallback() failed: unknown "
+                             "callback: %s" % name)
+@@ -588,6 +594,41 @@ cdef class PyBrowser:
+                 window_info, <CefRefPtr[CefClient]?>NULL, settings,
+                 inspect_element_at)
+ 
++
++    cpdef py_void PrintToPdf(self, py_string filepath, dict settings, object func = None):
++        self.SetClientCallback('OnPdfPrintFinished', func)
++        cdef CefPdfPrintSettings pdf_print_settings
++        pdf_print_settings.margin_type = settings.get('margin_type') or cef_types.PDF_PRINT_MARGIN_DEFAULT
++        pdf_print_settings.header_footer_enabled = int((bool(settings.get('header_footer_title') or
++                                                             settings.get('header_footer_url') or
++                                                             settings.get('header_footer_enabled', 0))))
++        pdf_print_settings.selection_only = settings.get('selection_only') or 0
++        pdf_print_settings.landscape = settings.get('landscape') or 0
++        pdf_print_settings.backgrounds_enabled = settings.get('backgrounds_enabled') or 0
++        pdf_print_settings.page_width = settings.get('page_width') or 0
++        pdf_print_settings.page_height = settings.get('page_height') or 0
++        if pdf_print_settings.margin_type == cef_types.PDF_PRINT_MARGIN_CUSTOM:
++            pdf_print_settings.margin_top = settings.get('margin_top')
++            pdf_print_settings.margin_right = settings.get('margin_right')
++            pdf_print_settings.margin_left = settings.get('margin_left')
++            pdf_print_settings.margin_bottom = settings.get('margin_bottom')
++        pdf_print_settings.scale_factor = settings.get('scale_factor') or 0
++        if settings.get('header_footer_title'):
++            header_footer_title = new CefString(&pdf_print_settings.header_footer_title)
++            PyToCefStringPointer(settings.get('header_footer_title'), header_footer_title)
++            del header_footer_title
++        if settings.get('header_footer_url'):
++            header_footer_url = new CefString(&pdf_print_settings.header_footer_url)
++            PyToCefStringPointer(settings.get('header_footer_url'), header_footer_url)
++            del header_footer_url
++        cdef CefString cef_file_path
++        PyToCefString(filepath, cef_file_path)
++
++        cdef CefRefPtr[CefPdfPrintCallback] pdf_callback = <CefRefPtr[
++            CefPdfPrintCallback]?> new PdfPrintCallback(self.cefBrowser)
++        self.GetCefBrowserHost().get().PrintToPDF(cef_file_path, pdf_print_settings, pdf_callback)
++
++
+     cpdef py_void StopLoad(self):
+         self.GetCefBrowser().get().StopLoad()
+ 
+diff --git a/src/cefpython.pyx b/src/cefpython.pyx
+index 6039e23..e701cc7 100644
+--- a/src/cefpython.pyx
++++ b/src/cefpython.pyx
+@@ -305,6 +305,7 @@ from main_message_loop cimport *
+ from cef_views cimport *
+ from cef_log cimport *
+ from cef_file_util cimport *
++from print_callback cimport *
+ 
+ # -----------------------------------------------------------------------------
+ # GLOBAL VARIABLES
+@@ -376,6 +377,7 @@ include "app.pyx"
+ include "drag_data.pyx"
+ include "helpers.pyx"
+ include "image.pyx"
++include "pdf_print_handler.pyx"
+ 
+ # Handlers
+ include "handlers/accessibility_handler.pyx"
+diff --git a/src/extern/cef/cef_browser.pxd b/src/extern/cef/cef_browser.pxd
+index 96d220d..dc4bb45 100644
+--- a/src/extern/cef/cef_browser.pxd
++++ b/src/extern/cef/cef_browser.pxd
+@@ -12,6 +12,7 @@ from libcpp.vector cimport vector as cpp_vector
+ from cef_frame cimport CefFrame
+ cimport cef_types
+ from cef_types cimport int64, cef_state_t, CefSize
++from cef_types cimport CefPdfPrintSettings
+ from cef_types cimport CefBrowserSettings, CefPoint
+ from cef_drag_data cimport CefDragData
+ from cef_types cimport CefMouseEvent
+@@ -26,6 +27,11 @@ ELIF UNAME_SYSNAME == "Darwin":
+ 
+ cdef extern from "include/cef_browser.h":
+ 
++
++    cdef cppclass CefPdfPrintCallback:
++
++        void OnPdfPrintFinished(const CefString& path, cpp_bool ok)
++
+     cdef cppclass CefBrowserHost:
+ 
+         void CloseBrowser(cpp_bool force_close)
+@@ -67,6 +73,10 @@ cdef extern from "include/cef_browser.h":
+                 cpp_bool matchCase, cpp_bool findNext)
+         void StopFinding(cpp_bool clearSelection)
+         void Print()
++        void PrintToPDF(const CefString& path,
++                        const CefPdfPrintSettings& settings,
++                        CefRefPtr[CefPdfPrintCallback] callback)
++
+         cpp_bool TryCloseBrowser()
+ 
+         # Drag & drop OSR
+diff --git a/src/extern/cef/cef_types.pxd b/src/extern/cef/cef_types.pxd
+index 8e50f04..293dd55 100644
+--- a/src/extern/cef/cef_types.pxd
++++ b/src/extern/cef/cef_types.pxd
+@@ -66,6 +66,28 @@ cdef extern from "include/internal/cef_types.h":
+         cef_string_t framework_dir_path
+         cef_string_t main_bundle_path
+ 
++    ctypedef enum cef_pdf_print_margin_type_t:
++        PDF_PRINT_MARGIN_DEFAULT,
++        PDF_PRINT_MARGIN_NONE,
++        PDF_PRINT_MARGIN_MINIMUM,
++        PDF_PRINT_MARGIN_CUSTOM,
++
++    ctypedef struct CefPdfPrintSettings:
++        cef_string_t header_footer_title
++        cef_string_t header_footer_url
++        int page_width
++        int page_height
++        int scale_factor
++        double margin_top
++        double margin_right
++        double margin_bottom
++        double margin_left
++        cef_pdf_print_margin_type_t margin_type
++        int header_footer_enabled
++        int selection_only
++        int landscape
++        int backgrounds_enabled
++
+     ctypedef struct CefBrowserSettings:
+         cef_string_t accept_language_list
+         cef_color_t background_color
+@@ -163,7 +185,7 @@ cdef extern from "include/internal/cef_types.h":
+         PDE_TYPE_EMPTY  = 0,
+         PDE_TYPE_BYTES,
+         PDE_TYPE_FILE,
+-        
++
+     # WebRequest
+     ctypedef enum cef_urlrequest_flags_t:
+         UR_FLAG_NONE = 0,
