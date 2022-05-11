@@ -36,7 +36,6 @@ Table of contents:
   * [IsFocused](#isfocused)
   * [IsMain](#ismain)
   * [IsValid](#isvalid)
-  * [LoadString](#loadstring)
   * [LoadUrl](#loadurl)
   * [Paste](#paste)
   * [Redo](#redo)
@@ -211,25 +210,6 @@ Returns true if this is the main (top-level) frame.
 | __Return__ | bool |
 
 True if this object is currently attached to a valid frame.
-
-
-### LoadString
-
-| Parameter | Type |
-| --- | --- |
-| value | string |
-| url | string |
-| __Return__ | void |
-
-NOTE: LoadString is problematic due to the multi-process model and the need
-to create a render process (which does not happen with LoadString). It is
-best to use instead LoadUrl with a data uri, e.g. `LoadUrl("data:text/html,some+html+code+here")`.
-Take also a look at a [custom resource handler](ResourceHandler.md).
-
-Load the contents of |value| with the specified dummy |url|. |url|
-should have a standard scheme (for example, http scheme) or behaviors like
-link clicks and web security restrictions may not behave as expected. 
-LoadString() can be called only after the Renderer process has been created.
 
 
 ### LoadUrl

@@ -31,7 +31,6 @@ cdef extern from "include/cef_frame.h":
       void ViewSource()
       void GetSource(CefRefPtr[CefStringVisitor] visitor)
       void GetText(CefRefPtr[CefStringVisitor] visitor)
-      void LoadString(CefString& string_val, CefString& url)
       cpp_bool IsFocused()
       CefString GetName()
       CefRefPtr[CefFrame] GetParent()

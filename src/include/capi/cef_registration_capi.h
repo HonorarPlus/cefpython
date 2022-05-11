@@ -33,11 +33,11 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=5c540e617cf2782876defad365e85cd43932ffce$
+// $hash=029e237cf80f94a25453bac5a9b1e0765bb56f37$
 //
 
-#ifndef CEF_INCLUDE_CAPI_CEF_CALLBACK_CAPI_H_
-#define CEF_INCLUDE_CAPI_CEF_CALLBACK_CAPI_H_
+#ifndef CEF_INCLUDE_CAPI_CEF_REGISTRATION_CAPI_H_
+#define CEF_INCLUDE_CAPI_CEF_REGISTRATION_CAPI_H_
 #pragma once
 
 #include "include/capi/cef_base_capi.h"
@@ -47,42 +47,17 @@ extern "C" {
 #endif
 
 ///
-// Generic callback structure used for asynchronous continuation.
+// Generic callback structure used for managing the lifespan of a registration.
 ///
-typedef struct _cef_callback_t {
+typedef struct _cef_registration_t {
   ///
   // Base structure.
   ///
   cef_base_ref_counted_t base;
-
-  ///
-  // Continue processing.
-  ///
-  void(CEF_CALLBACK* cont)(struct _cef_callback_t* self);
-
-  ///
-  // Cancel processing.
-  ///
-  void(CEF_CALLBACK* cancel)(struct _cef_callback_t* self);
-} cef_callback_t;
-
-///
-// Generic callback structure used for asynchronous completion.
-///
-typedef struct _cef_completion_callback_t {
-  ///
-  // Base structure.
-  ///
-  cef_base_ref_counted_t base;
-
-  ///
-  // Method that will be called once the task is complete.
-  ///
-  void(CEF_CALLBACK* on_complete)(struct _cef_completion_callback_t* self);
-} cef_completion_callback_t;
+} cef_registration_t;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // CEF_INCLUDE_CAPI_CEF_CALLBACK_CAPI_H_
+#endif  // CEF_INCLUDE_CAPI_CEF_REGISTRATION_CAPI_H_

@@ -15,7 +15,8 @@ Table of contents:
   * [SetStatusText](#setstatustext)
   * [GetMimeType](#getmimetype)
   * [SetMimeType](#setmimetype)
-  * [GetHeader](#getheader)
+  * [GetHeaderByName](#getheaderbyname)
+  * [SetHeaderByName](#setheaderbyname)
   * [GetHeaderMap](#getheadermap)
   * [GetHeaderMultimap](#getheadermultimap)
   * [SetHeaderMap](#setheadermap)
@@ -91,7 +92,7 @@ Get the response mime type.
 Set the response mime type.
 
 
-### GetHeader
+### GetHeaderByName
 
 | Parameter | Type |
 | --- | --- |
@@ -101,9 +102,23 @@ Set the response mime type.
 Get the value for the specified response header field.
 
 
+### SetHeaderByName
+
+| Parameter | Type |
+| --- | --- |
+| name | string |
+| value | string |
+| override | bool |
+| __Return__ | void |
+
+Set the header |name| to |value|. If |overwrite| is true any existing
+values will be replaced with the new value. If |overwrite| is false any
+existing values will not be overwritten.
+
+
 ### GetHeaderMap
 
-| | |
+| Parameter | Type |
 | --- | --- |
 | __Return__ | dict |
 
@@ -112,7 +127,7 @@ Get all header fields with duplicate keys overwritten by last.
 
 ### GetHeaderMultimap
 
-| | |
+| Parameter | Type |
 | --- | --- |
 | __Return__ | list |
 
