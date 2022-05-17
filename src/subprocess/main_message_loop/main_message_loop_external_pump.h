@@ -8,6 +8,8 @@
 
 #include "main_message_loop_std.h"
 
+namespace client {
+
 // This MessageLoop implementation simulates the embedding of CEF into an
 // existing host application that runs its own message loop. The scheduling
 // implementation provided by this class is very simplistic and does not handle
@@ -21,7 +23,7 @@ class MainMessageLoopExternalPump : public MainMessageLoopStd {
  public:
   // Creates the singleton instance of this object. Must be called on the main
   // application thread.
-  static scoped_ptr<MainMessageLoopExternalPump> Create();
+  static std::unique_ptr<MainMessageLoopExternalPump> Create();
 
   // Returns the singleton instance of this object. Safe to call from any
   // thread.
@@ -33,8 +35,8 @@ class MainMessageLoopExternalPump : public MainMessageLoopStd {
   virtual void OnScheduleMessagePumpWork(int64 delay_ms) = 0;
 
  protected:
-  // Only allow deletion via scoped_ptr.
-  friend struct base::DefaultDeleter<MainMessageLoopExternalPump>;
+  // Only allow deletion via std::unique_ptr.
+  friend std::default_delete<MainMessageLoopExternalPump>;
 
   // Construct and destruct this object on the main application thread.
   MainMessageLoopExternalPump();
@@ -62,5 +64,7 @@ class MainMessageLoopExternalPump : public MainMessageLoopStd {
   bool is_active_;
   bool reentrancy_detected_;
 };
+
+}  // namespace client
 
 #endif  // CEF_TESTS_SHARED_BROWSER_MAIN_MESSAGE_LOOP_EXTERNAL_PUMP_H_

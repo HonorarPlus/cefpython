@@ -149,7 +149,7 @@ void CefPythonApp::OnRegisterCustomSchemes(
 }
 
 CefRefPtr<CefResourceBundleHandler> CefPythonApp::GetResourceBundleHandler() {
-    return NULL;
+    return nullptr;
 }
 
 CefRefPtr<CefBrowserProcessHandler> CefPythonApp::GetBrowserProcessHandler() {
@@ -220,8 +220,7 @@ void CefPythonApp::OnBeforeChildProcessLaunch(
 
 void CefPythonApp::OnScheduleMessagePumpWork(int64 delay_ms) {
 #ifdef BROWSER_PROCESS
-    MainMessageLoopExternalPump* message_pump =\
-            MainMessageLoopExternalPump::Get();
+    auto message_pump = client::MainMessageLoopExternalPump::Get();
     if (message_pump) {
         message_pump->OnScheduleMessagePumpWork(delay_ms);
     }
@@ -395,7 +394,7 @@ CefRefPtr<CefDictionaryValue> CefPythonApp::GetJavascriptBindings(
     if (javascriptBindings_.find(browserId) != javascriptBindings_.end()) {
         return javascriptBindings_[browserId];
     }
-    return NULL;
+    return nullptr;
 }
 
 void CefPythonApp::RemoveJavascriptBindings(CefRefPtr<CefBrowser> browser) {
@@ -640,7 +639,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
     for (std::vector<CefString>::iterator it = objectsVector.begin(); \
             it != objectsVector.end(); ++it) {
         CefString objectName = *it;
-        CefRefPtr<CefV8Value> v8Object = CefV8Value::CreateObject(NULL, NULL);
+        CefRefPtr<CefV8Value> v8Object = CefV8Value::CreateObject(nullptr, nullptr);
         v8Window->SetValue(objectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE);
         // METHODS.
         if (!(objects->GetType(objectName) == VTYPE_DICTIONARY)) {
