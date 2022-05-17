@@ -242,6 +242,7 @@ cdef extern from "include/internal/cef_types.h":
         EVENTFLAG_IS_LEFT             = 1 << 10,
         EVENTFLAG_IS_RIGHT            = 1 << 11,
         EVENTFLAG_ALTGR_DOWN          = 1 << 12,
+        EVENTFLAG_IS_REPEAT           = 1 << 13,
 
     # Cookie priority values.
     ctypedef enum cef_cookie_priority_t:
