@@ -51,7 +51,7 @@ class MainMessageLoopExternalPumpWin : public MainMessageLoopExternalPump {
 MainMessageLoopExternalPumpWin::MainMessageLoopExternalPumpWin()
     : timer_pending_(false), main_thread_target_(nullptr) {
   HINSTANCE hInstance = GetModuleHandle(nullptr);
-  const wchar_t* const kClassName = L"CEFMainTargetHWND";
+  const char* const kClassName = "CEFMainTargetHWND";
 
   WNDCLASSEX wcex = {};
   wcex.cbSize = sizeof(WNDCLASSEX);
@@ -62,7 +62,7 @@ MainMessageLoopExternalPumpWin::MainMessageLoopExternalPumpWin()
 
   // Create the message handling window.
   main_thread_target_ =
-      CreateWindowW(kClassName, nullptr, WS_OVERLAPPEDWINDOW, 0, 0, 0, 0,
+      CreateWindowA(kClassName, nullptr, WS_OVERLAPPEDWINDOW, 0, 0, 0, 0,
                     HWND_MESSAGE, nullptr, hInstance, nullptr);
   DCHECK(main_thread_target_);
   SetUserDataPtr(main_thread_target_, this);

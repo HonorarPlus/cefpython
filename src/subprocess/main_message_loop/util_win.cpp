@@ -41,12 +41,6 @@ WNDPROC SetWndProcPtr(HWND hWnd, WNDPROC wndProc) {
   return old;
 }
 
-std::wstring GetResourceString(UINT id) {
-#define MAX_LOADSTRING 100
-  TCHAR buff[MAX_LOADSTRING] = {0};
-  LoadString(::GetModuleHandle(nullptr), id, buff, MAX_LOADSTRING);
-  return buff;
-}
 
 int GetCefMouseModifiers(WPARAM wparam) {
   int modifiers = 0;
@@ -151,8 +145,8 @@ int GetCefKeyboardModifiers(WPARAM wparam, LPARAM lparam) {
   return modifiers;
 }
 
-bool IsKeyDown(WPARAM wparam) {
-  return (GetKeyState(wparam) & 0x8000) != 0;
+bool IsKeyDown(int key_code) {
+  return (GetKeyState(key_code) & 0x8000) != 0;
 }
 
 float GetDeviceScaleFactor() {

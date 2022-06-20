@@ -69,7 +69,7 @@ bool ExecuteJavascriptCallback(int callbackId, CefRefPtr<CefListValue> args) {
     context->Enter();
     CefV8ValueList v8Arguments = CefListValueToCefV8ValueList(args);
     CefRefPtr<CefV8Value> v8ReturnValue = callback->ExecuteFunction(
-            NULL, v8Arguments);
+            nullptr, v8Arguments);
     if (v8ReturnValue.get()) {
         context->Exit();
         return true;

@@ -219,7 +219,7 @@ void SetBrowserDpiSettings(CefRefPtr<CefBrowser> cefBrowser,
     CefPostDelayedTask(
             TID_UI,
             CefCreateClosureTask(
-                    base::Bind(&SetBrowserDpiSettings,
+                    base::BindOnce(&SetBrowserDpiSettings,
                                cefBrowser, autoZooming)
             ),
             50

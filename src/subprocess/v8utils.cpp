@@ -270,7 +270,7 @@ CefRefPtr<CefV8Value> CefListValueToV8Value(
             if (binaryValue->GetSize() == sizeof(pyCallback)) {
                 binaryValue->GetData(&pyCallback, sizeof(pyCallback), 0);
                 v8FunctionHandler = new V8FunctionHandler(
-                        NULL, pyCallback.callbackId);
+                        nullptr, pyCallback.callbackId);
                 // You must provide a function name to
                 // CefV8Value::CreateFunction(), otherwise it fails.
                 callbackName.append(AnyToString(pyCallback.callbackId));
@@ -325,12 +325,11 @@ CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
                       " dictValue->GetKeys() failed";
         return CefV8Value::CreateNull();
     }
-    CefRefPtr<CefV8Value> ret = CefV8Value::CreateObject(NULL, NULL);
+    CefRefPtr<CefV8Value> ret = CefV8Value::CreateObject(nullptr, nullptr);
     CefRefPtr<CefBinaryValue> binaryValue;
     PythonCallback pyCallback;
     CefRefPtr<CefV8Handler> v8FunctionHandler;
-    for (std::vector<CefString>::iterator it = keys.begin(); \
-            it != keys.end(); ++it) {
+    for (auto it = keys.begin(); it != keys.end(); ++it) {
         CefString key = *it;
         cef_value_type_t valueType = dictValue->GetType(key);
         bool success;
@@ -360,7 +359,7 @@ CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
             if (binaryValue->GetSize() == sizeof(pyCallback)) {
                 binaryValue->GetData(&pyCallback, sizeof(pyCallback), 0);
                 v8FunctionHandler = new V8FunctionHandler(
-                        NULL, pyCallback.callbackId);
+                        nullptr, pyCallback.callbackId);
                 // You must provide a function name to
                 // CefV8Value::CreateFunction(), otherwise it fails.
                 callbackName.append(AnyToString(pyCallback.callbackId));
