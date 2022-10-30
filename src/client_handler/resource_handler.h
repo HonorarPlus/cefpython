@@ -31,7 +31,7 @@ public:
                             int& bytes_read,
                             CefRefPtr<CefCallback> callback) override;
 
-  virtual void Cancel() OVERRIDE;
+  virtual void Cancel() override;
     
 private:
   IMPLEMENT_REFCOUNTING(ResourceHandler);

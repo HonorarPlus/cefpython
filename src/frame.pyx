@@ -23,7 +23,7 @@ cdef PyFrame GetPyFrameById(int browserId, object frameId):
 cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     global g_pyFrames
 
-    if <void*>cefFrame == NULL or not cefFrame.get():
+    if not cefFrame.get():
         raise Exception("GetPyFrame(): CefFrame reference is NULL")
 
     cdef PyFrame pyFrame
@@ -89,7 +89,7 @@ cdef void RemovePyFrame(int browserId, object frameId) except *:
     if uniqueFrameId in g_pyFrames:
         Debug("del g_pyFrames[%s]" % uniqueFrameId)
         pyFrame = g_pyFrames[uniqueFrameId]
-        pyFrame.cefFrame.Assign(NULL)
+        pyFrame.cefFrame.swap(<CefRefPtr[CefFrame]?>nullptr)
         del pyFrame
         del g_pyFrames[uniqueFrameId]
         g_unreferenced_frames.append(uniqueFrameId)
@@ -109,7 +109,7 @@ cdef void RemovePyFramesForBrowser(int browserId) except *:
     for uniqueFrameId in toRemove:
         Debug("del g_pyFrames[%s]" % uniqueFrameId)
         pyFrame = g_pyFrames[uniqueFrameId]
-        pyFrame.cefFrame.Assign(NULL)
+        pyFrame.cefFrame.swap(<CefRefPtr[CefFrame]?>nullptr)
         del pyFrame
         del g_pyFrames[uniqueFrameId]
         g_unreferenced_frames.append(uniqueFrameId)
@@ -125,7 +125,7 @@ cdef class PyFrame:
         # Do not call IsValid() here, if the frame does not exist
         # then no big deal, no reason to crash the application.
         # The CEF calls will fail, but they also won't cause crash.
-        if <void*>self.cefFrame != NULL and self.cefFrame.get():
+        if self.cefFrame.get():
             return self.cefFrame
         raise Exception("PyFrame.GetCefFrame() failed: CefFrame was destroyed")
 
@@ -134,7 +134,7 @@ cdef class PyFrame:
         self.frameId = frameId
 
     cpdef py_bool IsValid(self):
-        if <void*>self.cefFrame != NULL and self.cefFrame.get() \
+        if self.cefFrame.get() \
                 and self.cefFrame.get().IsValid():
             return True
         return False

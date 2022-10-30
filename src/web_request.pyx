@@ -83,7 +83,7 @@ cdef class PyWebRequest:
         self.cefWebRequest = <CefRefPtr[CefURLRequest]?>(CefURLRequest_Create(
                 pyRequest.cefRequest,
                 <CefRefPtr[CefURLRequestClient]?>cppWebRequestClient,
-                <CefRefPtr[CefRequestContext]?>NULL))
+                <CefRefPtr[CefRequestContext]?>nullptr))
 
     cdef object GetCallback(self, str funcName):
         if hasattr(self.pyWebRequestClient, funcName) and (

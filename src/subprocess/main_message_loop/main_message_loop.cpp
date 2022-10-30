@@ -7,11 +7,7 @@
 #include "include/cef_task.h"
 #include "include/wrapper/cef_closure_task.h"
 
-namespace client {
-
 MainMessageLoop* g_main_message_loop = nullptr;
-
-
 
 MainMessageLoop::MainMessageLoop() {
   DCHECK(!g_main_message_loop);
@@ -35,5 +31,3 @@ void MainMessageLoop::PostClosure(base::OnceClosure closure) {
 void MainMessageLoop::PostClosure(const base::RepeatingClosure& closure) {
   PostTask(CefCreateClosureTask(closure));
 }
-
-}  // namespace client

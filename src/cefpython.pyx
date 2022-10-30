@@ -194,6 +194,13 @@ from libcpp.pair cimport pair as cpp_pair
 from libcpp.vector cimport vector as cpp_vector
 # noinspection PyUnresolvedReferences
 from libcpp.string cimport string as cpp_string
+
+# noinspection PyUnresolvedReferences
+from libcpp.memory cimport unique_ptr as cpp_unique_ptr
+
+# noinspection PyUnresolvedReferences
+from libcpp cimport nullptr
+
 # noinspection PyUnresolvedReferences
 from wstring cimport wstring as cpp_wstring
 # noinspection PyUnresolvedReferences
@@ -261,9 +268,6 @@ from cef_types cimport (
 # noinspection PyUnresolvedReferences
 from cef_ptr cimport CefRefPtr
 
-# noinspection PyUnresolvedReferences
-from cef_scoped_ptr cimport scoped_ptr
-
 from cef_task cimport *
 from cef_platform cimport *
 from cef_app cimport *
@@ -326,7 +330,7 @@ g_browser_settings = {}
 # noinspection PyUnresolvedReferences
 cdef CefRefPtr[CefRequestContext] g_shared_request_context
 
-cdef scoped_ptr[MainMessageLoopExternalPump] g_external_message_pump
+cdef unique_ptr[MainMessageLoopExternalPump] g_external_message_pump
 
 cdef py_bool g_MessageLoop_called = False
 cdef py_bool g_MessageLoopWork_called = False
@@ -633,8 +637,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         Debug("Create external message pump")
         # Using .reset() here to assign new instance was causing
         # MainMessageLoopExternalPump destructor to be called. Strange.
-        g_external_message_pump.Assign(
-                MainMessageLoopExternalPump.Create())
+        g_external_message_pump.swap(MainMessageLoopExternalPump.Create())
 
     Debug("CefInitialize()")
     cdef cpp_bool ret
@@ -777,7 +780,7 @@ def CreateBrowserSync(windowInfo=None,
                 cefNavigateUrl, cefBrowserSettings,
                 extraInfo, cefRequestContext)
 
-    if <void*>cefBrowser == NULL or not cefBrowser.get():
+    if not cefBrowser.get():
         Debug("CefBrowser::CreateBrowserSync() failed")
         return None
     else:

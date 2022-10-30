@@ -8,8 +8,6 @@
 
 #include "main_message_loop.h"
 
-namespace client {
-
 // Represents the main message loop in the browser process. This implementation
 // is a light-weight wrapper around the Chromium UI thread.
 class MainMessageLoopStd : public MainMessageLoop {
@@ -29,7 +27,5 @@ class MainMessageLoopStd : public MainMessageLoop {
  private:
   DISALLOW_COPY_AND_ASSIGN(MainMessageLoopStd);
 };
-
-}  // namespace client
 
 #endif  // CEF_TESTS_SHARED_BROWSER_MAIN_MESSAGE_LOOP_STD_H_

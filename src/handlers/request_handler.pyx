@@ -141,7 +141,7 @@ cdef public CefRefPtr[CefResourceHandler] ResourceRequestHandler_GetResourceHand
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
-            return <CefRefPtr[CefResourceHandler]>NULL
+            return <CefRefPtr[CefResourceHandler]>nullptr
 
         pyBrowser = GetPyBrowser(cefBrowser, "GetResourceHandler")
         pyFrame = GetPyFrame(cefFrame)
@@ -155,9 +155,9 @@ cdef public CefRefPtr[CefResourceHandler] ResourceRequestHandler_GetResourceHand
             if returnValue:
                 return CreateResourceHandler(returnValue)
             else:
-                return <CefRefPtr[CefResourceHandler]>NULL
+                return <CefRefPtr[CefResourceHandler]>nullptr
         else:
-            return <CefRefPtr[CefResourceHandler]>NULL
+            return <CefRefPtr[CefResourceHandler]>nullptr
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

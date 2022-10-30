@@ -78,10 +78,10 @@ cdef extern from "include/internal/cef_types.h":
         int page_width
         int page_height
         int scale_factor
-        double margin_top
-        double margin_right
-        double margin_bottom
-        double margin_left
+        int margin_top
+        int margin_right
+        int margin_bottom
+        int margin_left
         cef_pdf_print_margin_type_t margin_type
         int header_footer_enabled
         int selection_only

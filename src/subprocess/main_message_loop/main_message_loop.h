@@ -15,8 +15,6 @@
 #include <windows.h>
 #endif
 
-namespace client {
-
 // Represents the message loop running on the main application thread in the
 // browser process. This will be the same as the CEF UI thread on Linux, OS X
 // and Windows when not using multi-threaded message loop mode. The methods of
@@ -63,14 +61,14 @@ class MainMessageLoop {
 };
 
 #define CURRENTLY_ON_MAIN_THREAD() \
-  client::MainMessageLoop::Get()->RunsTasksOnCurrentThread()
+  MainMessageLoop::Get()->RunsTasksOnCurrentThread()
 
 #define REQUIRE_MAIN_THREAD() DCHECK(CURRENTLY_ON_MAIN_THREAD())
 
-#define MAIN_POST_TASK(task) client::MainMessageLoop::Get()->PostTask(task)
+#define MAIN_POST_TASK(task) MainMessageLoop::Get()->PostTask(task)
 
 #define MAIN_POST_CLOSURE(closure) \
-  client::MainMessageLoop::Get()->PostClosure(closure)
+  MainMessageLoop::Get()->PostClosure(closure)
 
 // Use this struct in conjuction with RefCountedThreadSafe to ensure that an
 // object is deleted on the main thread. For example:
@@ -98,12 +96,10 @@ struct DeleteOnMainThread {
     if (CURRENTLY_ON_MAIN_THREAD()) {
       delete x;
     } else {
-      client::MainMessageLoop::Get()->PostClosure(base::BindOnce(
+      MainMessageLoop::Get()->PostClosure(base::BindOnce(
           &DeleteOnMainThread::Destruct<T>, base::Unretained(x)));
     }
   }
 };
-
-}  // namespace client
 
 #endif  // CEF_TESTS_SHARED_BROWSER_MAIN_MESSAGE_LOOP_H_

@@ -14,7 +14,7 @@ cdef class PyResponse:
 
     cdef CefRefPtr[CefResponse] GetCefResponse(self
             ) except *:
-        if <void*>self.cefResponse != NULL and self.cefResponse.get():
+        if self.cefResponse.get():
             return self.cefResponse
         raise Exception("CefResponse was destroyed, you cannot use this object anymore")
 

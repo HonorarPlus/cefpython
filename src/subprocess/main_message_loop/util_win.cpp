@@ -6,8 +6,6 @@
 
 #include "include/base/cef_logging.h"
 
-namespace client {
-
 namespace {
 
 LARGE_INTEGER qi_freq_ = {};
@@ -167,4 +165,3 @@ float GetDeviceScaleFactor() {
   return scale_factor;
 }
 
-}  // namespace client

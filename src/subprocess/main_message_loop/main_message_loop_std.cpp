@@ -6,8 +6,6 @@
 
 #include "include/cef_app.h"
 
-namespace client {
-
 MainMessageLoopStd::MainMessageLoopStd() {}
 
 int MainMessageLoopStd::Run() {
@@ -33,5 +31,3 @@ void MainMessageLoopStd::SetCurrentModelessDialog(HWND hWndDialog) {
   // internally route dialog messages.
 }
 #endif
-
-}  // namespace client

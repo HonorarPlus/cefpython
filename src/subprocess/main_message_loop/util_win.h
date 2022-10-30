@@ -11,8 +11,6 @@
 
 #include "include/internal/cef_types_wrappers.h"
 
-namespace client {
-
 // Returns the current time in microseconds.
 uint64_t GetTimeNow();
 
@@ -33,12 +31,10 @@ std::wstring GetResourceString(UINT id);
 
 int GetCefMouseModifiers(WPARAM wparam);
 int GetCefKeyboardModifiers(WPARAM wparam, LPARAM lparam);
-bool IsKeyDown(WPARAM wparam);
+bool IsKeyDown(int wparam);
 
 // Returns the device scale factor. For example, 200% display scaling will
 // return 2.0.
 float GetDeviceScaleFactor();
-
-}  // namespace client
 
 #endif  // CEF_TESTS_SHARED_BROWSER_UTIL_WIN_H_

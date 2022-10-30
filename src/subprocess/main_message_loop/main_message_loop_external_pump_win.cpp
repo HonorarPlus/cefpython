@@ -11,8 +11,6 @@
 #include "include/cef_app.h"
 #include "util_win.h"
 
-namespace client {
-
 // Message sent to get an additional time slice for pumping (processing) another
 // task (a series of such messages creates a continuous task pump).
 static const int kMsgHaveWork = WM_USER + 1;
@@ -148,5 +146,3 @@ std::unique_ptr<MainMessageLoopExternalPump>
 MainMessageLoopExternalPump::Create() {
   return std::make_unique<MainMessageLoopExternalPumpWin>();
 }
-
-}  // namespace client

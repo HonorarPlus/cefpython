@@ -30,6 +30,7 @@
 #include "util.h"
 #include "include/wrapper/cef_closure_task.h"
 #include "include/base/cef_bind.h"
+#include "include/base/cef_callback.h"
 #include "include/base/cef_logging.h"
 #include <vector>
 #include <algorithm>
@@ -220,7 +221,7 @@ void CefPythonApp::OnBeforeChildProcessLaunch(
 
 void CefPythonApp::OnScheduleMessagePumpWork(int64 delay_ms) {
 #ifdef BROWSER_PROCESS
-    auto message_pump = client::MainMessageLoopExternalPump::Get();
+    auto message_pump = MainMessageLoopExternalPump::Get();
     if (message_pump) {
         message_pump->OnScheduleMessagePumpWork(delay_ms);
     }

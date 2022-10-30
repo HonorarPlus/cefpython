@@ -56,12 +56,12 @@ cdef object CefValueToPyValue(CefRefPtr[CefValue] cefValue):
         return CefToPyString(cefValue.get().GetString())
     elif valueType == cef_types.VTYPE_DICTIONARY:
         return CefDictionaryValueToPyDict(
-                <CefRefPtr[CefBrowser]>NULL,
+                <CefRefPtr[CefBrowser]>nullptr,
                 cefValue.get().GetDictionary(),
                 1)
     elif valueType == cef_types.VTYPE_LIST:
         return CefListValueToPyList(
-                <CefRefPtr[CefBrowser]>NULL,
+                <CefRefPtr[CefBrowser]>nullptr,
                 cefValue.get().GetList(),
                 1)
     elif valueType == cef_types.VTYPE_BINARY:

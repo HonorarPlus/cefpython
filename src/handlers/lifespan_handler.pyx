@@ -136,12 +136,12 @@ cdef public void LifespanHandler_OnBeforeClose(
         # flushing of cookies would need to be handled manually.
         cefBrowser.get().GetHost().get().GetRequestContext().get() \
                 .GetCookieManager(
-                        <CefRefPtr[CefCompletionCallback]?>NULL) \
-                .get().FlushStore(<CefRefPtr[CefCompletionCallback]?>NULL)
+                        <CefRefPtr[CefCompletionCallback]?>nullptr) \
+                .get().FlushStore(<CefRefPtr[CefCompletionCallback]?>nullptr)
 
         browserId = pyBrowser.GetIdentifier()
-        pyBrowser.cefBrowser.Assign(NULL)
-        cefBrowser.Assign(NULL)
+        pyBrowser.cefBrowser.swap(<CefRefPtr[CefBrowser]?>nullptr)
+        cefBrowser.swap(<CefRefPtr[CefBrowser]?>nullptr)
         del pyBrowser
 
         RemovePythonCallbacksForBrowser(browserId)

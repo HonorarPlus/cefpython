@@ -35,7 +35,7 @@ public:
                                   bool is_main_frame,
                                   const CefString& top_origin_url,
                                   CefRefPtr<CefWebPluginInfo> plugin_info,
-                                  PluginPolicy* plugin_policy) OVERRIDE;
+                                  PluginPolicy* plugin_policy) override;
 
 private:
     IMPLEMENT_REFCOUNTING(RequestContextHandler);

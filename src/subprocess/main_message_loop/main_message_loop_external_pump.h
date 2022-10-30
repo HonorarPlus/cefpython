@@ -8,8 +8,6 @@
 
 #include "main_message_loop_std.h"
 
-namespace client {
-
 // This MessageLoop implementation simulates the embedding of CEF into an
 // existing host application that runs its own message loop. The scheduling
 // implementation provided by this class is very simplistic and does not handle
@@ -64,7 +62,5 @@ class MainMessageLoopExternalPump : public MainMessageLoopStd {
   bool is_active_;
   bool reentrancy_detected_;
 };
-
-}  // namespace client
 
 #endif  // CEF_TESTS_SHARED_BROWSER_MAIN_MESSAGE_LOOP_EXTERNAL_PUMP_H_

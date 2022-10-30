@@ -10,8 +10,6 @@
 #include "include/wrapper/cef_helpers.h"
 #include "main_message_loop.h"
 
-namespace client {
-
 // Special timer delay placeholder value. Intentionally 32-bit for Windows and
 // OS X platform API compatibility.
 const int32 kTimerDelayPlaceholder = INT_MAX;
@@ -20,7 +18,7 @@ const int32 kTimerDelayPlaceholder = INT_MAX;
 // DoWork().
 const int64 kMaxTimerDelay = 1000 / 30;  // 30fps
 
-client::MainMessageLoopExternalPump* g_external_message_pump = nullptr;
+MainMessageLoopExternalPump* g_external_message_pump = nullptr;
 
 
 MainMessageLoopExternalPump::MainMessageLoopExternalPump()
@@ -100,5 +98,3 @@ bool MainMessageLoopExternalPump::PerformMessageLoopWork() {
   // method.
   return reentrancy_detected_;
 }
-
-}  // namespace client

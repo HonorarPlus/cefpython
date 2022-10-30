@@ -209,7 +209,7 @@ class CookieManager(object):
         cdef CefRefPtr[CefCookieManager] cefCookieManager
         if not g_globalCookieManager:
             cefCookieManager = CefCookieManager_GetGlobalManager(
-                    <CefRefPtr[CefCompletionCallback]?>NULL)
+                    <CefRefPtr[CefCompletionCallback]?>nullptr)
             g_globalCookieManager = CreatePyCookieManager(cefCookieManager)
         return g_globalCookieManager
 
@@ -258,17 +258,17 @@ cdef class PyCookieManager:
         CefPostTask(TID_IO, CreateTask_SetCookie(
                 self.cefCookieManager.get(),
                 PyToCefStringValue(url), cookie.cefCookie,
-                <CefRefPtr[CefSetCookieCallback]?>NULL))
+                <CefRefPtr[CefSetCookieCallback]?>nullptr))
 
     cpdef py_void DeleteCookies(self, py_string url, py_string cookie_name):
         CefPostTask(TID_IO, CreateTask_DeleteCookies(
                 self.cefCookieManager.get(),
                 PyToCefStringValue(url), PyToCefStringValue(cookie_name),
-                <CefRefPtr[CefDeleteCookiesCallback]?>NULL))
+                <CefRefPtr[CefDeleteCookiesCallback]?>nullptr))
 
     cpdef py_bool FlushStore(self, callback=None):
         return self.cefCookieManager.get().FlushStore(
-                <CefRefPtr[CefCompletionCallback]?>NULL)
+                <CefRefPtr[CefCompletionCallback]?>nullptr)
 
 
 # ------------------------------------------------------------------------------

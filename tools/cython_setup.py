@@ -151,6 +151,7 @@ def get_winsdk_lib():
             ]
         elif ARCH64:
             winsdk_libs = [
+                r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.20348.0\x64",
                 r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.17134.0\x64",
                 r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64",
                 r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64",

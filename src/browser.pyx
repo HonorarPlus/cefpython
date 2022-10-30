@@ -59,7 +59,7 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser,
 
     global g_pyBrowsers
 
-    if <void*>cefBrowser == NULL or not cefBrowser.get():
+    if not cefBrowser.get():
         raise Exception("{caller}: CefBrowser reference is NULL"
                         .format(caller=callerIdStr))
 
@@ -144,11 +144,12 @@ cdef void RemovePyBrowser(int browserId) except *:
     # Called from LifespanHandler_OnBeforeClose().
     global g_pyBrowsers, g_unreferenced_browsers
     cdef PyBrowser pyBrowser
+    
     if browserId in g_pyBrowsers:
         # noinspection PyUnresolvedReferences
         Debug("del g_pyBrowsers[%s]" % browserId)
         pyBrowser = g_pyBrowsers[browserId]
-        pyBrowser.cefBrowser.Assign(NULL)
+        pyBrowser.cefBrowser.swap(<CefRefPtr[CefBrowser]?>nullptr)
         del pyBrowser
         del g_pyBrowsers[browserId]
         g_unreferenced_browsers.append(browserId)
@@ -207,7 +208,7 @@ cdef class PyBrowser:
     cdef void* imageBuffer
 
     cdef CefRefPtr[CefBrowser] GetCefBrowser(self) except *:
-        if <void*>self.cefBrowser != NULL and self.cefBrowser.get():
+        if self.cefBrowser.get():
             return self.cefBrowser
         raise Exception("PyBrowser.GetCefBrowser() failed: CefBrowser "
                         "was destroyed")
@@ -215,7 +216,7 @@ cdef class PyBrowser:
     cdef CefRefPtr[CefBrowserHost] GetCefBrowserHost(self) except *:
         cdef CefRefPtr[CefBrowserHost] cefBrowserHost = (
                 self.GetCefBrowser().get().GetHost())
-        if <void*>cefBrowserHost != NULL and cefBrowserHost.get():
+        if cefBrowserHost.get():
             return cefBrowserHost
         raise Exception("PyBrowser.GetCefBrowserHost() failed: this "
                         "method can only be called in the browser "
@@ -401,8 +402,8 @@ cdef class PyBrowser:
         # then flushing of cookies would need to be handled manually.
         self.GetCefBrowserHost().get().GetRequestContext().get() \
                 .GetCookieManager(
-                        <CefRefPtr[CefCompletionCallback]?>NULL) \
-                .get().FlushStore(<CefRefPtr[CefCompletionCallback]?>NULL)
+                        <CefRefPtr[CefCompletionCallback]?>nullptr) \
+                .get().FlushStore(<CefRefPtr[CefCompletionCallback]?>nullptr)
 
         cdef int browserId = self.GetCefBrowser().get().GetIdentifier()
         self.GetCefBrowserHost().get().CloseBrowser(bool(forceClose))
@@ -594,7 +595,7 @@ cdef class PyBrowser:
         cdef CefBrowserSettings settings
         cdef CefPoint inspect_element_at
         self.GetCefBrowserHost().get().ShowDevTools(
-                window_info, <CefRefPtr[CefClient]?>NULL, settings,
+                window_info, <CefRefPtr[CefClient]?>nullptr, settings,
                 inspect_element_at)
 
 
