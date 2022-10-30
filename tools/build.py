@@ -218,7 +218,7 @@ def check_cython_version():
         require_version = match.group(1)
     try:
         import Cython
-        version = Cython.__version__[:3]
+        version = Cython.__version__
         print("Cython version: {0}".format(version))
     except ImportError:
         # noinspection PyUnusedLocal

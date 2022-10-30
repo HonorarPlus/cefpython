@@ -461,7 +461,7 @@ def get_cefpython_api_hash():
 
 
 def get_version_from_file(header_file):
-    with open(header_file, "rU") as fp:
+    with open(header_file, "r") as fp:
         contents = fp.read()  # no need to decode() as "rU" specified
     ret = dict()
     matches = re.findall(r'^#define (\w+) "?([^\s"]+)"?', contents,
@@ -486,6 +486,8 @@ def get_msvs_for_python(vs_prefix=False):
     elif sys.version_info[:2] == (3, 9):
         return "VS2019" if vs_prefix else "2019"
     elif sys.version_info[:2] == (3, 10):
+        return "VS2019" if vs_prefix else "2019"
+    elif sys.version_info[:2] == (3, 11):
         return "VS2019" if vs_prefix else "2019"
     else:
         print("ERROR: This version of Python is not supported")
