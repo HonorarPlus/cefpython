@@ -28,54 +28,57 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// OVERVIEW:
-//
-// A container for a list of callbacks. Provides callers the ability to manually
-// or automatically unregister callbacks at any time, including during callback
-// notification.
-//
-// TYPICAL USAGE:
-//
-// class MyWidget {
-//  public:
-//   using CallbackList = base::RepeatingCallbackList<void(const Foo&)>;
-//
-//   // Registers |cb| to be called whenever NotifyFoo() is executed.
-//   CallbackListSubscription RegisterCallback(CallbackList::CallbackType cb) {
-//     return callback_list_.Add(std::move(cb));
-//   }
-//
-//  private:
-//   // Calls all registered callbacks, with |foo| as the supplied arg.
-//   void NotifyFoo(const Foo& foo) {
-//     callback_list_.Notify(foo);
-//   }
-//
-//   CallbackList callback_list_;
-// };
-//
-//
-// class MyWidgetListener {
-//  private:
-//   void OnFoo(const Foo& foo) {
-//     // Called whenever MyWidget::NotifyFoo() is executed, unless
-//     // |foo_subscription_| has been destroyed.
-//   }
-//
-//   // Automatically deregisters the callback when deleted (e.g. in
-//   // ~MyWidgetListener()).  Unretained(this) is safe here since the
-//   // ScopedClosureRunner does not outlive |this|.
-//   CallbackListSubscription foo_subscription_ =
-//       MyWidget::Get()->RegisterCallback(
-//           base::BindRepeating(&MyWidgetListener::OnFoo,
-//                               base::Unretained(this)));
-// };
-//
-// UNSUPPORTED:
-//
-// * Destroying the CallbackList during callback notification.
-//
-// This is possible to support, but not currently necessary.
+///
+/// \file
+/// A container for a list of callbacks. Provides callers the ability to
+/// manually or automatically unregister callbacks at any time, including during
+/// callback notification.
+///
+/// TYPICAL USAGE:
+///
+/// <pre>
+/// class MyWidget {
+///  public:
+///   using CallbackList = base::RepeatingCallbackList<void(const Foo&)>;
+///
+///   // Registers |cb| to be called whenever NotifyFoo() is executed.
+///   CallbackListSubscription RegisterCallback(CallbackList::CallbackType cb) {
+///     return callback_list_.Add(std::move(cb));
+///   }
+///
+///  private:
+///   // Calls all registered callbacks, with |foo| as the supplied arg.
+///   void NotifyFoo(const Foo& foo) {
+///     callback_list_.Notify(foo);
+///   }
+///
+///   CallbackList callback_list_;
+/// };
+///
+///
+/// class MyWidgetListener {
+///  private:
+///   void OnFoo(const Foo& foo) {
+///     // Called whenever MyWidget::NotifyFoo() is executed, unless
+///     // |foo_subscription_| has been destroyed.
+///   }
+///
+///   // Automatically deregisters the callback when deleted (e.g. in
+///   // ~MyWidgetListener()).  Unretained(this) is safe here since the
+///   // ScopedClosureRunner does not outlive |this|.
+///   CallbackListSubscription foo_subscription_ =
+///       MyWidget::Get()->RegisterCallback(
+///           base::BindRepeating(&MyWidgetListener::OnFoo,
+///                               base::Unretained(this)));
+/// };
+/// </pre>
+///
+/// UNSUPPORTED:
+///
+/// * Destroying the CallbackList during callback notification.
+///
+/// This is possible to support, but not currently necessary.
+///
 
 #ifndef CEF_INCLUDE_BASE_CEF_CALLBACK_LIST_H_
 #define CEF_INCLUDE_BASE_CEF_CALLBACK_LIST_H_
@@ -98,7 +101,6 @@
 #include "include/base/cef_bind.h"
 #include "include/base/cef_callback.h"
 #include "include/base/cef_callback_helpers.h"
-#include "include/base/cef_compiler_specific.h"
 #include "include/base/cef_logging.h"
 #include "include/base/cef_weak_ptr.h"
 
@@ -191,7 +193,7 @@ class CallbackListBase {
 
   // Registers |cb| for future notifications. Returns a CallbackListSubscription
   // whose destruction will cancel |cb|.
-  CallbackListSubscription Add(CallbackType cb) WARN_UNUSED_RESULT {
+  [[nodiscard]] CallbackListSubscription Add(CallbackType cb) {
     DCHECK(!cb.is_null());
     return CallbackListSubscription(base::BindOnce(
         &CallbackListBase::CancelCallback, weak_ptr_factory_.GetWeakPtr(),
@@ -382,9 +384,9 @@ class RepeatingCallbackList
   }
 };
 
-// Syntactic sugar to parallel that used for Callbacks.
-// ClosureList explicitly not provided since it is not used, and CallbackList
-// is deprecated. {Once,Repeating}ClosureList should instead be used.
+///
+/// Syntactic sugar to parallel that used for Callbacks.
+///
 using OnceClosureList = OnceCallbackList<void()>;
 using RepeatingClosureList = RepeatingCallbackList<void()>;
 

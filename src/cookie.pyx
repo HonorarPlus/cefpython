@@ -161,16 +161,16 @@ cdef class Cookie:
         return self.cefCookie.httponly
 
     cpdef py_void SetCreation(self, object creation):
-        DatetimeToCefTimeT(creation, self.cefCookie.creation)
+        self.cefCookie.creation.val = creation
 
     cpdef object GetCreation(self):
-        return CefTimeTToDatetime(self.cefCookie.creation)
+        return self.cefCookie.creation.val
 
     cpdef py_void SetLastAccess(self, object lastAccess):
-        DatetimeToCefTimeT(lastAccess, self.cefCookie.last_access)
+        self.cefCookie.last_access.val = lastAccess
 
     cpdef object GetLastAccess(self):
-        return CefTimeTToDatetime(self.cefCookie.last_access)
+        return self.cefCookie.last_access.val
 
     cpdef py_void SetHasExpires(self, py_bool hasExpires):
         self.cefCookie.has_expires = bool(hasExpires)
@@ -179,10 +179,10 @@ cdef class Cookie:
         return self.cefCookie.has_expires
 
     cpdef py_void SetExpires(self, object expires):
-        DatetimeToCefTimeT(expires, self.cefCookie.expires)
+        self.cefCookie.expires.val = expires
 
     cpdef object GetExpires(self):
-        return CefTimeTToDatetime(self.cefCookie.expires)
+        return self.cefCookie.expires.val
     
     cpdef py_void SetSameSite(self, cef_cookie_same_site_t sameSite):
         self.cefCookie.sameSite = sameSite

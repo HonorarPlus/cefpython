@@ -4,7 +4,7 @@
 
 from cef_string cimport cef_string_t
 from libcpp cimport bool as cpp_bool
-from cef_time cimport cef_time_t
+from cef_time cimport cef_basetime_t
 from libcpp.vector cimport vector as cpp_vector
 from cef_string cimport CefString
 from cef_ptr cimport CefRefPtr
@@ -20,10 +20,10 @@ cdef extern from "include/cef_cookie.h":
         cef_string_t path
         cpp_bool secure
         cpp_bool httponly
-        cef_time_t creation
-        cef_time_t last_access
+        cef_basetime_t creation
+        cef_basetime_t last_access
         cpp_bool has_expires
-        cef_time_t expires
+        cef_basetime_t expires
         cef_cookie_same_site_t same_site
         cef_cookie_priority_t priority
 
