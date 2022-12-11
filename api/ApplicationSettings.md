@@ -9,7 +9,6 @@ Table of contents:
 * [Settings](#settings)
   * [accept_language_list](#accept_language_list)
   * [app_user_model_id](#app_user_model_id)
-  * [application_client_id_for_file_scanning](#application_client_id_for_file_scanning)
   * [auto_zooming](#auto_zooming)
   * [background_color](#background_color)
   * [browser_subprocess_path](#browser_subprocess_path)
@@ -71,15 +70,6 @@ per-browser basis using the CefBrowserSettings.accept_language_list value.
 If both values are empty then "en-US,en" will be used. Can be overridden
 for individual CefRequestContext instances via the
 CefRequestContextSettings.accept_language_list value.
-
-
-### application_client_id_for_file_scanning
-
-(string)
-GUID string used for identifying the application. This is passed to the
-system AV function for scanning downloaded files. By default, the GUID
-will be an empty string and the file will be treated as an untrusted
-file when the GUID is empty.
 
 
 ### app_user_model_id

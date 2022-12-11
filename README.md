@@ -406,7 +406,6 @@ supporting this project actively on a daily basis.
 * [Application settings](api/ApplicationSettings.md#application-settings)
   * [accept_language_list](api/ApplicationSettings.md#accept_language_list)
   * [app_user_model_id](api/ApplicationSettings.md#app_user_model_id)
-  * [application_client_id_for_file_scanning](api/ApplicationSettings.md#application_client_id_for_file_scanning)
   * [auto_zooming](api/ApplicationSettings.md#auto_zooming)
   * [background_color](api/ApplicationSettings.md#background_color)
   * [browser_subprocess_path](api/ApplicationSettings.md#browser_subprocess_path)

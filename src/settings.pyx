@@ -50,10 +50,6 @@ cdef void SetApplicationSettings(
             cefString = new CefString(&cefAppSettings.accept_language_list)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
-        elif key == "application_client_id_for_file_scanning":
-            cefString = new CefString(&cefAppSettings.application_client_id_for_file_scanning)
-            PyToCefStringPointer(appSettings[key], cefString)
-            del cefString
         elif key == "cache_path":
             cefString = new CefString(&cefAppSettings.cache_path)
             PyToCefStringPointer(appSettings[key], cefString)

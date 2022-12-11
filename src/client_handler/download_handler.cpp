@@ -5,6 +5,24 @@
 #include "download_handler.h"
 #include "include/base/cef_logging.h"
 
+bool DownloadHandler::CanDownload(CefRefPtr<CefBrowser> browser,
+                    const CefString& url,
+                    const CefString& request_method)
+{
+    REQUIRE_UI_THREAD();
+    bool downloads_enabled = ApplicationSettings_GetBool("downloads_enabled");
+    if (downloads_enabled) {
+        auto msg = std::string{"[Browser process] Trying to download a file from: "};
+        msg += url.ToString();
+        LOG(INFO) << msg.c_str();
+        return true;
+    } else {
+        LOG(INFO) << "[Browser process] Tried to download file,"
+                     " but downloads are disabled";
+        return false;
+    }
+}
+
 
 void DownloadHandler::OnBeforeDownload(
                             CefRefPtr<CefBrowser> browser,

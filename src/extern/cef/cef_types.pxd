@@ -34,7 +34,6 @@ cdef extern from "include/internal/cef_types.h":
 
     ctypedef struct CefSettings:
         cef_string_t accept_language_list
-        cef_string_t application_client_id_for_file_scanning
         cef_string_t browser_subprocess_path
         int command_line_args_disabled
         cef_string_t cache_path
