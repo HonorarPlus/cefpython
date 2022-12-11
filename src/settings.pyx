@@ -241,11 +241,6 @@ cdef void SetBrowserSettings(
         elif key == "java_disabled":
             # Keep the key for BC
             Debug("DEPRECATED: 'java_disabled' setting")
-        elif key == "plugins_disabled":
-            if browserSettings[key]:
-                cefBrowserSettings.plugins = cef_types.STATE_DISABLED
-            else:
-                cefBrowserSettings.plugins = cef_types.STATE_ENABLED
         elif key == "image_load_disabled":
             if browserSettings[key]:
                 cefBrowserSettings.image_loading = cef_types.STATE_DISABLED

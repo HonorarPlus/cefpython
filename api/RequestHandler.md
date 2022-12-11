@@ -25,7 +25,6 @@ Table of contents:
   * [_OnCertificateError](#_oncertificateerror)
   * [OnQuotaRequest](#onquotarequest)
   * [OnResourceRedirect](#onresourceredirect)
-  * [OnPluginCrashed](#onplugincrashed)
   * [OnProtocolExecution](#onprotocolexecution)
   * [OnRendererProcessTerminated](#onrendererprocessterminated)
 
@@ -249,18 +248,6 @@ Description from upstream CEF:
 > redirect. The |new_url| parameter will contain the new URL and can be
 > changed if desired. The |request| object cannot be modified in this
 > callback.
-
-
-### OnPluginCrashed
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| plugin_path | string |
-| __Return__ | void |
-
-Called when a plugin has crashed. |plugin_path| is the path of the plugin
-that crashed.
 
 
 ### OnProtocolExecution

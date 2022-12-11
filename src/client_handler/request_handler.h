@@ -44,9 +44,6 @@ public:
     void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
                                    cef_termination_status_t status) override;
 
-    void OnPluginCrashed(CefRefPtr<CefBrowser> browser,
-                         const CefString& plugin_path) override;
-
 private:
     IMPLEMENT_REFCOUNTING(RequestHandler);
 };

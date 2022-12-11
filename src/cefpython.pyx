@@ -281,7 +281,6 @@ from cef_time cimport *
 from cef_values cimport *
 from cefpython_app cimport *
 from cef_process_message cimport *
-from cef_web_plugin cimport *
 from cef_request_handler cimport *
 from cef_request cimport *
 from cef_cookie cimport *
@@ -367,7 +366,6 @@ include "window_info.pyx"
 include "process_message_utils.pyx"
 include "javascript_callback.pyx"
 include "python_callback.pyx"
-include "web_plugin_info.pyx"
 include "request.pyx"
 include "cookie.pyx"
 include "string_visitor.pyx"

@@ -23,7 +23,6 @@
 #include "include/cef_client.h"
 #include "include/cef_urlrequest.h"
 #include "include/cef_command_line.h"
-#include "include/cef_web_plugin.h"
 #include "util.h"
 
 // cefpython_fixed.h declares public functions using DL_IMPORT and these

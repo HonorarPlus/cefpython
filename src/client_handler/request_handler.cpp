@@ -65,14 +65,6 @@ void RequestHandler::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
 }
 
 
-void RequestHandler::OnPluginCrashed(CefRefPtr<CefBrowser> browser,
-                                     const CefString& plugin_path)
-{
-    REQUIRE_UI_THREAD();
-    RequestHandler_OnPluginCrashed(browser, plugin_path);
-}
-
-
 ReturnValue ResourceRequestHandler::OnBeforeResourceLoad(
                                         CefRefPtr<CefBrowser> browser,
                                         CefRefPtr<CefFrame> frame,

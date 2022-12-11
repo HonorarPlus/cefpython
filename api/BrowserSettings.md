@@ -19,7 +19,6 @@ Table of contents:
   * [javascript_close_windows_disallowed](#javascript_close_windows_disallowed)
   * [javascript_access_clipboard_disallowed](#javascript_access_clipboard_disallowed)
   * [local_storage_disabled](#local_storage_disabled)
-  * [plugins_disabled](#plugins_disabled)
   * [remote_fonts](#remote_fonts)
   * [shrink_standalone_images_to_fit](#shrink_standalone_images_to_fit)
   * [tab_to_links_disabled](#tab_to_links_disabled)
@@ -139,11 +138,6 @@ switch.
 ### local_storage_disabled
 
 (bool) Controls whether local storage can be used. Also configurable using the --disable-local-storage switch.
-
-
-### plugins_disabled
-
-(bool) Controls whether any plugins will be loaded. Also configurable using the --disable-plugins switch.
 
 
 ### remote_fonts
