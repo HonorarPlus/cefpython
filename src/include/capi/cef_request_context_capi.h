@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,7 +33,7 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=2e42334fc22050e207e5a0af6fe290a592e4105f$
+// $hash=89e64a2db658ad560e85ea5d3e564a6505d4e914$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_REQUEST_CONTEXT_CAPI_H_
@@ -164,17 +164,6 @@ typedef struct _cef_request_context_t {
   ///
   int(CEF_CALLBACK* clear_scheme_handler_factories)(
       struct _cef_request_context_t* self);
-
-  ///
-  // Tells all renderer processes associated with this context to throw away
-  // their plugin list cache. If |reload_pages| is true (1) they will also
-  // reload all pages with plugins.
-  // cef_request_context_handler_t::OnBeforePluginLoad may be called to rebuild
-  // the plugin list cache.
-  ///
-  void(CEF_CALLBACK* purge_plugin_list_cache)(
-      struct _cef_request_context_t* self,
-      int reload_pages);
 
   ///
   // Returns true (1) if a preference with the specified |name| exists. This

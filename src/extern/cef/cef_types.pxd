@@ -386,12 +386,6 @@ cdef extern from "include/internal/cef_types.h":
         PK_DIR_RESOURCES,
     ctypedef cef_path_key_t PathKey
 
-    ctypedef enum cef_plugin_policy_t:
-        PLUGIN_POLICY_ALLOW,
-        PLUGIN_POLICY_DETECT_IMPORTANT,
-        PLUGIN_POLICY_BLOCK,
-        PLUGIN_POLICY_DISABLE,
-
     # Drag & drop
 
     ctypedef enum cef_drag_operations_mask_t:

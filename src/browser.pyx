@@ -241,9 +241,8 @@ cdef class PyBrowser:
             # KeyboardHandler
             self.allowedClientCallbacks += ["OnPreKeyEvent", "OnKeyEvent"]
             # RequestHandler
-            # NOTE: OnCertificateError and OnBeforePluginLoad are not
-            #       included as they must be set using
-            #       cefpython.SetGlobalClientCallback().
+            # NOTE: OnCertificateError is not included as it must be set 
+            #       using cefpython.SetGlobalClientCallback().
             self.allowedClientCallbacks += ["OnBeforeResourceLoad",
                     "OnResourceRedirect", "GetAuthCredentials",
                     "OnQuotaRequest", "OnProtocolExecution",

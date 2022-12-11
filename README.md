@@ -792,7 +792,6 @@ supporting this project actively on a daily basis.
   * [GetCookieManager](api/RequestHandler.md#getcookiemanager)
   * [GetResourceHandler](api/RequestHandler.md#getresourcehandler)
   * [OnBeforeBrowse](api/RequestHandler.md#onbeforebrowse)
-  * [_OnBeforePluginLoad](api/RequestHandler.md#_onbeforepluginload)
   * [OnBeforeResourceLoad](api/RequestHandler.md#onbeforeresourceload)
   * [_OnCertificateError](api/RequestHandler.md#_oncertificateerror)
   * [OnQuotaRequest](api/RequestHandler.md#onquotarequest)

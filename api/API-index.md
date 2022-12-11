@@ -394,7 +394,6 @@
   * [GetCookieManager](RequestHandler.md#getcookiemanager)
   * [GetResourceHandler](RequestHandler.md#getresourcehandler)
   * [OnBeforeBrowse](RequestHandler.md#onbeforebrowse)
-  * [_OnBeforePluginLoad](RequestHandler.md#_onbeforepluginload)
   * [OnBeforeResourceLoad](RequestHandler.md#onbeforeresourceload)
   * [_OnCertificateError](RequestHandler.md#_oncertificateerror)
   * [OnQuotaRequest](RequestHandler.md#onquotarequest)

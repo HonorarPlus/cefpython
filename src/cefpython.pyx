@@ -983,7 +983,7 @@ cpdef py_void SetGlobalClientCallback(py_string name, object callback):
     # Accept both with and without a prefix.
     if name.startswith("_"):
         name = name[1:]
-    if name in ["OnCertificateError", "OnBeforePluginLoad", "OnAfterCreated",
+    if name in ["OnCertificateError", "OnAfterCreated",
                 "OnAccessibilityTreeChange", "OnAccessibilityLocationChange"]:
         g_globalClientCallbacks[name] = callback
     else:
