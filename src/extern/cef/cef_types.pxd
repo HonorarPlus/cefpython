@@ -56,7 +56,6 @@ cdef extern from "include/internal/cef_types.h":
         int remote_debugging_port
         int uncaught_exception_stack_size
         int context_safety_implementation # Not exposed.
-        int ignore_certificate_errors
         cef_color_t background_color
         int persist_user_preferences
         cef_string_t user_data_path
@@ -108,15 +107,12 @@ cdef extern from "include/internal/cef_types.h":
         cef_state_t javascript_access_clipboard
         cef_state_t javascript_dom_paste
         cef_state_t plugins
-        cef_state_t universal_access_from_file_urls
-        cef_state_t file_access_from_file_urls
         cef_state_t image_loading
         cef_state_t image_shrink_standalone_to_fit
         cef_state_t text_area_resize
         cef_state_t tab_to_links
         cef_state_t local_storage
         cef_state_t databases
-        cef_state_t application_cache
         cef_state_t webgl
         int windowless_frame_rate
 

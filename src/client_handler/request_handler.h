@@ -33,13 +33,13 @@ public:
     bool OnQuotaRequest(CefRefPtr<CefBrowser> browser,
                         const CefString& origin_url,
                         int64 new_size,
-                        CefRefPtr<CefRequestCallback> callback) override;
+                        CefRefPtr<CefCallback> callback) override;
 
     bool OnCertificateError(CefRefPtr<CefBrowser> browser,
                             cef_errorcode_t cert_error,
                             const CefString& request_url,
                             CefRefPtr<CefSSLInfo> ssl_info,
-                            CefRefPtr<CefRequestCallback> callback) override;
+                            CefRefPtr<CefCallback> callback) override;
 
     void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
                                    cef_termination_status_t status) override;
@@ -61,7 +61,7 @@ public:
     ReturnValue OnBeforeResourceLoad(CefRefPtr<CefBrowser> browser,
                                      CefRefPtr<CefFrame> frame,
                                      CefRefPtr<CefRequest> request,
-                                     CefRefPtr<CefRequestCallback> callback
+                                     CefRefPtr<CefCallback> callback
                                      ) override;
 
     CefRefPtr<CefResourceHandler> GetResourceHandler(

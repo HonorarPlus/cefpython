@@ -38,16 +38,16 @@ cdef class PyAuthCallback:
 # -----------------------------------------------------------------------------
 
 cdef PyRequestCallback CreatePyRequestCallback(
-        CefRefPtr[CefRequestCallback] cefCallback):
+        CefRefPtr[CefCallback] cefCallback):
     cdef PyRequestCallback pyCallback = PyRequestCallback()
     pyCallback.cefCallback = cefCallback
     return pyCallback
 
 cdef class PyRequestCallback:
-    cdef CefRefPtr[CefRequestCallback] cefCallback
+    cdef CefRefPtr[CefCallback] cefCallback
 
-    cpdef py_void Continue(self, py_bool allow):
-        self.cefCallback.get().Continue(bool(allow))
+    cpdef py_void Continue(self):
+        self.cefCallback.get().Continue()
 
     cpdef py_void Cancel(self):
         self.cefCallback.get().Cancel()
@@ -281,7 +281,7 @@ cdef public cpp_bool RequestHandler_OnQuotaRequest(
         CefRefPtr[CefBrowser] cefBrowser,
         const CefString& cefOriginUrl,
         int64 newSize,
-        CefRefPtr[CefRequestCallback] cefRequestCallback
+        CefRefPtr[CefCallback] cefRequestCallback
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef py_string pyOriginUrl
@@ -403,7 +403,7 @@ cdef public cpp_bool RequestHandler_OnBeforePluginLoad(
 cdef public cpp_bool RequestHandler_OnCertificateError(
         int certError,
         const CefString& cefRequestUrl,
-        CefRefPtr[CefRequestCallback] cefCertCallback
+        CefRefPtr[CefCallback] cefCertCallback
         ) except * with gil:
     cdef py_bool returnValue
     cdef object clientCallback

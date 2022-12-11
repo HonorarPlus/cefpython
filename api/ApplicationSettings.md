@@ -23,7 +23,6 @@ Table of contents:
   * [external_message_pump](#external_message_pump)
   * [framework_dir_path](#framework_dir_path)
   * [main_bundle_path](#main_bundle_path)
-  * [ignore_certificate_errors](#ignore_certificate_errors)
   * [javascript_flags](#javascript_flags)
   * [locale](#locale)
   * [locales_dir_path](#locales_dir_path)
@@ -287,40 +286,6 @@ defaults to the top-level app bundle. Also configurable using
 the "main-bundle-path" command-line switch.
 
 
-### ignore_certificate_errors
-
-(bool)
-Set to true (1) to ignore errors related to invalid SSL certificates.  
-Enabling this setting can lead to potential security vulnerabilities like  
-"man in the middle" attacks. Applications that load content from the  
-internet should not enable this setting. Also configurable using the  
-"ignore-certificate-errors" [command-line switch](CommandLineSwitches.md).
-Can be overridden for individual CefRequestContext instances via the
-CefRequestContextSettings.ignore_certificate_errors value.
-
-__IMPORTANT__: This option not only ignores all certificate errors,
-but it also enables caching of content due to custom patch being
-applied (read more in "NOTE ON CACHING" further down). If you don't
-want this caching feature of insecure content then alternatively you
-can ignore certificate errors using the
-RequestHandler.[_OnCertificateError()](#_oncertificateerror)
-callback. Note that disk caching is enabled only when the "cache_path"
-option is set.
-
-__NOTE ON CACHING__: Chromium by default disallows caching of
-content when there is certificate error. There is a issue125.patch
-in the patches/ directory that can be enabled when doing a custom
-CEF build. This patch changes the caching behavior on sites with SSL
-certificate errors when used with this setting. This patch can be
-applied Chromium sources to allow for caching even when there is
-certificate error, but only when the "ignore_certificate_errors"
-option is set to True.
-When it's set to False then the Chromium's caching behavior does not
-change. Enabling caching with certificate errors is useful on local
-private networks that use self-signed SSL certificates. See the
-referenced CEF topic in [Issue #125](../../../issues/125) for more details.
-
-
 ### javascript_flags
 
 (string)
@@ -510,7 +475,7 @@ set `unique_request_context_per_browser` to True.
 
 In upstream CEF each request context may have separate settings like
 cache_path, persist_session_cookies, persist_user_preferences,
-ignore_certificate_errors, accept_language_list. Such functionality
+accept_language_list. Such functionality
 wasn't yet exposed in CEF Python.
 
 

@@ -81,7 +81,6 @@ Table of contents:
   * [SendMouseClickEvent](#sendmouseclickevent)
   * [SendMouseMoveEvent](#sendmousemoveevent)
   * [SendMouseWheelEvent](#sendmousewheelevent)
-  * [SendFocusEvent](#sendfocusevent)
   * [SendCaptureLostEvent](#sendcapturelostevent)
   * [SetAccessibilityState](#setaccessibilitystate)
   * [SetClientCallback](#setclientcallback)
@@ -884,16 +883,6 @@ flags see SendMouseClickEvent().
 | __Return__ | void |
 
 Send a mouse wheel event to the browser. The |x| and |y| coordinates are relative to the upper-left corner of the view. The |deltaX| and |deltaY| values represent the movement delta in the X and Y directions respectively. In order to scroll inside select popups with window rendering disabled [RenderHandler](RenderHandler.md).GetScreenPoint() should be implemented properly. For a list of modifiers flags see SendMouseClickEvent().
-
-
-### SendFocusEvent
-
-| Parameter | Type |
-| --- | --- |
-| setFocus | bool |
-| __Return__ | void |
-
-Send a focus event to the browser.
 
 
 ### SendCaptureLostEvent

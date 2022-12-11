@@ -223,9 +223,6 @@ class CefBrowser(Widget):
                 browserSettings,
                 navigateUrl=self.start_url)
 
-        # Set focus
-        self.browser.SendFocusEvent(True)
-
         self._client_handler = ClientHandler(self)
         self.browser.SetClientHandler(self._client_handler)
         self.set_js_bindings()
@@ -290,9 +287,6 @@ class CefBrowser(Widget):
         self.is_ctrl2 = False
         self.is_alt1 = False
         self.is_alt2 = False
-        # Not sure if it is still required to send the focus
-        # (some earlier bug), but it shouldn't hurt to call it.
-        self.browser.SendFocusEvent(True)
 
     def release_keyboard(self):
         # When using local keyboard mode, do all the request
@@ -850,8 +844,6 @@ class ClientHandler:
         # is local the fix is in the request_keyboard() method.
         # Call it from OnLoadEnd only when keyboard mode is global.
         browserWidget = browser.GetUserData("browserWidget")
-        if browserWidget and browserWidget.keyboard_mode == "global":
-            browser.SendFocusEvent(True)
 
     def OnLoadingStateChange(self, is_loading, **_):
         print("[kivy_.py] OnLoadingStateChange: isLoading = %s" % is_loading)

@@ -242,13 +242,11 @@ it. The callback name was prefixed with "`_`" to distinguish this
 special behavior.
 
 Called on the UI thread to handle requests for URLs with an invalid
-SSL certificate. Return true and call CefRequestCallback::Continue() either
+SSL certificate. Return true and call CefCallback::Continue() either
 in this method or at a later time to continue or cancel the request. Return
-false to cancel the request immediately. If
-CefSettings.ignore_certificate_errors is set all invalid certificates will
-be accepted without calling this method.
+false to cancel the request immediately.
 
-The `RequestCallback` object methods:
+The `CefCallback` object methods:
   * void Continue(bool allow)
   * void Cancel()
 
@@ -267,10 +265,10 @@ Called on the IO thread when javascript requests a specific storage quota
 size via the `webkitStorageInfo.requestQuota` function. |origin_url| is the
 origin of the page making the request. |new_size| is the requested quota
 size in bytes. Return true to continue the request and call
-CefRequestCallback::Continue() either in this method or at a later time to
+CefCallback::Continue() either in this method or at a later time to
 grant or deny the request. Return false to cancel the request immediately.
 
-The `RequestCallback` object methods:
+The `CefCallback` object methods:
 * void Continue(bool allow)
 * void Cancel()
 

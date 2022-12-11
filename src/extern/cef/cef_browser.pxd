@@ -57,7 +57,6 @@ cdef extern from "include/cef_browser.h":
                 cpp_bool mouseLeave)
         void SendMouseWheelEvent(cef_types.CefMouseEvent, int deltaX,
                 int deltaY)
-        void SendFocusEvent(cpp_bool setFocus)
         void SendCaptureLostEvent()
 
         void ShowDevTools(const CefWindowInfo& windowInfo,

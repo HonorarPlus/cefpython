@@ -9,12 +9,10 @@ Table of contents:
 * [Settings](#settings)
   * [Font settings](#font-settings)
   * [accept_language_list](#accept_language_list)
-  * [application_cache_disabled](#application_cache_disabled)
   * [background_color](#background_color)
   * [databases_disabled](#databases_disabled)
   * [default_encoding](#default_encoding)
   * [dom_paste_disabled](#dom_paste_disabled)
-  * [file_access_from_file_urls_allowed](#file_access_from_file_urls_allowed)
   * [inherit_client_handlers_for_popups](#inherit_client_handlers_for_popups)
   * [image_load_disabled](#image_load_disabled)
   * [javascript_disabled](#javascript_disabled)
@@ -26,7 +24,6 @@ Table of contents:
   * [shrink_standalone_images_to_fit](#shrink_standalone_images_to_fit)
   * [tab_to_links_disabled](#tab_to_links_disabled)
   * [text_area_resize_disabled](#text_area_resize_disabled)
-  * [universal_access_from_file_urls_allowed](#universal_access_from_file_urls_allowed)
   * [user_style_sheet_location](#user_style_sheet_location)
   * [webgl_disabled](#webgl_disabled)
   * [windowless_frame_rate](#windowless_frame_rate)
@@ -68,11 +65,6 @@ using the CefBrowserSettings.accept_language_list value. If both values are
 empty then "en-US,en" will be used.
 
 
-### application_cache_disabled
-
-(bool) Controls whether the application cache can be used. Also configurable using the --disable-application-cache switch.
-
-
 ### background_color
 
 (int)
@@ -103,11 +95,6 @@ in a known order. Equivalent to the `SkColor` type in Chromium.
 ### dom_paste_disabled
 
 (bool) Controls whether DOM pasting is supported in the editor via `execCommand("paste")`. The |javascript_access_clipboard_disallowed| setting must also be set (to true or false). Also configurable using the --disable-javascript-dom-paste switch.
-
-
-### file_access_from_file_urls_allowed
-
-(bool) Controls whether file URLs will have access to other file URLs. Also configurable using the --allow-access-from-files switch. Other similar switches are: --allow-file-access and --allow-file-access-from-files.
 
 
 ### inherit_client_handlers_for_popups
@@ -177,11 +164,6 @@ switch.
 ### text_area_resize_disabled
 
 (bool) Controls whether text areas can be resized. Also configurable using the --disable-text-area-resize switch.
-
-
-### universal_access_from_file_urls_allowed
-
-(bool) Controls whether file URLs will have access to all URLs. Also configurable using the --allow-universal-access-from-files switch. Other similar switches are --allow-file-access and --allow-file-access-from-files.
 
 
 ### user_style_sheet_location

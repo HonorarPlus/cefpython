@@ -119,8 +119,6 @@ cdef void SetApplicationSettings(
             cefAppSettings.command_line_args_disabled = int(appSettings[key])
         elif key == "remote_debugging_port":
             cefAppSettings.remote_debugging_port = int(appSettings[key])
-        elif key == "ignore_certificate_errors":
-            cefAppSettings.ignore_certificate_errors = int(appSettings[key])
         elif key == "background_color":
             cefAppSettings.background_color = \
                     <cef_types.uint32>int(appSettings[key])
@@ -248,20 +246,6 @@ cdef void SetBrowserSettings(
                 cefBrowserSettings.plugins = cef_types.STATE_DISABLED
             else:
                 cefBrowserSettings.plugins = cef_types.STATE_ENABLED
-        elif key == "universal_access_from_file_urls_allowed":
-            if browserSettings[key]:
-                cefBrowserSettings.universal_access_from_file_urls = (
-                        cef_types.STATE_ENABLED)
-            else:
-                cefBrowserSettings.universal_access_from_file_urls = (
-                        cef_types.STATE_DISABLED)
-        elif key == "file_access_from_file_urls_allowed":
-            if browserSettings[key]:
-                cefBrowserSettings.file_access_from_file_urls = (
-                        cef_types.STATE_ENABLED)
-            else:
-                cefBrowserSettings.file_access_from_file_urls = (
-                        cef_types.STATE_DISABLED)
         elif key == "image_load_disabled":
             if browserSettings[key]:
                 cefBrowserSettings.image_loading = cef_types.STATE_DISABLED
@@ -298,13 +282,6 @@ cdef void SetBrowserSettings(
                 cefBrowserSettings.databases = cef_types.STATE_DISABLED
             else:
                 cefBrowserSettings.databases = cef_types.STATE_ENABLED
-        elif key == "application_cache_disabled":
-            if browserSettings[key]:
-                cefBrowserSettings.application_cache = (
-                        cef_types.STATE_DISABLED)
-            else:
-                cefBrowserSettings.application_cache = (
-                        cef_types.STATE_ENABLED)
         elif key == "webgl_disabled":
             if browserSettings[key]:
                 cefBrowserSettings.webgl = cef_types.STATE_DISABLED

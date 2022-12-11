@@ -522,7 +522,7 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
         }
         CefRefPtr<CefV8Context> context = frame->GetV8Context();
         CefRefPtr<CefTaskRunner> taskRunner = context->GetTaskRunner();
-        taskRunner->PostTask(CefCreateClosureTask(base::Bind(
+        taskRunner->PostTask(CefCreateClosureTask(base::BindOnce(
                 &CefPythonApp::DoJavascriptBindingsForFrame, this,
                 browser, frame, context
         )));
