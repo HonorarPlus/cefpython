@@ -259,7 +259,7 @@ class FocusHandler(object):
 
 
 class DialogHandler(object):
-    def OnFileDialog(self, browser, mode, title, default_file_path, accept_filters, selected_accept_filter, file_dialog_callback):
+    def OnFileDialog(self, browser, mode, title, default_file_path, accept_filters, file_dialog_callback):
       file_real_path = os.path.realpath('test1.pdf')
       if os.path.exists(file_real_path):
         file_dialog_callback.Continue(0, [file_real_path])

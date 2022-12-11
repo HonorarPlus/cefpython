@@ -8,6 +8,5 @@ from libcpp.vector cimport vector as cpp_vector
 cdef extern from "include/cef_dialog_handler.h":
 
     cdef cppclass CefFileDialogCallback:
-        void Continue(int selected_accept_filter,
-                      const cpp_vector[CefString]& file_paths)
+        void Continue(const cpp_vector[CefString]& file_paths)
         void Cancel()
