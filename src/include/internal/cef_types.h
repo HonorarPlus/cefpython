@@ -2829,7 +2829,11 @@ typedef enum {
   // security rules as those applied to "file" URLs. Normal pages cannot link to
   // or access local URLs. Also, by default, local URLs can only perform
   // XMLHttpRequest calls to the same URL (origin + path) that originated the
-  // request.
+  // request. To allow XMLHttpRequest calls from a local URL to other URLs with
+  // the same origin set the CefSettings.file_access_from_file_urls_allowed
+  // value to true (1). To allow XMLHttpRequest calls from a local URL to all
+  // origins set the CefSettings.universal_access_from_file_urls_allowed value
+  // to true (1).
   ///
   CEF_SCHEME_OPTION_LOCAL = 1 << 1,
 

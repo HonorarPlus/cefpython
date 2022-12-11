@@ -192,7 +192,9 @@ class CefRequestHandler : public virtual CefBaseRefCounted {
   // Called on the UI thread to handle requests for URLs with an invalid
   // SSL certificate. Return true and call CefCallback methods either in this
   // method or at a later time to continue or cancel the request. Return false
-  // to cancel the request immediately.
+  // to cancel the request immediately. If CefSettings.ignore_certificate_errors
+  // is set all invalid certificates will be accepted without calling this
+  // method.
   ///
   /*--cef()--*/
   virtual bool OnCertificateError(CefRefPtr<CefBrowser> browser,
