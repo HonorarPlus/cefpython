@@ -320,7 +320,6 @@ Calling javascript from native code synchronously is not possible in CEF 3. It i
 
 | Parameter | Type |
 | --- | --- |
-| searchId | int |
 | searchText | string |
 | forward | bool |
 | matchCase | bool |

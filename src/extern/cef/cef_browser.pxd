@@ -68,7 +68,7 @@ cdef extern from "include/cef_browser.h":
 
         CefRefPtr[CefRequestContext] GetRequestContext()
 
-        void Find(int identifier, const CefString& searchText, cpp_bool forward,
+        void Find(const CefString& searchText, cpp_bool forward,
                 cpp_bool matchCase, cpp_bool findNext)
         void StopFinding(cpp_bool clearSelection)
         void Print()

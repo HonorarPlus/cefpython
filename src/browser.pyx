@@ -419,12 +419,12 @@ cdef class PyBrowser:
             py_string scriptUrl="", int startLine=1):
         self.GetMainFrame().ExecuteJavascript(jsCode, scriptUrl, startLine)
 
-    cpdef py_void Find(self, int searchId, py_string searchText,
+    cpdef py_void Find(self, py_string searchText,
                        py_bool forward, py_bool matchCase,
                        py_bool findNext):
         cdef CefString cefSearchText
         PyToCefString(searchText, cefSearchText)
-        self.GetCefBrowserHost().get().Find(searchId, cefSearchText,
+        self.GetCefBrowserHost().get().Find(cefSearchText,
                 bool(forward), bool(matchCase), bool(findNext))
 
     cpdef PyFrame GetFocusedFrame(self):
