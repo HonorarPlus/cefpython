@@ -441,7 +441,7 @@ callback and it fails, a Javascript exception will be thrown.
 To see Javascript exceptions open Developer Tools
 window using mouse context menu and switch to Console tab.
 
-There are multiple ways to intercept javascript exceptions programmaticaly
+There are multiple ways to intercept javascript exceptions programmatically
 in CEF:
 
 1. In Javascript you can register "window.onerror" event to
@@ -568,7 +568,7 @@ cef.Initialize(settings={"windowless_rendering_enabled": True})
 Do not enable this value if the application does not use off-screen
 rendering as it may reduce rendering performance on some systems.
 
-Another thing that distincts windowed rendering from off-screen
+Another thing that distinct windowed rendering from off-screen
 rendering is that when creating browser you have to call SetAsOffscreen
 method on the WindowInfo object. Code from the example:
 

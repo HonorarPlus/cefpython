@@ -166,7 +166,7 @@ which sets DPI awareness only for the main process.
 The `ApplicationSettings`.[auto_zooming](../api/ApplicationSettings.md#auto_zooming)
 option has a default value of an empty string now. Previously the
 default was "system_dpi". When enabling High DPI support you should
-set it to "system_dpi" explicitilly.
+set it to "system_dpi" explicitly.
 
 Note that `DpiAware`.[CalculateWindowSize](../api/DpiAware.md#calculatewindowsize)
 does not handle all DPI settings (e.g. 132% on Windows 10).
@@ -382,7 +382,7 @@ function instead.
 The ApplicationSettings.[auto_zooming](../api/ApplicationSettings.md#auto_zooming)
 option should have its value set to an empty string (a default now)
 for High DPI support. In previous versions the default value was
-"system_dpi" and if you have set it explicitilly in your application,
+"system_dpi" and if you have set it explicitly in your application,
 then you should change it to an empty string now.
 
 
@@ -416,7 +416,7 @@ callback has a new param `user_gesture`.
 ## v66+ Window transparency changes
 
 1. OSR windows (off-screen rendering, also known as windowless) are now
-transparent by default. You can control its transperency with
+transparent by default. You can control its transparency with
 ApplicationSettings.[background_color](../api/ApplicationSettings.md#background_color) and BrowserSettings.[background_color](../api/BrowserSettings.md#background_color) options.
 The WindowInfo.`SetTransparentPainting` method is now deprecated. Calling
 it with True will do nothing, and calling it with False **will result
