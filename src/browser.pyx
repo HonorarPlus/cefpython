@@ -602,28 +602,33 @@ cdef class PyBrowser:
         self.SetClientCallback('OnPdfPrintFinished', func)
         cdef CefPdfPrintSettings pdf_print_settings
         pdf_print_settings.margin_type = settings.get('margin_type') or cef_types.PDF_PRINT_MARGIN_DEFAULT
-        pdf_print_settings.header_footer_enabled = int((bool(settings.get('header_footer_title') or
-                                                             settings.get('header_footer_url') or
-                                                             settings.get('header_footer_enabled', 0))))
-        pdf_print_settings.selection_only = settings.get('selection_only') or 0
+        pdf_print_settings.display_header_footer = int((bool(settings.get('display_header_footer') or
+                                                             settings.get('header_template') or
+                                                             settings.get('footer_template', ""))))
+        if settings.get('page_ranges'):
+            pages_range = new CefString(&pdf_print_settings.page_ranges)
+            PyToCefStringPointer(settings.get('page_ranges'), pages_range)
+            del pages_range
         pdf_print_settings.landscape = settings.get('landscape') or 0
-        pdf_print_settings.backgrounds_enabled = settings.get('backgrounds_enabled') or 0
-        pdf_print_settings.page_width = settings.get('page_width') or 0
-        pdf_print_settings.page_height = settings.get('page_height') or 0
+        pdf_print_settings.print_background = settings.get('print_background') or 0
+        pdf_print_settings.paper_width = settings.get('paper_width') or 0.0
+        pdf_print_settings.paper_height = settings.get('paper_height') or 0.0
         if pdf_print_settings.margin_type == cef_types.PDF_PRINT_MARGIN_CUSTOM:
-            pdf_print_settings.margin_top = settings.get('margin_top')
-            pdf_print_settings.margin_right = settings.get('margin_right')
-            pdf_print_settings.margin_left = settings.get('margin_left')
-            pdf_print_settings.margin_bottom = settings.get('margin_bottom')
-        pdf_print_settings.scale_factor = settings.get('scale_factor') or 0
-        if settings.get('header_footer_title'):
-            header_footer_title = new CefString(&pdf_print_settings.header_footer_title)
-            PyToCefStringPointer(settings.get('header_footer_title'), header_footer_title)
-            del header_footer_title
-        if settings.get('header_footer_url'):
-            header_footer_url = new CefString(&pdf_print_settings.header_footer_url)
-            PyToCefStringPointer(settings.get('header_footer_url'), header_footer_url)
-            del header_footer_url
+            pdf_print_settings.margin_top = settings.get('margin_top') or 0.0
+            pdf_print_settings.margin_right = settings.get('margin_right') or 0.0
+            pdf_print_settings.margin_left = settings.get('margin_left') or 0.0
+            pdf_print_settings.margin_bottom = settings.get('margin_bottom') or 0.0
+        pdf_print_settings.scale = settings.get('scale') or 0.0
+        
+        if settings.get('header_template'):
+            header_template = new CefString(&pdf_print_settings.header_template)
+            PyToCefStringPointer(settings.get('header_template'), header_template)
+            del header_template
+        if settings.get('footer_template'):
+            footer_template = new CefString(&pdf_print_settings.footer_template)
+            PyToCefStringPointer(settings.get('footer_template'), footer_template)
+            del footer_template
+
         cdef CefString cef_file_path
         PyToCefString(filepath, cef_file_path)
 

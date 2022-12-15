@@ -27,3 +27,6 @@ cdef extern from "include/internal/cef_win.h":
     cdef cppclass CefMainArgs:
         CefMainArgs()
         CefMainArgs(HINSTANCE hInstance)
+        
+    cdef void CefSetOSModalLoop(cpp_bool osModalLoop) nogil
+    cdef void CefEnableHighDPISupport() nogil

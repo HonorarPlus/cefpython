@@ -174,9 +174,9 @@ class MainFrame(wx.Frame):
     def menu_handler(self, event):
       id = event.GetId()
       if id == 3:
-        self.browser.PrintToPdf('test1.pdf', {'backgrounds_enabled': 1})
+        self.browser.PrintToPdf('test1.pdf', {'print_background': 1})
       if id == 4:
-        self.browser.PrintToPdf('test2.pdf', {'backgrounds_enabled': 1}, func=self.OnPdfFinished)
+        self.browser.PrintToPdf('test2.pdf', {'print_background': 1}, func=self.OnPdfFinished)
 
     def OnPdfFinished(self, path, ok):
         if ok:

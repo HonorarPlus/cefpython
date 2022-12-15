@@ -71,20 +71,21 @@ cdef extern from "include/internal/cef_types.h":
         PDF_PRINT_MARGIN_CUSTOM,
 
     ctypedef struct CefPdfPrintSettings:
-        cef_string_t header_footer_title
-        cef_string_t header_footer_url
-        int page_width
-        int page_height
-        int scale_factor
-        int margin_top
-        int margin_right
-        int margin_bottom
-        int margin_left
-        cef_pdf_print_margin_type_t margin_type
-        int header_footer_enabled
-        int selection_only
         int landscape
-        int backgrounds_enabled
+        int print_background
+        double scale
+        double paper_width
+        double paper_height
+        int prefer_css_page_size
+        cef_pdf_print_margin_type_t margin_type
+        double margin_top
+        double margin_right
+        double margin_bottom
+        double margin_left
+        cef_string_t page_ranges
+        int display_header_footer
+        cef_string_t header_template
+        cef_string_t footer_template
 
     ctypedef struct CefBrowserSettings:
         cef_string_t accept_language_list
