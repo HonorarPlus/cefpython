@@ -32,17 +32,6 @@ bool RequestHandler::GetAuthCredentials(CefRefPtr<CefBrowser> browser,
                                              port, realm, scheme, callback);
 }
 
-
-bool RequestHandler::OnQuotaRequest(CefRefPtr<CefBrowser> browser,
-                                    const CefString& origin_url,
-                                    int64 new_size,
-                                    CefRefPtr<CefCallback> callback) {
-    REQUIRE_IO_THREAD();
-    return RequestHandler_OnQuotaRequest(browser, origin_url, new_size,
-                                         callback);
-}
-
-
 bool RequestHandler::OnCertificateError(
                                   CefRefPtr<CefBrowser> browser, // not used
                                   cef_errorcode_t cert_error,

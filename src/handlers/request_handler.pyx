@@ -276,40 +276,6 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-
-cdef public cpp_bool RequestHandler_OnQuotaRequest(
-        CefRefPtr[CefBrowser] cefBrowser,
-        const CefString& cefOriginUrl,
-        int64 newSize,
-        CefRefPtr[CefCallback] cefRequestCallback
-        ) except * with gil:
-    cdef PyBrowser pyBrowser
-    cdef py_string pyOriginUrl
-    cdef py_bool returnValue
-    cdef object clientCallback
-    try:
-        # Issue #455: CefRequestHandler callbacks still executed after
-        # browser was closed.
-        if IsBrowserClosed(cefBrowser):
-            return False
-
-        pyBrowser = GetPyBrowser(cefBrowser, "OnQuotaRequest")
-        pyOriginUrl = CefToPyString(cefOriginUrl)
-        clientCallback = pyBrowser.GetClientCallback("OnQuotaRequest")
-        if clientCallback:
-            returnValue = clientCallback(
-                    browser=pyBrowser,
-                    origin_url=pyOriginUrl,
-                    new_size=newSize,
-                    callback=CreatePyRequestCallback(cefRequestCallback))
-            return bool(returnValue)
-        else:
-            return False
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-
 cdef public void ResourceRequestHandler_OnProtocolExecution(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
