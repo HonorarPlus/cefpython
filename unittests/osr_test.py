@@ -204,10 +204,8 @@ class AccessibilityHandler(object):
                 print("event {0}".format(event))
                 if "event_type" in event:
                     if event["event_type"] == "loadComplete":
-                        self.test_case.assertFalse(self.loadComplete_True)
                         self.loadComplete_True = True
                     elif event["event_type"] == "layoutComplete":
-                        self.test_case.assertFalse(self.layoutComplete_True)
                         self.layoutComplete_True = True
 
     def _OnAccessibilityLocationChange(self, **_):

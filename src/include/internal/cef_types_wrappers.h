@@ -50,8 +50,9 @@ class CefStructBase : public traits::struct_type {
   virtual ~CefStructBase() {
     // Only clear this object's data if it isn't currently attached to a
     // structure.
-    if (!attached_to_)
+    if (!attached_to_) {
       Clear(this);
+    }
   }
 
   CefStructBase(const CefStructBase& r) {
@@ -70,8 +71,9 @@ class CefStructBase : public traits::struct_type {
   void AttachTo(struct_type& source) {
     // Only clear this object's data if it isn't currently attached to a
     // structure.
-    if (!attached_to_)
+    if (!attached_to_) {
       Clear(this);
+    }
 
     // This object is now attached to the new structure.
     attached_to_ = &source;
