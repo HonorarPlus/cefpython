@@ -792,7 +792,6 @@ supporting this project actively on a daily basis.
   * [OnBeforeBrowse](api/RequestHandler.md#onbeforebrowse)
   * [OnBeforeResourceLoad](api/RequestHandler.md#onbeforeresourceload)
   * [_OnCertificateError](api/RequestHandler.md#_oncertificateerror)
-  * [OnQuotaRequest](api/RequestHandler.md#onquotarequest)
   * [OnResourceRedirect](api/RequestHandler.md#onresourceredirect)
   * [OnProtocolExecution](api/RequestHandler.md#onprotocolexecution)
   * [OnRendererProcessTerminated](api/RequestHandler.md#onrendererprocessterminated)

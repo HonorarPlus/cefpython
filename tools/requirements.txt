@@ -1,5 +1,5 @@
-Cython == 0.29.32
+Cython == 0.29.33
 docopt >= 0.6.2
-setuptools >= 57.0.0
-wheel >= 0.36.2
+setuptools == 61.2.0
+wheel == 0.36.2
 Pillow

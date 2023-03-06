@@ -23,7 +23,6 @@ Table of contents:
   * [OnBeforeBrowse](#onbeforebrowse)
   * [OnBeforeResourceLoad](#onbeforeresourceload)
   * [_OnCertificateError](#_oncertificateerror)
-  * [OnQuotaRequest](#onquotarequest)
   * [OnResourceRedirect](#onresourceredirect)
   * [OnProtocolExecution](#onprotocolexecution)
   * [OnRendererProcessTerminated](#onrendererprocessterminated)
@@ -205,29 +204,6 @@ false to cancel the request immediately.
 The `CefCallback` object methods:
   * void Continue(bool allow)
   * void Cancel()
-
-
-### OnQuotaRequest
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| origin_url | string |
-| new_size | long |
-| callback | RequestCallback |
-| __Return__ | bool |
-
-Called on the IO thread when javascript requests a specific storage quota
-size via the `webkitStorageInfo.requestQuota` function. |origin_url| is the
-origin of the page making the request. |new_size| is the requested quota
-size in bytes. Return true to continue the request and call
-CefCallback::Continue() either in this method or at a later time to
-grant or deny the request. Return false to cancel the request immediately.
-
-The `CefCallback` object methods:
-* void Continue(bool allow)
-* void Cancel()
-
 
 ### OnResourceRedirect
 
