@@ -33,7 +33,7 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=0cbb756a64d2aca1075480b5188b36cae533864d$
+// $hash=46817ef557307a55a9b7138134c4f5c32562f2d7$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_COMMAND_HANDLER_CAPI_H_
