@@ -33,7 +33,7 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=019abf16be4e151d31181a6bdcb1ad8dfef03d00$
+// $hash=9f0389a439e6787282880d53375369829adb6a3d$
 //
 
 #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_WINDOW_DELEGATE_CAPI_H_
@@ -139,7 +139,7 @@ typedef struct _cef_window_delegate_t {
 
   ///
   /// Return true (1) if |window| should be created with standard window buttons
-  /// like close, minimize and zoom. This function is only supported on macOS.
+  /// like close, minimize and zoom.
   ///
   int(CEF_CALLBACK* with_standard_window_buttons)(
       struct _cef_window_delegate_t* self,
