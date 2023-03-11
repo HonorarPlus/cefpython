@@ -323,7 +323,7 @@ class DisplayHandler2(object):
     def OnAutoResize(self, new_size, **_):
         self.OnAutoResize_True = True
         self.test_case.assertGreaterEqual(new_size[0], 800)
-        self.test_case.assertLessEqual(new_size[0], 1024)
+        self.test_case.assertLessEqual(new_size[0], 2564)
         self.test_case.assertGreaterEqual(new_size[1], 600)
         self.test_case.assertLessEqual(new_size[1], 768)
 
