@@ -353,7 +353,6 @@ include "settings.pyx"
 
 IF UNAME_SYSNAME == "Windows":
     include "window_utils_win.pyx"
-    include "dpi_aware_win.pyx"
 ELIF UNAME_SYSNAME == "Linux":
     include "window_utils_linux.pyx"
 ELIF UNAME_SYSNAME == "Darwin":

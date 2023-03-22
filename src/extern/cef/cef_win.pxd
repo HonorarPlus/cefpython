@@ -29,4 +29,3 @@ cdef extern from "include/internal/cef_win.h":
         CefMainArgs(HINSTANCE hInstance)
         
     cdef void CefSetOSModalLoop(cpp_bool osModalLoop) nogil
-    cdef void CefEnableHighDPISupport() nogil

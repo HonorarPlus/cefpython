@@ -163,22 +163,6 @@ class MainTest_IsolatedTest(unittest.TestCase):
             cef.LoadCrlSetsFile(crlset)
             subtest_message("cef.LoadCrlSetsFile ok")
 
-        # High DPI on Windows
-        if WINDOWS:
-            self.assertIsInstance(cef.DpiAware.GetSystemDpi(), tuple)
-            window_size = cef.DpiAware.CalculateWindowSize(800, 600)
-            self.assertIsInstance(window_size, tuple)
-            self.assertGreater(window_size[0], 0)
-            self.assertGreater(cef.DpiAware.Scale((800, 600))[0], 0)
-            cef.DpiAware.EnableHighDpiSupport()
-            self.assertTrue(cef.DpiAware.IsProcessDpiAware())
-            # Make some calls again after DPI Aware was set
-            self.assertIsInstance(cef.DpiAware.GetSystemDpi(), tuple)
-            self.assertGreater(cef.DpiAware.Scale([800, 600])[0], 0)
-            self.assertIsInstance(cef.DpiAware.Scale(800), int)
-            self.assertGreater(cef.DpiAware.Scale(800), 0)
-            subtest_message("cef.DpiAware ok")
-
         # Global handler
         global_handler = GlobalHandler(self)
         cef.SetGlobalClientCallback("OnAfterCreated",
