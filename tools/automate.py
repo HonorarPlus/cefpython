@@ -680,7 +680,7 @@ def prepare_build_command(build_lib=False, vcvars=None):
                 command.append(get_vcvars_for_python())
             command.append(VS_PLATFORM_ARG)
         else:
-            if int(Options.cef_branch) >= 5359:
+            if int(Options.cef_branch) >= 5615:
                 command.append(VS2022_VCVARS)
             elif int(Options.cef_branch) >= 2704:
                 command.append(VS2019_VCVARS)
@@ -863,12 +863,11 @@ def create_prebuilt_binaries():
 def get_available_python_compilers():
     all_python_compilers = OrderedDict([
         ("2022", VS2022_VCVARS),
-        # skip oldies
-        #("2019", VS2019_VCVARS),
-        #("2015", VS2015_VCVARS),
-        #("2013", VS2013_VCVARS),
-        #("2010", VS2010_VCVARS),
-        #("2008", VS2008_VCVARS),
+        ("2019", VS2019_VCVARS),
+        ("2015", VS2015_VCVARS),
+        ("2013", VS2013_VCVARS),
+        ("2010", VS2010_VCVARS),
+        ("2008", VS2008_VCVARS),
     ])
     ret_compilers = OrderedDict()
     for msvs in all_python_compilers:

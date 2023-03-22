@@ -489,7 +489,7 @@ def get_msvs_for_python(vs_prefix=False):
     elif sys.version_info[:2] == (3, 9):
         return "VS2019" if vs_prefix else "2019"
     elif sys.version_info[:2] == (3, 10):
-        return "VS2019" if vs_prefix else "2019"
+        return "VS2022" if vs_prefix else "2022"
     elif sys.version_info[:2] == (3, 11):
         return "VS2022" if vs_prefix else "2022"
     else:

@@ -360,7 +360,6 @@ supporting this project actively on a daily basis.
  * [Callback](api/Callback.md#callback-object) object
  * [Cookie](api/Cookie.md#cookie-class) class
  * [CookieManager](api/CookieManager.md#cookiemanager-class) class
- * [DpiAware](api/DpiAware.md#dpiaware-class) class (Win)
  * [DragData](api/DragData.md#dragdata-object) object
  * [Frame](api/Frame.md#frame-object) object
  * [Image](api/Image.md#image-object) object
@@ -618,13 +617,6 @@ supporting this project actively on a daily basis.
   * [OnTitleChange](api/DisplayHandler.md#ontitlechange)
   * [OnTooltip](api/DisplayHandler.md#ontooltip)
 * [DownloadHandler](api/DownloadHandler.md#downloadhandler)
-* [DpiAware (class)](api/DpiAware.md#dpiaware-class)
-  * [CalculateWindowSize](api/DpiAware.md#calculatewindowsize)
-  * [EnableHighDpiSupport](api/DpiAware.md#enablehighdpisupport)
-  * [GetSystemDpi](api/DpiAware.md#getsystemdpi)
-  * [IsProcessDpiAware](api/DpiAware.md#isprocessdpiaware)
-  * [SetProcessDpiAware](api/DpiAware.md#setprocessdpiaware)
-  * [Scale](api/DpiAware.md#scale)
 * [DragData (object)](api/DragData.md#dragdata-object)
   * [IsLink](api/DragData.md#islink)
   * [IsFragment](api/DragData.md#isfragment)
