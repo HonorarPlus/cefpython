@@ -411,5 +411,5 @@ cdef extern from "include/internal/cef_types.h":
         FOCUS_SOURCE_SYSTEM,
 
     cdef cppclass CefRange:
-        int from_val "from"
-        int to_val "to"
+        uint32 from_val "from"
+        uint32 to_val "to"
