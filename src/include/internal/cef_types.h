@@ -3000,8 +3000,8 @@ typedef enum {
 /// Structure representing a range.
 ///
 typedef struct _cef_range_t {
-  int from;
-  int to;
+  uint32_t from;
+  uint32_t to;
 } cef_range_t;
 
 ///
@@ -3487,6 +3487,14 @@ typedef enum {
   /// is created.
   CEF_PREFERENCES_TYPE_REQUEST_CONTEXT,
 } cef_preferences_type_t;
+
+///
+/// Specifies the gesture commands.
+///
+typedef enum {
+  CEF_GESTURE_COMMAND_BACK,
+  CEF_GESTURE_COMMAND_FORWARD,
+} cef_gesture_command_t;
 
 #ifdef __cplusplus
 }
