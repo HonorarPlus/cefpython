@@ -87,7 +87,7 @@ import glob
 import shutil
 import multiprocessing
 from collections import OrderedDict
-from setuptools.msvc import msvc9_query_vcvarsall
+#from setuptools.msvc import msvc9_query_vcvarsall
 
 # Constants
 CEF_UPSTREAM_GIT_URL = "https://bitbucket.org/chromiumembedded/cef.git"
@@ -681,7 +681,9 @@ def prepare_build_command(build_lib=False, vcvars=None):
                 command.append(get_vcvars_for_python())
             command.append(VS_PLATFORM_ARG)
         else:
-            if int(Options.cef_branch) >= 2704:
+            if int(Options.cef_branch) >= 5359:
+                command.append(VS2022_VCVARS)
+            elif int(Options.cef_branch) >= 2704:
                 command.append(VS2019_VCVARS)
             else:
                 command.append(VS2013_VCVARS)
@@ -861,11 +863,13 @@ def create_prebuilt_binaries():
 
 def get_available_python_compilers():
     all_python_compilers = OrderedDict([
-        ("2019", VS2019_VCVARS),
-        ("2015", VS2015_VCVARS),
-        ("2013", VS2013_VCVARS),
-        ("2010", VS2010_VCVARS),
-        ("2008", VS2008_VCVARS),
+        ("2022", VS2022_VCVARS),
+        # skip oldies
+        #("2019", VS2019_VCVARS),
+        #("2015", VS2015_VCVARS),
+        #("2013", VS2013_VCVARS),
+        #("2010", VS2010_VCVARS),
+        #("2008", VS2008_VCVARS),
     ])
     ret_compilers = OrderedDict()
     for msvs in all_python_compilers:
