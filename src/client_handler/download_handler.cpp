@@ -37,7 +37,6 @@ void DownloadHandler::OnBeforeDownload(
         msg.append(suggested_name.ToString().c_str());
         LOG(INFO) << msg.c_str();
         DownloadHandler_OnBeforeDownload(browser, download_item, suggested_name, callback);
-        //callback->Continue(suggested_name, true);
     } else {
         LOG(INFO) << "[Browser process] Tried to download file,"
                      " but downloads are disabled";

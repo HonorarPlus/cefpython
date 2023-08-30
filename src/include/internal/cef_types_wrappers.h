@@ -214,7 +214,7 @@ class CefRange : public cef_range_t {
  public:
   CefRange() : cef_range_t{} {}
   CefRange(const cef_range_t& r) : cef_range_t(r) {}
-  CefRange(uint32_t from, uint32_t to) : cef_range_t{from, to} {}
+  CefRange(int from, int to) : cef_range_t{from, to} {}
 
   static CefRange InvalidRange() {
     return CefRange(std::numeric_limits<std::uint32_t>::max(),
