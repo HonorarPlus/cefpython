@@ -15,7 +15,7 @@ bool DownloadHandler::CanDownload(CefRefPtr<CefBrowser> browser,
         auto msg = std::string{"[Browser process] Trying to download a file from: "};
         msg += url.ToString();
         LOG(INFO) << msg.c_str();
-        return true;
+        return DownloadHandler_CanDownload(browser, url, request_method);
     } else {
         LOG(INFO) << "[Browser process] Tried to download file,"
                      " but downloads are disabled";
@@ -36,7 +36,8 @@ void DownloadHandler::OnBeforeDownload(
         std::string msg = "[Browser process] About to download file: ";
         msg.append(suggested_name.ToString().c_str());
         LOG(INFO) << msg.c_str();
-        callback->Continue(suggested_name, true);
+        DownloadHandler_OnBeforeDownload(browser, download_item, suggested_name, callback);
+        //callback->Continue(suggested_name, true);
     } else {
         LOG(INFO) << "[Browser process] Tried to download file,"
                      " but downloads are disabled";
@@ -50,6 +51,7 @@ void DownloadHandler::OnDownloadUpdated(
                                 CefRefPtr<CefDownloadItemCallback> callback)
 {
     REQUIRE_UI_THREAD();
+    DownloadHandler_OnDownloadUpdated(browser, download_item, callback);
     if (download_item->IsComplete()) {
         std::string msg = "[Browser process] Download completed, saved to: ";
         msg.append(download_item->GetFullPath().ToString().c_str());

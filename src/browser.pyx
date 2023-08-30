@@ -281,6 +281,11 @@ cdef class PyBrowser:
 
             # Printing
             self.allowedClientCallbacks += ["OnFileDialog",  "OnPdfPrintFinished"]
+            
+            # Download
+            self.allowedClientCallbacks += ["CanDownload", 
+                                            "OnBeforeDownload",
+                                            "OnDownloadUpdated"]
 
         if name not in self.allowedClientCallbacks:
             raise Exception("Browser.SetClientCallback() failed: unknown "

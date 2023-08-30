@@ -309,6 +309,8 @@ from cef_views cimport *
 from cef_log cimport *
 from cef_file_util cimport *
 from print_callback cimport *
+from cef_download_handler cimport *
+from cef_download_item cimport *
 
 # -----------------------------------------------------------------------------
 # GLOBAL VARIABLES
@@ -380,11 +382,13 @@ include "drag_data.pyx"
 include "helpers.pyx"
 include "image.pyx"
 include "pdf_print_handler.pyx"
+include "download_item.pyx"
 
 # Handlers
 include "handlers/accessibility_handler.pyx"
 include "handlers/browser_process_handler.pyx"
 include "handlers/display_handler.pyx"
+include "handlers/download_handler.pyx"
 include "handlers/focus_handler.pyx"
 include "handlers/javascript_dialog_handler.pyx"
 include "handlers/keyboard_handler.pyx"
