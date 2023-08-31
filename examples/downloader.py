@@ -32,10 +32,12 @@ class DownloadHandler(object):
         print("Downloading: {}".format(suggested_name))
         callback.Continue(suggested_name, True)
 
+
     def OnDownloadUpdated(self, browser, download_item, callback):
         print("Download update {}".format(download_item.GetPercentComplete()))
         if download_item.IsComplete():
             print("Download finished")
+            print("Full path: {}".format(download_item.GetFullPath()))
 
 
 

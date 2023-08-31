@@ -41,7 +41,8 @@ cdef class PyDownloadItem:
         return self.cefDownloadItem.get().GetReceivedBytes()
 #          CefBaseTime GetStartTime()
 #          CefBaseTime GetEndTime()
-#          CefString GetFullPath()
+    cpdef py_string GetFullPath(self):
+        return CefToPyString(self.cefDownloadItem.get().GetFullPath())
 #          uint32 GetId()
     cpdef py_string GetURL(self):
         return CefToPyString(self.cefDownloadItem.get().GetURL())

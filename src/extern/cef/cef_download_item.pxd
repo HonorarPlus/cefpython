@@ -20,7 +20,7 @@ cdef extern from "include/cef_download_item.h":
           int64 GetReceivedBytes()
 #          CefBaseTime GetStartTime()
 #          CefBaseTime GetEndTime()
-#          CefString GetFullPath()
+          CefString GetFullPath()
 #          uint32 GetId()
           CefString GetURL()
           CefString GetOriginalUrl()
