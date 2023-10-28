@@ -863,11 +863,6 @@ def create_prebuilt_binaries():
 def get_available_python_compilers():
     all_python_compilers = OrderedDict([
         ("2022", VS2022_VCVARS),
-        ("2019", VS2019_VCVARS),
-        ("2015", VS2015_VCVARS),
-        ("2013", VS2013_VCVARS),
-        ("2010", VS2010_VCVARS),
-        ("2008", VS2008_VCVARS),
     ])
     ret_compilers = OrderedDict()
     for msvs in all_python_compilers:

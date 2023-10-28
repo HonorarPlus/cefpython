@@ -55,6 +55,8 @@ void DownloadHandler::OnDownloadUpdated(
         std::string msg = "[Browser process] Download completed, saved to: ";
         msg.append(download_item->GetFullPath().ToString().c_str());
         LOG(INFO) << msg.c_str();
+    } else if (download_item->IsInterrupted()) {
+        LOG(INFO) << "[Browser process] Download was interrupted";
     } else if (download_item->IsCanceled()) {
         LOG(INFO) << "[Browser process] Download was cancelled";
     }

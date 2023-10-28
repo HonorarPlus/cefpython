@@ -14,6 +14,8 @@ cdef extern from "include/cef_download_item.h":
           cpp_bool IsInProgress()
           cpp_bool IsComplete()
           cpp_bool IsCanceled()
+          cpp_bool IsInterrupted()
+#          DownloadInterruptReason GetInterruptReason()
           int64 GetCurrentSpeed()
           int GetPercentComplete()
           int64 GetTotalBytes()

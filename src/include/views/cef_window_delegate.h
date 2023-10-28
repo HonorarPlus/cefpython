@@ -130,7 +130,7 @@ class CefWindowDelegate : public CefPanelDelegate {
 
   ///
   /// Return true if |window| should be created with standard window buttons
-  /// like close, minimize and zoom.
+  /// like close, minimize and zoom. This method is only supported on macOS.
   ///
   /*--cef()--*/
   virtual bool WithStandardWindowButtons(CefRefPtr<CefWindow> window) {

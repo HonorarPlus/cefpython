@@ -27,6 +27,9 @@ cdef class PyDownloadItem:
     
     cpdef py_bool IsCanceled(self):
         return self.cefDownloadItem.get().IsCanceled()
+
+    cpdef py_bool IsInterrupted(self):
+        return self.cefDownloadItem.get().IsInterrupted()
     
     cpdef int64 GetCurrentSpeed(self) except *:
         return self.cefDownloadItem.get().GetCurrentSpeed()
