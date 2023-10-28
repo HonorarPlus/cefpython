@@ -42,7 +42,7 @@ bool ClientHandler::OnProcessMessageReceived(
     if (messageName == "OnContextCreated") {
         CefRefPtr<CefListValue> arguments = message->GetArgumentList();
         if (arguments->GetSize() == 1 && arguments->GetType(0) == VTYPE_INT) {
-            int64 frameId = arguments->GetInt(0);
+            int64_t frameId = arguments->GetInt(0);
             CefRefPtr<CefFrame> frame = browser->GetFrame(frameId);
             if (!frame.get()) {
                 // Frame was already destroyed while IPC messaging was
@@ -63,7 +63,7 @@ bool ClientHandler::OnProcessMessageReceived(
                 && arguments->GetType(0) == VTYPE_INT \
                 && arguments->GetType(1) == VTYPE_INT) {
             int browserId = arguments->GetInt(0);
-            int64 frameId = arguments->GetInt(1);
+            int64_t frameId = arguments->GetInt(1);
             // Even if frame was alrady destroyed (Issue #431) you still
             // want to call V8ContextHandler_OnContextReleased as it releases
             // some resources. Thus passing IDs instead of actual
@@ -85,7 +85,7 @@ bool ClientHandler::OnProcessMessageReceived(
                     && arguments->GetType(1) == VTYPE_STRING
                     // functionArguments
                     && arguments->GetType(2) == VTYPE_LIST) {
-            int64 frameId = arguments->GetInt(0);
+            int64_t frameId = arguments->GetInt(0);
             CefString functionName = arguments->GetString(1);
             CefRefPtr<CefListValue> functionArguments = arguments->GetList(2);
             // Even if frame was already destroyed (Issue #431) you still

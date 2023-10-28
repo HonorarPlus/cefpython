@@ -117,14 +117,10 @@ cdef void SetApplicationSettings(
             cefAppSettings.remote_debugging_port = int(appSettings[key])
         elif key == "background_color":
             cefAppSettings.background_color = \
-                    <cef_types.uint32>int(appSettings[key])
+                    <cef_types.uint32_t>int(appSettings[key])
         elif key == "persist_user_preferences":
             cefAppSettings.persist_user_preferences = \
                     int(appSettings[key])
-        elif key == "user_data_path":
-            cefString = new CefString(&cefAppSettings.user_data_path)
-            PyToCefStringPointer(appSettings[key], cefString)
-            del cefString
         elif key == "windowless_rendering_enabled":
             cefAppSettings.windowless_rendering_enabled = \
                     int(appSettings[key])
@@ -158,7 +154,7 @@ cdef void SetBrowserSettings(
             del cefString
         elif key == "background_color":
             cefBrowserSettings.background_color = \
-                    <cef_types.uint32>int(browserSettings[key])
+                    <cef_types.uint32_t>int(browserSettings[key])
         elif key == "standard_font_family":
             cefString = new CefString(&cefBrowserSettings.standard_font_family)
             PyToCefStringPointer(browserSettings[key], cefString)

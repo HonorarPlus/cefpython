@@ -226,6 +226,8 @@ from libc.stdlib cimport atoi
 # "from ... cimport *", this is important to know in pxd files.
 
 # noinspection PyUnresolvedReferences
+from libc.stdint cimport uint32_t
+# noinspection PyUnresolvedReferences
 from libc.stdint cimport uint64_t
 # noinspection PyUnresolvedReferences
 from libc.stdint cimport uintptr_t

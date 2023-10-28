@@ -34,7 +34,7 @@ cdef public void V8ContextHandler_OnContextCreated(
 
 cdef public void V8ContextHandler_OnContextReleased(
         int browserId,
-        int64 frameId
+        int64_t frameId
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame

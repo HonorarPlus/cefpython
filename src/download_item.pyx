@@ -31,16 +31,16 @@ cdef class PyDownloadItem:
     cpdef py_bool IsInterrupted(self):
         return self.cefDownloadItem.get().IsInterrupted()
     
-    cpdef int64 GetCurrentSpeed(self) except *:
+    cpdef int64_t GetCurrentSpeed(self) except *:
         return self.cefDownloadItem.get().GetCurrentSpeed()
     
     cpdef int GetPercentComplete(self) except *:
         return self.cefDownloadItem.get().GetPercentComplete()
     
-    cpdef int64 GetTotalBytes(self) except *:
+    cpdef int64_t GetTotalBytes(self) except *:
         return self.cefDownloadItem.get().GetTotalBytes()
     
-    cpdef int64 GetReceivedBytes(self) except *:
+    cpdef int64_t GetReceivedBytes(self) except *:
         return self.cefDownloadItem.get().GetReceivedBytes()
 #          CefBaseTime GetStartTime()
 #          CefBaseTime GetEndTime()

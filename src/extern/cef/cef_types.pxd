@@ -8,7 +8,7 @@ from libcpp cimport bool as cpp_bool
 # noinspection PyUnresolvedReferences
 from libc.stddef cimport wchar_t
 # noinspection PyUnresolvedReferences
-from libc.stdint cimport int32_t, uint32_t, int64_t, uint64_t
+from libc.stdint cimport int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t
 from cef_string cimport cef_string_t
 # noinspection PyUnresolvedReferences
 from libc.limits cimport UINT_MAX
@@ -26,11 +26,12 @@ cdef extern from "include/internal/cef_types.h":
 
     IF UNAME_SYSNAME == "Windows":
         # noinspection PyUnresolvedReferences
-        ctypedef wchar_t char16
+        #TODO: revisit me
+        ctypedef uint16_t char16
     ELSE:
         ctypedef unsigned short char16
 
-    ctypedef uint32 cef_color_t
+    ctypedef uint32_t cef_color_t
 
     ctypedef struct CefSettings:
         cef_string_t accept_language_list
@@ -57,7 +58,6 @@ cdef extern from "include/internal/cef_types.h":
         int context_safety_implementation # Not exposed.
         cef_color_t background_color
         int persist_user_preferences
-        cef_string_t user_data_path
         int windowless_rendering_enabled
         int no_sandbox
         int external_message_pump
@@ -213,12 +213,12 @@ cdef extern from "include/internal/cef_types.h":
         KEYEVENT_CHAR
     ctypedef struct _cef_key_event_t:
         cef_key_event_type_t type
-        uint32 modifiers
+        uint32_t modifiers
         int windows_key_code
         int native_key_code
         int is_system_key
-        char16 character
-        char16 unmodified_character
+        uint16_t character
+        uint16_t unmodified_character
         cpp_bool focus_on_editable_field
     ctypedef _cef_key_event_t CefKeyEvent
     ctypedef enum cef_event_flags_t:
@@ -325,7 +325,7 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef struct cef_mouse_event_t:
         int x
         int y
-        uint32 modifiers
+        uint32_t modifiers
     ctypedef cef_mouse_event_t CefMouseEvent
 
     # RenderHandler > GetScreenInfo():
@@ -411,8 +411,8 @@ cdef extern from "include/internal/cef_types.h":
         FOCUS_SOURCE_SYSTEM,
 
     cdef cppclass CefRange:
-        uint32 from_val "from"
-        uint32 to_val "to"
+        uint32_t from_val "from"
+        uint32_t to_val "to"
 
     # Download interrupt reasons.
     ctypedef enum cef_download_interrupt_reason_t:

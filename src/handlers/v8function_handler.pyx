@@ -8,7 +8,7 @@ include "../frame.pyx"
 
 cdef public void V8FunctionHandler_Execute(
         CefRefPtr[CefBrowser] cefBrowser,
-        int64 frameId,
+        int64_t frameId,
         CefString& cefFuncName,
         CefRefPtr[CefListValue] cefFuncArgs
         ) except * with gil:

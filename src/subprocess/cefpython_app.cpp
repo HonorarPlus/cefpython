@@ -219,7 +219,7 @@ void CefPythonApp::OnBeforeChildProcessLaunch(
 //     return print_handler_;
 // }
 
-void CefPythonApp::OnScheduleMessagePumpWork(int64 delay_ms) {
+void CefPythonApp::OnScheduleMessagePumpWork(int64_t delay_ms) {
 #ifdef BROWSER_PROCESS
     auto message_pump = MainMessageLoopExternalPump::Get();
     if (message_pump) {
@@ -252,17 +252,17 @@ void CefPythonApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
             "OnContextCreated");
     CefRefPtr<CefListValue> arguments = message->GetArgumentList();
     /*
-    Sending int64 type using process messaging would require
+    Sending int64_t type using process messaging would require
     converting it to a string or a binary, or you could send
     two ints, see this topic:
     http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10869
     */
     /*
-    // Example of converting int64 to string. Still need an
+    // Example of converting int64_t to string. Still need an
     // example of converting it back from string.
     std::string logMessage = "[Renderer process] OnContextCreated(): frameId=";
     stringstream stream;
-    int64 value = frame->GetIdentifier();
+    int64_t value = frame->GetIdentifier();
     stream << value;
     logMessage.append(stream.str());
     LOG(INFO) << logMessage.c_str();
@@ -304,9 +304,9 @@ void CefPythonApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
     message = CefProcessMessage::Create("OnContextReleased");
     arguments = message->GetArgumentList();
     arguments->SetInt(0, browser->GetIdentifier());
-    // TODO: losing int64 precision, the solution is to convert
+    // TODO: losing int64_t precision, the solution is to convert
     //       it to string and then in the Browser process back
-    //       from string to int64. But it is rather unlikely
+    //       from string to int64_t. But it is rather unlikely
     //       that number of frames will exceed int range, so
     //       casting it to int for now.
     arguments->SetInt(1, (int)(frame->GetIdentifier()));
@@ -466,7 +466,7 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
                       " bindings not set";
         return;
     }
-    std::vector<int64> frameIds;
+    std::vector<int64_t> frameIds;
     std::vector<CefString> frameNames;
     if (jsBindings->HasKey("bindToFrames")
             && jsBindings->GetType("bindToFrames") == VTYPE_BOOL
@@ -488,7 +488,7 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
     // BUG in CEF:
     //   GetFrameNames() does not return the main frame (as of revision 1448).
     //   Make it work for the future when this bug gets fixed.
-    std::vector<int64>::iterator find_it = std::find(
+    std::vector<int64_t>::iterator find_it = std::find(
             frameIds.begin(), frameIds.end(),
             browser->GetMainFrame()->GetIdentifier());
     if (find_it == frameIds.end()) {
@@ -502,7 +502,7 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
                       " frameIds.size() == 0";
         return;
     }
-    for (std::vector<int64>::iterator it = frameIds.begin(); \
+    for (std::vector<int64_t>::iterator it = frameIds.begin(); \
             it != frameIds.end(); ++it) {
         if (*it <= 0) {
             // GetFrameIdentifiers() bug that returned a vector

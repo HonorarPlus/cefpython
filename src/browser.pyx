@@ -445,7 +445,7 @@ cdef class PyBrowser:
 
     cpdef object GetFrameByIdentifier(self, object identifier):
         return GetPyFrame(self.GetCefBrowser().get().GetFrame(
-                <int64>identifier))
+                <int64_t>identifier))
 
     cpdef list GetFrameNames(self):
         assert IsThread(TID_UI), (
@@ -736,7 +736,7 @@ cdef class PyBrowser:
         if "type" in pyEvent:
             cefEvent.type = int(pyEvent["type"])
         if "modifiers" in pyEvent:
-            cefEvent.modifiers = <uint32>pyEvent["modifiers"]
+            cefEvent.modifiers = <uint32_t>pyEvent["modifiers"]
         # Always set CefKeyEvent.windows_key_code in SendKeyEvent, even on
         # Linux. When sending key event for 'backspace' on Linux and setting
         # "native_key_code", "character", "unmodified_character" it doesn't
@@ -812,7 +812,7 @@ cdef class PyBrowser:
     # -------------------------------------------------------------------------
 
     cpdef py_void DragTargetDragEnter(self, DragData drag_data, int x, int y,
-                                      uint32 allowed_ops):
+                                      uint32_t allowed_ops):
         cdef CefMouseEvent mouse_event
         mouse_event.x = x
         mouse_event.y = y
@@ -820,7 +820,7 @@ cdef class PyBrowser:
                 drag_data.cef_drag_data, mouse_event,
                 <cef_types.cef_drag_operations_mask_t>allowed_ops)
 
-    cpdef py_void DragTargetDragOver(self, int x, int y, uint32 allowed_ops):
+    cpdef py_void DragTargetDragOver(self, int x, int y, uint32_t allowed_ops):
         cdef CefMouseEvent mouse_event
         mouse_event.x = x
         mouse_event.y = y
@@ -836,7 +836,7 @@ cdef class PyBrowser:
         mouse_event.y = y
         self.GetCefBrowserHost().get().DragTargetDrop(mouse_event)
 
-    cpdef py_void DragSourceEndedAt(self, int x, int y, uint32 operation):
+    cpdef py_void DragSourceEndedAt(self, int x, int y, uint32_t operation):
         self.GetCefBrowserHost().get().DragSourceEndedAt(
                 x, y, <cef_types.cef_drag_operations_mask_t>operation)
 

@@ -41,8 +41,8 @@ cdef object CefValueToPyValue(CefRefPtr[CefValue] cefValue):
     assert cefValue.get().IsValid(), "cefValue is invalid"
     cdef cef_types.cef_value_type_t valueType = cefValue.get().GetType()
     cdef CefRefPtr[CefBinaryValue] binaryValue
-    cdef uint32 uint32_value = 0
-    cdef int64 int64_value = 0
+    cdef uint32_t uint32_value = 0
+    cdef int64_t int64_value = 0
 
     if valueType == cef_types.VTYPE_NULL:
         return None
@@ -97,8 +97,8 @@ cdef list CefListValueToPyList(
     cdef cef_types.cef_value_type_t valueType
     cdef list ret = []
     cdef CefRefPtr[CefBinaryValue] binaryValue
-    cdef uint32 uint32_value = 0
-    cdef int64 int64_value = 0
+    cdef uint32_t uint32_value = 0
+    cdef int64_t int64_value = 0
     cdef object originallyString
     for index in range(0, size):
         valueType = cefListValue.get().GetType(index)
@@ -162,8 +162,8 @@ cdef dict CefDictionaryValueToPyDict(
     cdef CefString cefKey
     cdef py_string pyKey
     cdef CefRefPtr[CefBinaryValue] binaryValue
-    cdef uint32 uint32_value = 0
-    cdef int64 int64_value = 0
+    cdef uint32_t uint32_value = 0
+    cdef int64_t int64_value = 0
     cdef object originallyString
     while iterator != keyList.end():
         # noinspection PyUnresolvedReferences

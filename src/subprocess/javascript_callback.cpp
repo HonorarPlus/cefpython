@@ -30,7 +30,7 @@ CefString PutJavascriptCallback(
     // {"what":"javascript-callback","callbackId":123,
     //  "frameId":123,"functionName":"xx"}
     int callbackId = ++g_jsCallbackMaxId;
-    int64 frameId = frame->GetIdentifier();
+    int64_t frameId = frame->GetIdentifier();
     CefString functionName = jsCallback->GetFunctionName();
     std::string strCallbackId = "####cefpython####";
     strCallbackId.append("{");
@@ -86,7 +86,7 @@ void RemoveJavascriptCallbacksForFrame(CefRefPtr<CefFrame> frame) {
         return;
     }
     JavascriptCallbackMap::iterator it = g_jsCallbackMap.begin();
-    int64 frameId = frame->GetIdentifier();
+    int64_t frameId = frame->GetIdentifier();
     while (it != g_jsCallbackMap.end()) {
         if (it->second.first->GetIdentifier() == frameId) {
             // Pass current iterator and increment it after passing
