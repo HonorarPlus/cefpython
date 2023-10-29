@@ -34,36 +34,37 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef uint32_t cef_color_t
 
     ctypedef struct CefSettings:
-        cef_string_t accept_language_list
+        # size_t size
+        int no_sandbox
         cef_string_t browser_subprocess_path
+        cef_string_t framework_dir_path
+        cef_string_t main_bundle_path
+        int chrome_runtime
+        int multi_threaded_message_loop
+        int external_message_pump
+        int windowless_rendering_enabled
         int command_line_args_disabled
         cef_string_t cache_path
-        int chrome_runtime
-        cef_string_t cookieable_schemes_list
-        int cookieable_schemes_exclude_defaults
         cef_string_t root_cache_path
         int persist_session_cookies
+        int persist_user_preferences
         cef_string_t user_agent
         cef_string_t user_agent_product
         cef_string_t locale
         cef_string_t log_file
         int log_severity
         int log_items # not exposed.
-        int multi_threaded_message_loop
         cef_string_t javascript_flags
         cef_string_t resources_dir_path
         cef_string_t locales_dir_path
         int pack_loading_disabled
         int remote_debugging_port
         int uncaught_exception_stack_size
-        int context_safety_implementation # Not exposed.
         cef_color_t background_color
-        int persist_user_preferences
-        int windowless_rendering_enabled
-        int no_sandbox
-        int external_message_pump
-        cef_string_t framework_dir_path
-        cef_string_t main_bundle_path
+        cef_string_t accept_language_list
+        cef_string_t cookieable_schemes_list
+        int cookieable_schemes_exclude_defaults
+        cef_string_t chrome_policy_id
 
     ctypedef enum cef_pdf_print_margin_type_t:
         PDF_PRINT_MARGIN_DEFAULT,
@@ -89,8 +90,7 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t footer_template
 
     ctypedef struct CefBrowserSettings:
-        cef_string_t accept_language_list
-        cef_color_t background_color
+        int windowless_frame_rate
         cef_string_t standard_font_family
         cef_string_t fixed_font_family
         cef_string_t serif_font_family
@@ -114,7 +114,9 @@ cdef extern from "include/internal/cef_types.h":
         cef_state_t local_storage
         cef_state_t databases
         cef_state_t webgl
-        int windowless_frame_rate
+        cef_color_t background_color
+        # chrome_status_bubble
+        # chrome_zoom_bubble
 
     cdef cppclass CefRect:
         int x, y, width, height

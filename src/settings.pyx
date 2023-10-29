@@ -148,10 +148,6 @@ cdef void SetBrowserSettings(
         if key == "inherit_client_handlers_for_popups":
             # CEF Python only options. These are not to be found in CEF.
             continue
-        elif key == "accept_language_list":
-            cefString = new CefString(&cefBrowserSettings.accept_language_list)
-            PyToCefStringPointer(browserSettings[key], cefString)
-            del cefString
         elif key == "background_color":
             cefBrowserSettings.background_color = \
                     <cef_types.uint32_t>int(browserSettings[key])
