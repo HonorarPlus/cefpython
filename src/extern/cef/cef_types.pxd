@@ -48,6 +48,7 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t locale
         cef_string_t log_file
         int log_severity
+        int log_items # not exposed.
         int multi_threaded_message_loop
         cef_string_t javascript_flags
         cef_string_t resources_dir_path
@@ -141,6 +142,14 @@ cdef extern from "include/internal/cef_types.h":
         LOGSEVERITY_ERROR,
         LOGSEVERITY_FATAL,
         LOGSEVERITY_DISABLE = 99,
+        
+    ctypedef enum cef_log_items_t:
+        LOG_ITEMS_DEFAULT = 0,
+        LOG_ITEMS_NONE = 1,
+        LOG_ITEMS_FLAG_PROCESS_ID = 1 << 1,
+        LOG_ITEMS_FLAG_THREAD_ID = 1 << 2,
+        LOG_ITEMS_FLAG_TIME_STAMP = 1 << 3,
+        LOG_ITEMS_FLAG_TICK_COUNT = 1 << 4,
 
     ctypedef enum cef_thread_id_t:
         TID_UI,
