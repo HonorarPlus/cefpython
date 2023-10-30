@@ -227,10 +227,6 @@ def check_cython_version():
         print("[build.py] ERROR: Cython is not installed ({0} required)"
               .format(require_version))
         sys.exit(1)
-    if version != require_version:
-        print("[build.py] ERROR: Wrong Cython version: {0}. Required: {1}"
-              .format(version, require_version))
-        sys.exit(1)
     print("[build.py] Cython version: {0}".format(version))
 
 
@@ -299,7 +295,7 @@ def setup_environ():
         print("[build.py] PYTHON_INCLUDE: {python_include}"
               .format(python_include=os.environ["PYTHON_INCLUDE"]))
 
-        os.environ["CEF_CCFLAGS"] = "-std=gnu++11 -DNDEBUG -Wall -Werror -Wno-deprecated-declarations"
+        os.environ["CEF_CCFLAGS"] = "-std=gnu++14 -DNDEBUG -Wall -Werror -Wno-deprecated-declarations"
         if FAST_FLAG:
             os.environ["CEF_CCFLAGS"] += " -O0"
         else:
@@ -322,8 +318,12 @@ def setup_environ():
 
         if ARCH32:
             raise Exception("Python 32-bit is not supported on Mac")
-        os.environ["ARCHFLAGS"] = "-arch x86_64"
-        os.environ["CEF_CCFLAGS"] += " -arch x86_64"
+        if ARM:
+            os.environ["ARCHFLAGS"] = "-arch arm64"
+            os.environ["CEF_CCFLAGS"] += " -arch arm64"
+        else:
+            os.environ["ARCHFLAGS"] = "-arch x86_64"
+            os.environ["CEF_CCFLAGS"] += " -arch x86_64"
         os.environ["CEF_LINK_FLAGS"] += " -mmacosx-version-min=10.9"
 
         # -Wno-return-type-c-linkage to ignore:

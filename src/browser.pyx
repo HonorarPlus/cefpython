@@ -144,12 +144,13 @@ cdef void RemovePyBrowser(int browserId) except *:
     # Called from LifespanHandler_OnBeforeClose().
     global g_pyBrowsers, g_unreferenced_browsers
     cdef PyBrowser pyBrowser
+    cdef CefRefPtr[CefBrowser] dummy
     
     if browserId in g_pyBrowsers:
         # noinspection PyUnresolvedReferences
         Debug("del g_pyBrowsers[%s]" % browserId)
         pyBrowser = g_pyBrowsers[browserId]
-        pyBrowser.cefBrowser.swap(<CefRefPtr[CefBrowser]?>nullptr)
+        pyBrowser.cefBrowser.swap(dummy)
         del pyBrowser
         del g_pyBrowsers[browserId]
         g_unreferenced_browsers.append(browserId)

@@ -85,7 +85,7 @@ void MacShutdown() {
 }
 
 void MacSetWindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
-    NSView* view = browser->GetHost()->GetWindowHandle();
+    NSView* view = (NSView*)browser->GetHost()->GetWindowHandle();
     NSString* nstitle = [NSString stringWithFormat:@"%s" , title];
     view.window.title = nstitle;
 }

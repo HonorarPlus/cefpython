@@ -108,7 +108,8 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         }
 
         # Initialize
-        cef.Initialize(settings=settings, switches=switches)
+        #cef.Initialize(settings=settings, switches=switches)
+        cef.Initialize()
         subtest_message("cef.Initialize() ok")
 
         # Accessibility handler

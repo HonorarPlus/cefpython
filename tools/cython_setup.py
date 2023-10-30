@@ -49,10 +49,10 @@ if MAC:
     g_generate_extern_c_macro_definition_old = (
             ModuleNode.generate_extern_c_macro_definition)
 
-    def generate_extern_c_macro_definition(self, code):
+    def generate_extern_c_macro_definition(self, code, *is_cpp):
         # This code is written by Cython to both cefpython API header file
         # and cefpython module cpp file.
-        g_generate_extern_c_macro_definition_old(self, code)
+        g_generate_extern_c_macro_definition_old(self, code, *is_cpp)
         code.putln("// Added by: cefpython/tools/cython_setup.py")
         code.putln("#undef PyMODINIT_FUNC")
 
@@ -126,6 +126,7 @@ def main():
     compile_time_constants()
     options = dict()
     set_compiler_options(options)
+    print(options)
     options["include_dirs"] = get_include_dirs()
     options["library_dirs"] = get_library_dirs()
     options["libraries"] = get_libraries()
@@ -136,6 +137,7 @@ def main():
         cmdclass={"build_ext": build_ext},
         ext_modules=get_ext_modules(options)
     )
+    print("Setup done")
 
 
 def get_winsdk_lib():
@@ -215,7 +217,7 @@ def set_compiler_options(options):
 
         extra_compile_args.extend([
                 "-DNDEBUG",
-                "-std=gnu++11",
+                "-std=gnu++14",
         ])
 
     if LINUX:

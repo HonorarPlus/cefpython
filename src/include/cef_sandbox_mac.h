@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2018 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -27,13 +27,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef CEF_INCLUDE_CEF_SANDBOX_WIN_H_
-#define CEF_INCLUDE_CEF_SANDBOX_WIN_H_
+#ifndef CEF_INCLUDE_CEF_SANDBOX_MAC_H_
+#define CEF_INCLUDE_CEF_SANDBOX_MAC_H_
 #pragma once
 
 #include "include/base/cef_build.h"
+#include "include/internal/cef_export.h"
 
-#if defined(OS_WIN)
+#if defined(OS_MAC)
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,45 +48,46 @@ extern "C" {
 /// http://www.chromium.org/developers/design-documents/sandbox for complete
 /// details.
 ///
-/// To enable the sandbox on Windows the following requirements must be met:
-/// 1. Use the same executable for the browser process and all sub-processes.
-/// 2. Link the executable with the cef_sandbox static library.
-/// 3. Call the cef_sandbox_info_create() function from within the executable
-///    (not from a separate DLL) and pass the resulting pointer into both the
-///    CefExecuteProcess() and CefInitialize() functions via the
-///    |windows_sandbox_info| parameter.
+/// To enable the sandbox on macOS the following requirements must be met:
+/// 1. Link the helper process executable with the cef_sandbox static library.
+/// 2. Call the cef_sandbox_initialize() function at the beginning of the
+///    helper executable main() function and before loading the CEF framework
+///    library. See include/wrapper/cef_library_loader.h for example usage.
 ///
 
 ///
-/// Create the sandbox information object for this process. It is safe to create
-/// multiple of this object and to destroy the object immediately after passing
-/// into the CefExecuteProcess() and/or CefInitialize() functions.
+/// Initialize the sandbox for this process. Returns the sandbox context
+/// handle on success or NULL on failure. The returned handle should be
+/// passed to cef_sandbox_destroy() immediately before process termination.
 ///
-void* cef_sandbox_info_create(void);
+CEF_EXPORT void* cef_sandbox_initialize(int argc, char** argv);
 
 ///
-/// Destroy the specified sandbox information object.
+/// Destroy the specified sandbox context handle.
 ///
-void cef_sandbox_info_destroy(void* sandbox_info);
+CEF_EXPORT void cef_sandbox_destroy(void* sandbox_context);
 
 #ifdef __cplusplus
 }
 
 ///
-/// Manages the life span of a sandbox information object.
+/// Scoped helper for managing the life span of a sandbox context handle.
 ///
-class CefScopedSandboxInfo {
+class CEF_EXPORT CefScopedSandboxContext {
  public:
-  CefScopedSandboxInfo() { sandbox_info_ = cef_sandbox_info_create(); }
-  ~CefScopedSandboxInfo() { cef_sandbox_info_destroy(sandbox_info_); }
+  CefScopedSandboxContext();
+  ~CefScopedSandboxContext();
 
-  void* sandbox_info() const { return sandbox_info_; }
+  ///
+  /// Load the sandbox for this process. Returns true on success.
+  ///
+  bool Initialize(int argc, char** argv);
 
  private:
-  void* sandbox_info_;
+  void* sandbox_context_;
 };
 #endif  // __cplusplus
 
-#endif  // defined(OS_WIN)
+#endif  // defined(OS_MAC)
 
-#endif  // CEF_INCLUDE_CEF_SANDBOX_WIN_H_
+#endif  // CEF_INCLUDE_CEF_SANDBOX_MAC_H_

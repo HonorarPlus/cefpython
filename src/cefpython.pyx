@@ -630,6 +630,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         g_applicationSettings[key] = copy.deepcopy(application_settings[key])
 
     cdef CefSettings cefApplicationSettings
+    cdef unique_ptr[MainMessageLoopExternalPump] dummy
     # No sandboxing for the subprocesses
     cefApplicationSettings.no_sandbox = 1
     SetApplicationSettings(application_settings, &cefApplicationSettings)
@@ -640,7 +641,8 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         Debug("Create external message pump")
         # Using .reset() here to assign new instance was causing
         # MainMessageLoopExternalPump destructor to be called. Strange.
-        g_external_message_pump.swap(MainMessageLoopExternalPump.Create())
+        dummy = MainMessageLoopExternalPump.Create()
+        g_external_message_pump.swap(dummy)
 
     Debug("CefInitialize()")
     cdef cpp_bool ret
@@ -975,10 +977,11 @@ def Shutdown():
     IF UNAME_SYSNAME == "Darwin":
         MacShutdown()
 
-def SetOsModalLoop(py_bool modalLoop):
-    cdef cpp_bool cefModalLoop = bool(modalLoop)
-    with nogil:
-        CefSetOSModalLoop(cefModalLoop)
+IF UNAME_SYSNAME == "WINDOWS":
+    def SetOsModalLoop(py_bool modalLoop):
+        cdef cpp_bool cefModalLoop = bool(modalLoop)
+        with nogil:
+            CefSetOSModalLoop(cefModalLoop)
 
 cpdef py_void SetGlobalClientCallback(py_string name, object callback):
     global g_globalClientCallbacks

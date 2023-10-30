@@ -419,7 +419,10 @@ def build_cef_projects():
         command.extend(["cmake", "-G", "Ninja"])
         command.append("-DCMAKE_BUILD_TYPE="+Options.build_type)
         if MAC:
-            command.append("-DPROJECT_ARCH=x86_64")
+            if ARM:
+                command.append("-DPROJECT_ARCH=arm64")
+            else:
+                command.append("-DPROJECT_ARCH=x86_64")
         command.append("..")
         run_command(command, build_cefclient_dir)
         print("[automate.py] OK")
@@ -627,7 +630,7 @@ def build_wrapper_library_mac():
     # from cefclient.
     cmake_wrapper = prepare_build_command(build_lib=True)
     cmake_wrapper.extend(["cmake", "-G", "Ninja",
-                          "-DPROJECT_ARCH=x86_64",
+                          "-DPROJECT_ARCH=arm64",
                           "-DCMAKE_CXX_FLAGS=-stdlib=libc++",
                           "-DCMAKE_BUILD_TYPE=" + Options.build_type,
                           ".."])

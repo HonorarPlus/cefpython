@@ -22,6 +22,8 @@ cdef void SetCefWindowInfo(
         cdef CefRect windowRect
         cdef RECT rect2
         cdef CefString windowName
+    ELIF UNAME_SYSNAME == "Darwin":
+        cdef CefRect windowRect
     ELIF UNAME_SYSNAME == "Linux":
         cdef CefRect windowRect
 
@@ -47,12 +49,15 @@ cdef void SetCefWindowInfo(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowRect)
         ELIF UNAME_SYSNAME == "Darwin":
+            windowRect = CefRect(
+                int(windowInfo.windowRect[0]),
+                int(windowInfo.windowRect[1]),
+                int(windowInfo.windowRect[2]),
+                int(windowInfo.windowRect[3]))
+
             cefWindowInfo.SetAsChild(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
-                    int(windowInfo.windowRect[0]),
-                    int(windowInfo.windowRect[1]),
-                    int(windowInfo.windowRect[2]),
-                    int(windowInfo.windowRect[3]))
+                    windowRect)
         ELIF UNAME_SYSNAME == "Linux":
             x = int(windowInfo.windowRect[0])
             y = int(windowInfo.windowRect[1])

@@ -114,6 +114,8 @@ cdef public void LifespanHandler_OnBeforeClose(
     cdef PyBrowser pyBrowser
     cdef int browserId
     cdef object callback
+    cdef CefRefPtr[CefBrowser] dummy
+
     try:
         Debug("LifespanHandler_OnBeforeClose")
         # NOTE: browser_id may not necessarily be in g_pyBrowsers currently.
@@ -140,8 +142,8 @@ cdef public void LifespanHandler_OnBeforeClose(
                 .get().FlushStore(<CefRefPtr[CefCompletionCallback]?>nullptr)
 
         browserId = pyBrowser.GetIdentifier()
-        pyBrowser.cefBrowser.swap(<CefRefPtr[CefBrowser]?>nullptr)
-        cefBrowser.swap(<CefRefPtr[CefBrowser]?>nullptr)
+        pyBrowser.cefBrowser.swap(dummy)
+        cefBrowser.swap(dummy)
         del pyBrowser
 
         RemovePythonCallbacksForBrowser(browserId)

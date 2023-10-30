@@ -86,10 +86,11 @@ cdef void RemovePyFrame(int browserId, object frameId) except *:
     global g_pyFrames
     cdef PyFrame pyFrame
     cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
+    cdef CefRefPtr[CefFrame] dummy
     if uniqueFrameId in g_pyFrames:
         Debug("del g_pyFrames[%s]" % uniqueFrameId)
         pyFrame = g_pyFrames[uniqueFrameId]
-        pyFrame.cefFrame.swap(<CefRefPtr[CefFrame]?>nullptr)
+        pyFrame.cefFrame.swap(dummy)
         del pyFrame
         del g_pyFrames[uniqueFrameId]
         g_unreferenced_frames.append(uniqueFrameId)
@@ -102,6 +103,7 @@ cdef void RemovePyFramesForBrowser(int browserId) except *:
     cdef list toRemove = []
     cdef object uniqueFrameId
     cdef PyFrame pyFrame
+    cdef CefRefPtr[CefFrame] dummy
     global g_pyFrames
     for uniqueFrameId, pyFrame in g_pyFrames.iteritems():
         if pyFrame.GetBrowserIdentifier() == browserId:
@@ -109,7 +111,7 @@ cdef void RemovePyFramesForBrowser(int browserId) except *:
     for uniqueFrameId in toRemove:
         Debug("del g_pyFrames[%s]" % uniqueFrameId)
         pyFrame = g_pyFrames[uniqueFrameId]
-        pyFrame.cefFrame.swap(<CefRefPtr[CefFrame]?>nullptr)
+        pyFrame.cefFrame.swap(dummy)
         del pyFrame
         del g_pyFrames[uniqueFrameId]
         g_unreferenced_frames.append(uniqueFrameId)
