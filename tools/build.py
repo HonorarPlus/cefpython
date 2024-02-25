@@ -286,7 +286,8 @@ def setup_environ():
 
     if LINUX or MAC:
         # Env variables for makefiles
-        os.environ["PYTHON_INCLUDE"] = get_python_include_path()
+        command = "python" + str(sys.version_info[0]) + "." + str(sys.version_info[1]) + "-config --includes"
+        os.environ["PYTHON_INCLUDE"] = subprocess.getoutput(command)
         print("[build.py] PYTHON_INCLUDE: {python_include}"
               .format(python_include=os.environ["PYTHON_INCLUDE"]))
 

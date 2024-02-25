@@ -150,6 +150,7 @@ def main():
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.11",
             "Topic :: Desktop Environment",
             "Topic :: Internet",
             "Topic :: Internet :: WWW/HTTP",

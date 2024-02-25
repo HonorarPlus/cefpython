@@ -49,10 +49,10 @@ if MAC:
     g_generate_extern_c_macro_definition_old = (
             ModuleNode.generate_extern_c_macro_definition)
 
-    def generate_extern_c_macro_definition(self, code):
+    def generate_extern_c_macro_definition(self, code, is_cpp):
         # This code is written by Cython to both cefpython API header file
         # and cefpython module cpp file.
-        g_generate_extern_c_macro_definition_old(self, code)
+        g_generate_extern_c_macro_definition_old(self, code, is_cpp)
         code.putln("// Added by: cefpython/tools/cython_setup.py")
         code.putln("#undef PyMODINIT_FUNC")
 
