@@ -88,6 +88,8 @@ cdef extern from "include/internal/cef_types.h":
         int display_header_footer
         cef_string_t header_template
         cef_string_t footer_template
+        int generate_tagged_pdf
+        int generate_document_outline
 
     ctypedef struct CefBrowserSettings:
         int windowless_frame_rate

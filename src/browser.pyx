@@ -632,6 +632,9 @@ cdef class PyBrowser:
             footer_template = new CefString(&pdf_print_settings.footer_template)
             PyToCefStringPointer(settings.get('footer_template'), footer_template)
             del footer_template
+            
+        pdf_print_settings.generate_tagged_pdf = settings.get('generate_tagged_pdf') or 0
+        pdf_print_settings.generate_document_outline = settings.get('generate_document_outline') or 0
 
         cdef CefString cef_file_path
         PyToCefString(filepath, cef_file_path)
