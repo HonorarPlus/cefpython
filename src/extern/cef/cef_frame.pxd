@@ -18,7 +18,7 @@ cdef extern from "include/cef_frame.h":
       cpp_bool IsValid()
       void ExecuteJavaScript(CefString& jsCode, CefString& scriptUrl, int startLine)
       CefString GetURL()
-      int64 GetIdentifier()
+      CefString GetIdentifier()
       cpp_bool IsMain()
       void LoadURL(CefString& url)
       void Undo()

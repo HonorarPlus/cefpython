@@ -8,7 +8,6 @@ include "browser.pyx"
 cdef JavascriptCallback CreateJavascriptCallback(int callbackId,
         CefRefPtr[CefBrowser] cefBrowser, object frameId,
         py_string functionName):
-    # frameId is int64
     cdef JavascriptCallback jsCallback = JavascriptCallback()
     jsCallback.callbackId = callbackId
     cdef PyBrowser browser = GetPyBrowser(cefBrowser)

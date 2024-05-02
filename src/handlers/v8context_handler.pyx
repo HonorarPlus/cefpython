@@ -34,11 +34,12 @@ cdef public void V8ContextHandler_OnContextCreated(
 
 cdef public void V8ContextHandler_OnContextReleased(
         int browserId,
-        int64_t frameId
+        CefString frameId
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object clientCallback
+    cdef object pyFrameId
     try:
         # Due to multi-process architecture in CEF 3, this function won't
         # get called for the main frame in main browser. To send a message
@@ -50,19 +51,20 @@ cdef public void V8ContextHandler_OnContextReleased(
         # were released.
         Debug("V8ContextHandler_OnContextReleased()")
         pyBrowser = GetPyBrowserById(browserId)
+        pyFrameId = CefToPyString(frameId)
         if not pyBrowser:
             Debug("OnContextReleased: Browser doesn't exist anymore, id={id}"
                   .format(id=str(browserId)))
-            RemovePyFrame(browserId, frameId)
+            RemovePyFrame(browserId, pyFrameId)
             return
-        pyFrame = GetPyFrameById(browserId, frameId)
+        pyFrame = GetPyFrameById(browserId, pyFrameId)
         # Frame may already be destroyed while IPC messaging was executing
         # (Issue #431).
         if pyFrame:
             clientCallback = pyBrowser.GetClientCallback("OnContextReleased")
             if clientCallback:
                 clientCallback(browser=pyBrowser, frame=pyFrame)
-        RemovePyFrame(browserId, frameId)
+        RemovePyFrame(browserId, pyFrameId)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

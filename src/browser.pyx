@@ -436,16 +436,19 @@ cdef class PyBrowser:
                 "Browser.GetFocusedFrame() may only be called on UI thread")
         return GetPyFrame(self.GetCefBrowser().get().GetFocusedFrame())
 
-    cpdef PyFrame GetFrame(self, py_string name):
+    cpdef PyFrame GetFrameByName(self, py_string name):
         assert IsThread(TID_UI), (
-                "Browser.GetFrame() may only be called on the UI thread")
+                "Browser.GetFrameByName() may only be called on the UI thread")
         cdef CefString cefName
         PyToCefString(name, cefName)
-        return GetPyFrame(self.GetCefBrowser().get().GetFrame(cefName))
+        return GetPyFrame(self.GetCefBrowser().get().GetFrameByName(cefName))
 
-    cpdef object GetFrameByIdentifier(self, object identifier):
-        return GetPyFrame(self.GetCefBrowser().get().GetFrame(
-                <int64_t>identifier))
+    cpdef PyFrame GetFrameByIdentifier(self, object identifier):
+        assert IsThread(TID_UI), (
+                "Browser.GetFrameByIdentifier() may only be called on the UI thread")
+        cdef CefString cefIdentifier
+        PyToCefString(identifier, cefIdentifier)
+        return GetPyFrame(self.GetCefBrowser().get().GetFrameByIdentifier(cefIdentifier))
 
     cpdef list GetFrameNames(self):
         assert IsThread(TID_UI), (
@@ -466,7 +469,7 @@ cdef class PyBrowser:
         cdef PyFrame frame
         cdef list frames = []
         for name in names:
-            frame = self.GetFrame(name)
+            frame = self.GetFrameByName(name)
             frames.append(frame)
         return frames
 

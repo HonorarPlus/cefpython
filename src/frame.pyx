@@ -12,7 +12,7 @@ cdef dict g_pyFrames = {}
 cdef list g_unreferenced_frames = []  # [str unique identifier, ..]
 
 cdef object GetUniqueFrameId(int browserId, object frameId):
-    return str(browserId) +"#"+ str(frameId)
+    return str(browserId) +"#"+ frameId
 
 cdef PyFrame GetPyFrameById(int browserId, object frameId):
     cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
@@ -27,12 +27,12 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
         raise Exception("GetPyFrame(): CefFrame reference is NULL")
 
     cdef PyFrame pyFrame
-    cdef object frameId = cefFrame.get().GetIdentifier()  # int64
+    cdef object frameId = CefToPyString(cefFrame.get().GetIdentifier())
     cdef int browserId = cefFrame.get().GetBrowser().get().GetIdentifier()
     assert (frameId and browserId), "frameId or browserId empty"
     cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
 
-    if frameId < 0:
+    if frameId == "":
         # Underlying frame does not yet exist. In such case PyFrame
         # is not stored in g_pyFrames since frameId is invalid.
         # However even though frame is not supposed to exist, you
@@ -60,7 +60,7 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     pyFrame.cefFrame = cefFrame
 
     if uniqueFrameId in g_unreferenced_frames \
-            or frameId < 0 \
+            or frameId == "" \
             or browserId in g_unreferenced_browsers \
             or browserId in g_closed_browsers:
         # Browser was already globally unreferenced in OnBeforeClose,
