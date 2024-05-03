@@ -129,6 +129,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
             "debug": False,
             "log_severity": cef.LOGSEVERITY_ERROR,
             "log_file": "",
+            "root_cache_path": os.path.abspath(os.getcwd())
         }
         if not LINUX:
             # On Linux you get a lot of "X error received" messages
