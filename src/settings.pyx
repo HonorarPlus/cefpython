@@ -60,6 +60,8 @@ cdef void SetApplicationSettings(
             del cefString
         elif key == "cookieable_schemes_exclude_defaults":
             cefAppSettings.cookieable_schemes_exclude_defaults = int(appSettings[key])
+        elif key == "no_sandbox":
+            cefAppSettings.no_sandbox = int(appSettings[key])
         elif key == "chrome_runtime":
             cefAppSettings.chrome_runtime = int(appSettings[key])
         elif key == "root_cache_path":
