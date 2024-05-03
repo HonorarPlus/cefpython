@@ -364,12 +364,8 @@ def copy_cpp_extension_dependencies_issue359(pkg_dir):
     # required as well.
 
 
-    # Python 3.5 / 3.6 / 3.7 / 3.8 / 3.9 / 3.10 / 3.11
-    if os.path.exists(os.path.join(pkg_dir, "cefpython_py35.pyd")) \
-            or os.path.exists(os.path.join(pkg_dir, "cefpython_py36.pyd")) \
-            or os.path.exists(os.path.join(pkg_dir, "cefpython_py37.pyd")) \
-            or os.path.exists(os.path.join(pkg_dir, "cefpython_py38.pyd")) \
-            or os.path.exists(os.path.join(pkg_dir, "cefpython_py39.pyd")) \
+    # Python 3.9 / 3.10 / 3.11
+    if os.path.exists(os.path.join(pkg_dir, "cefpython_py39.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py310.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py311.pyd")):
         search_paths = [
@@ -378,32 +374,6 @@ def copy_cpp_extension_dependencies_issue359(pkg_dir):
             os.path.join(system, "msvcp140.dll"),
         ]
         root_search_paths.append(search_paths)
-
-    # Python 3.4
-    if os.path.exists(os.path.join(pkg_dir, "cefpython_py34.pyd")):
-        search_paths = [
-            # 10.00.40219.325 installs here on my system.
-            os.path.join(system, "msvcp100.dll"),
-        ]
-        root_search_paths.append(search_paths)
-
-    # Python 2.7
-    if os.path.exists(os.path.join(pkg_dir, "cefpython_py27.pyd")):
-        if ARCH32:
-            search_paths = [
-                # This runtime version is shipped with Python 2.7.14
-                r"c:\Windows\winsxs\x86_microsoft.vc90.crt_1fc8b3b9a1e18e3b"
-                r"_9.0.30729.1_none_e163563597edeada\msvcp90.dll",
-            ]
-        else:
-            search_paths = [
-                # This runtime version is shipped with Python 2.7.14
-                r"c:\Windows\winsxs\amd64_microsoft.vc90.crt_1fc8b3b9a1e18e3b"
-                r"_9.0.30729.1_none_99b61f5e8371c1d4\msvcp90.dll",
-            ]
-        root_search_paths.append(search_paths)
-
-    #assert len(root_search_paths)
 
     for search_paths in root_search_paths:
         found = False

@@ -80,7 +80,7 @@ NO_AUTOMATE = False
 ALLOW_PARTIAL = False
 
 # Python versions
-SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3.10), (3.11)]
+SUPPORTED_PYTHON_VERSIONS = [(3, 9), (3.10), (3.11)]
 
 # Python search paths. It will use first Python found for specific version.
 # Supports replacement of one environment variable in path eg.: %ENV_KEY%.
@@ -507,54 +507,9 @@ def build_cefpython_modules(pythons, arch):
             sys.exit(1)
         print("[build_distrib.py] Built successfully cefpython module for"
               " {python_name}".format(python_name=python["name"]))
-        # Issue #342
-        backup_subprocess_executable_issue342(python)
-
-    # Issue #342
-    restore_subprocess_executable_issue342(arch)
 
     print("[build_distrib.py] Successfully built cefpython modules for {arch}"
           .format(arch=arch))
-
-
-def backup_subprocess_executable_issue342(python):
-    """Use subprocess executable build by Python 2.7 to avoid
-    false-positives by AVs when building subprocess with Python 3.
-    Windows-only issue."""
-    if not WINDOWS:
-        return
-    if python["version2"] == (2, 7):
-        print("[build_distrib.py] Backup subprocess executable built"
-              " with Python 2.7 (Issue #342)")
-        cefpython_binary_basename = get_cefpython_binary_basename(
-                get_os_postfix2_for_arch(python["arch"]))
-        cefpython_binary = os.path.join(BUILD_DIR, cefpython_binary_basename)
-        assert os.path.isdir(cefpython_binary)
-        src = os.path.join(cefpython_binary, "subprocess.exe")
-        dst = os.path.join(BUILD_CEFPYTHON,
-                           "subprocess_py27_{arch}_issue342.exe"
-                           .format(arch=python["arch"]))
-        shutil.copy(src, dst)
-
-
-def restore_subprocess_executable_issue342(arch):
-    """Use subprocess executable build by Python 2.7 to avoid
-    false-positives by AVs when building subprocess with Python 3.
-    Windows-only issue."""
-    if not WINDOWS:
-        return
-    print("[build_distrib.py] Restore subprocess executable built"
-          " with Python 2.7 (Issue #342)")
-    cefpython_binary_basename = get_cefpython_binary_basename(
-            get_os_postfix2_for_arch(arch))
-    cefpython_binary = os.path.join(BUILD_DIR, cefpython_binary_basename)
-    assert os.path.isdir(cefpython_binary)
-    src = os.path.join(BUILD_CEFPYTHON,
-                       "subprocess_py27_{arch}_issue342.exe"
-                       .format(arch=arch))
-    assert os.path.isfile(src)
-    dst = os.path.join(cefpython_binary, "subprocess.exe")
-    shutil.copy(src, dst)
 
 
 def make_packages(python, arch, all_pythons):
@@ -615,21 +570,12 @@ def check_cpp_extension_dependencies_issue359(setup_dir, all_pythons):
         return
     checked_any = False
     for python in all_pythons:
-        if python["version2"] in ((3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11)):
+        if python["version2"] in ((3, 9), (3, 10), (3, 11)):
             checked_any = True
             if not os.path.exists(os.path.join(setup_dir, "cefpython3",
                                                "msvcp140.dll")):
                 raise Exception("C++ ext dependency missing: msvcp140.dll")
-        elif python["version2"] == (3, 4):
-            checked_any = True
-            if not os.path.exists(os.path.join(setup_dir, "cefpython3",
-                                               "msvcp100.dll")):
-                raise Exception("C++ ext dependency missing: msvcp100.dll")
-        elif python["version2"] == (2, 7):
-            if not os.path.exists(os.path.join(setup_dir, "cefpython3",
-                                               "msvcp90.dll")):
-                raise Exception("C++ ext dependency missing: msvcp90.dll")
-            checked_any = True
+
     assert checked_any
 
 

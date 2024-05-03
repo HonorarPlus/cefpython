@@ -45,22 +45,7 @@ if platform.system() == "Linux":
     ctypes.CDLL(libcef, ctypes.RTLD_GLOBAL)
 
 # Load the cefpython module for given Python version
-if sys.version_info[:2] == (3, 4):
-    # noinspection PyUnresolvedReferences
-    from . import cefpython_py34 as cefpython
-elif sys.version_info[:2] == (3, 5):
-    # noinspection PyUnresolvedReferences
-    from . import cefpython_py35 as cefpython
-elif sys.version_info[:2] == (3, 6):
-    # noinspection PyUnresolvedReferences
-    from . import cefpython_py36 as cefpython
-elif sys.version_info[:2] == (3, 7):
-    # noinspection PyUnresolvedReferences
-    from . import cefpython_py37 as cefpython
-elif sys.version_info[:2] == (3, 8):
-    # noinspection PyUnresolvedReferences
-    from . import cefpython_py38 as cefpython
-elif sys.version_info[:2] == (3, 9):
+if sys.version_info[:2] == (3, 9):
     # noinspection PyUnresolvedReferences
     from . import cefpython_py39 as cefpython
 elif sys.version_info[:2] == (3, 10):

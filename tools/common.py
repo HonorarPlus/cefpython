@@ -229,18 +229,6 @@ VS2019_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio"
 VS2015_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio 14.0"
                  r"\VC\vcvarsall.bat")
 
-VS2013_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio 12.0"
-                 r"\VC\vcvarsall.bat")
-
-VS2010_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio 10.0"
-                 r"\VC\vcvarsall.bat")
-
-VS2008_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio 9.0"
-                 r"\VC\vcvarsall.bat")
-
-if WINDOWS and not os.path.exists(VS2008_VCVARS):
-    VS2008_VCVARS = (os.environ["LOCALAPPDATA"]+"\\Programs\\Common\\Microsoft"
-                     "\\Visual C++ for Python\\9.0\\vcvarsall.bat")
 
 # -----------------------------------------------------------------------------
 
@@ -475,18 +463,8 @@ def get_version_from_file(header_file):
 
 
 def get_msvs_for_python(vs_prefix=False):
-    """Get MSVS version (eg 2008) for current python running."""
-    if sys.version_info[:2] == (3, 4):
-        return "VS2010" if vs_prefix else "2010"
-    elif sys.version_info[:2] == (3, 5):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 6):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 7):
-        return "VS2019" if vs_prefix else "2019"
-    elif sys.version_info[:2] == (3, 8):
-        return "VS2019" if vs_prefix else "2019"
-    elif sys.version_info[:2] == (3, 9):
+    """Get MSVS version for current python running."""
+    if sys.version_info[:2] == (3, 9):
         return "VS2019" if vs_prefix else "2019"
     elif sys.version_info[:2] == (3, 10):
         return "VS2022" if vs_prefix else "2022"
