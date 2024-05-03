@@ -439,6 +439,7 @@ def get_ext_modules(options):
             "c_string_encoding": "utf-8",
             "profile": ENABLE_PROFILING,
             "linetrace": ENABLE_LINE_TRACING,
+            "show_performance_hints" : False 
         },
 
         language="c++",

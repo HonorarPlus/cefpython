@@ -379,18 +379,6 @@ def fix_cefpython_api_header_file():
     with open(CEFPYTHON_API_HFILE, "rb") as fo:
         contents = fo.read().decode("utf-8")
 
-    # Pragma fix on Windows
-    if WINDOWS:
-        pragma = "#pragma warning(disable:4190)"
-        if pragma in contents:
-            print("[build.py] cefpython API header file is already fixed")
-        else:
-            contents = ("%s\n\n" % pragma) + contents
-            with open(CEFPYTHON_API_HFILE, "wb") as fo:
-                fo.write(contents.encode("utf-8"))
-            print("[build.py] Save {filename}"
-                  .format(filename=CEFPYTHON_API_HFILE))
-
     # Make a copy with a "_fixed" postfix
     if os.path.exists(CEFPYTHON_API_HFILE_FIXED):
         with open(CEFPYTHON_API_HFILE_FIXED, "rb") as fo:
