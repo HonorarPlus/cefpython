@@ -28,7 +28,7 @@ CefString PutJavascriptCallback(
         CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Value> jsCallback) {
     // Returns a "####cefpython####" string followed by json encoded data.
     // {"what":"javascript-callback","callbackId":123,
-    //  "frameId":123,"functionName":"xx"}
+    //  "frameId":"5-208881C03C0A24BB04CCE3275DE0B192","functionName":"xx"}
     int callbackId = ++g_jsCallbackMaxId;
     auto frameId = frame->GetIdentifier();
     CefString functionName = jsCallback->GetFunctionName();
@@ -37,9 +37,8 @@ CefString PutJavascriptCallback(
     // JSON format allows only for double quotes.
     strCallbackId.append("\"what\":\"javascript-callback\"");
     strCallbackId.append(",\"callbackId\":").append(AnyToString(callbackId));
-    strCallbackId.append(",\"frameId\":").append(frameId);
-    strCallbackId.append(",\"functionName\":\"").append(functionName) \
-            .append("\"");
+    strCallbackId.append(",\"frameId\":\"").append(frameId).append("\"");
+    strCallbackId.append(",\"functionName\":\"").append(functionName).append("\"");
     strCallbackId.append("}");
     g_jsCallbackMap.insert(std::make_pair(
             callbackId,
