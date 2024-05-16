@@ -212,7 +212,7 @@ def check_cython_version():
     print("[build.py] Check Cython version")
     with open(os.path.join(TOOLS_DIR, "requirements.txt"), "rb") as fileobj:
         contents = fileobj.read().decode("utf-8")
-        match = re.search(r"cython\s*==\s*([\w.]+)", contents,
+        match = re.search(r"cython\s*>=\s*([\w.]+)", contents,
                           flags=re.IGNORECASE)
         assert match, "cython package not found in requirements.txt"
         require_version = match.group(1)
