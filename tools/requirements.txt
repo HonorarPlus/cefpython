@@ -1,5 +1,4 @@
-Cython == 0.29.32
+Cython == 3.0.12
 docopt >= 0.6.2
-setuptools >= 57.0.0
-wheel >= 0.36.2
-Pillow
+cx-freeze == 7.2.10 
+setuptools == 75.8.0
