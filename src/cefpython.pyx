@@ -1008,14 +1008,18 @@ cpdef py_void SetGlobalClientHandler(object clientHandler):
         if key and key[0:2] != '__':
             SetGlobalClientCallback(key, method)
 
-cpdef object GetGlobalClientCallback(py_string name):
+cpdef object GetGlobalClientCallback(str name):
+    cdef py_string name_ = CharToPyString(name.encode("utf-8", "replace"))
+
     global g_globalClientCallbacks
-    if name in g_globalClientCallbacks:
-        return g_globalClientCallbacks[name]
+    if name_ in g_globalClientCallbacks:
+        return g_globalClientCallbacks[name_]
     else:
         return None
 
-cpdef object GetAppSetting(py_string key):
+cpdef object GetAppSetting(str key):
+    cdef py_string key_ = CharToPyString(key.encode("utf-8", "replace"))
+
     global g_applicationSettings
     if key in g_applicationSettings:
         return g_applicationSettings[key]

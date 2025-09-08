@@ -33,7 +33,7 @@ cdef py_string AnyToPyString(object value):
         # The unicode type is not defined in Python 3
         return value
     else:
-        return ""
+        return CharToPyString("")
 
 cdef py_string CharToPyString(
         const char* charString):
@@ -81,7 +81,7 @@ cdef py_string CefToPyString(
         ConstCefString& cefString):
     cdef cpp_string cppString
     if cefString.empty():
-        return ""
+        return CharToPyString("")
     IF UNAME_SYSNAME == "Windows":
         cdef wchar_t* wcharstr = <wchar_t*> cefString.c_str()
         return WidecharToPyString(wcharstr)
@@ -119,10 +119,12 @@ cdef void PyToCefString(
     cefString.FromString(cppString)
 
 cdef CefString PyToCefStringValue(
-        py_string pyString
+        str pyString
         ) except *:
+    cdef py_string string_ = CharToPyString(pyString.encode("utf-8", "replace"))
+
     cdef CefString cefString
-    PyToCefString(pyString, cefString)
+    PyToCefString(string_, cefString)
     return cefString
 
 cdef void PyToCefStringPointer(

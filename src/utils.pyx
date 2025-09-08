@@ -42,29 +42,34 @@ cpdef py_bool IsThread(int threadID):
 #       unicode strings and writing them to file (codecs.open).
 #       This change is required to work with Cython 0.20.
 
-cpdef object Debug(py_string msg):
+cpdef object Debug(str msg):
+    cdef py_string message
+    message = CharToPyString(msg.encode("utf-8", "replace"))
+
     """Print debug message. Will be shown only when settings.debug=True."""
     # In Python 3 str or bytes may be passed
-    if type(msg) != str and type(msg) == bytes:
-        msg = msg.decode("utf-8", "replace")
+    if type(message) != str and type(message) == bytes:
+        message = message.decode("utf-8", "replace")
     # Convert to str in case other kind of object was passed
-    msg = str(msg)
-    msg = "[Browser process] " + msg
+    message = str(message)
+    message = "[Browser process] " + message
     # CEF logging is initialized only after CEF was initialized.
     # Otherwise the default is LOGSEVERITY_INFO and log_file is
     # none.
     if g_cef_initialized or g_debug:
-        cef_log_info(PyStringToChar(msg))
+        cef_log_info(PyStringToChar(message))
 
-cdef void NonCriticalError(py_string msg) except *:
+cdef void NonCriticalError(str msg) except *:
+    cdef py_string message = CharToPyString(msg.encode("utf-8", "replace"))
+
     """Notify about error gently. Does not terminate application."""
     # In Python 3 str or bytes may be passed
-    if type(msg) != str and type(msg) == bytes:
-        msg = msg.decode("utf-8", "replace")
+    if type(message) != str and type(message) == bytes:
+        message = message.decode("utf-8", "replace")
     # Convert to str in case other kind of object was passed
-    msg = str(msg)
-    msg = "[Browser process] " + msg
-    cef_log_error(PyStringToChar(msg))
+    message = str(message)
+    message = "[Browser process] " + message
+    cef_log_error(PyStringToChar(message))
 
 cpdef str GetSystemError():
     IF UNAME_SYSNAME == "Windows":

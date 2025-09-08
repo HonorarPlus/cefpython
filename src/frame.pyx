@@ -164,7 +164,7 @@ cdef class PyFrame:
         self.ExecuteJavascript(code)
 
     cpdef py_void ExecuteJavascript(self, py_string jsCode,
-            py_string scriptUrl="", int startLine=1):
+            py_string scriptUrl=CharToPyString(""), int startLine=1):
         self.GetCefFrame().get().ExecuteJavaScript(PyToCefStringValue(jsCode),
                 PyToCefStringValue(scriptUrl), startLine)
 
@@ -225,10 +225,12 @@ cdef class PyFrame:
         self.GetCefFrame().get().ViewSource()
 
     cdef void SendProcessMessage(self, cef_process_id_t targetProcess,
-            object frameId, py_string messageName, list pyArguments
+            object frameId, str messageName, list pyArguments
             ) except *:
+        cdef py_string messageName_ = CharToPyString(messageName.encode("utf-8", "replace"))
+
         cdef CefRefPtr[CefProcessMessage] message = \
-                CefProcessMessage_Create(PyToCefStringValue(messageName))
+                CefProcessMessage_Create(PyToCefStringValue(messageName_))
         # This does not work, no idea why, the CEF implementation
         # seems not to allow it, both Assign() and swap() do not work:
         # | message.get().GetArgumentList().Assign(arguments.get())
@@ -238,6 +240,6 @@ cdef class PyFrame:
         PyListToExistingCefListValue(self.GetBrowserIdentifier(), frameId,
                 pyArguments, messageArguments)
         Debug("SendProcessMessage(): message=%s, arguments size=%d" % (
-                messageName,
+                messageName_,
                 message.get().GetArgumentList().get().GetSize()))
         self.GetCefFrame().get().SendProcessMessage( targetProcess, message)
