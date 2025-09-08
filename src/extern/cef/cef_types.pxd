@@ -8,7 +8,7 @@ from libcpp cimport bool as cpp_bool
 # noinspection PyUnresolvedReferences
 from libc.stddef cimport wchar_t
 # noinspection PyUnresolvedReferences
-from libc.stdint cimport int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t
+from libc.stdint cimport int16_t, uint8_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t
 from cef_string cimport cef_string_t
 # noinspection PyUnresolvedReferences
 from libc.limits cimport UINT_MAX
@@ -469,10 +469,29 @@ cdef extern from "include/internal/cef_types.h":
         CEF_COLOR_VARIANT_VIBRANT,
         CEF_COLOR_VARIANT_EXPRESSIVE,
 
+    ctypedef struct cef_size_t:
+        int width
+        int height
+
+    ctypedef struct cef_accelerated_paint_info_common_t:
+        uint64_t timestamp
+        cef_size_t coded_size
+        cef_rect_t visible_rect
+        cef_rect_t content_rect
+        cef_size_t source_size
+        cef_rect_t capture_update_rect
+        cef_rect_t region_capture_rect
+        uint64_t capture_counter
+        uint8_t has_capture_update_rect
+        uint8_t has_region_capture_rect
+        uint8_t has_source_size
+        uint8_t has_capture_counter
+
     ctypedef void* CefSharedTextureHandle 
 
     ctypedef struct cef_accelerated_paint_info_t:
         CefSharedTextureHandle shared_texture_handle
         cef_color_type_t format
+        cef_accelerated_paint_info_common_t extra;
         
     ctypedef cef_accelerated_paint_info_t CefAcceleratedPaintInfo

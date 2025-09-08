@@ -26,7 +26,8 @@ DRAG_OPERATION_EVERY   = cef_types.DRAG_OPERATION_EVERY
 cdef dict CefToPyPaintInfo(const cef_types.CefAcceleratedPaintInfo& cefPaintInfo):
     pyPaintInfo = {
         "shared_texture_handle": <object>PyLong_FromVoidPtr(cefPaintInfo.shared_texture_handle),
-        "format": cefPaintInfo.format
+        "format": cefPaintInfo.format,
+        "extra": cefPaintInfo.extra
     }
     return pyPaintInfo
 

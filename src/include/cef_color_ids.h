@@ -399,6 +399,7 @@
   E_CPONLY(CEF_ColorListItemFolderIconForeground) \
   E_CPONLY(CEF_ColorListItemUrlFaviconBackground) \
   E_CPONLY(CEF_ColorLiveCaptionBubbleBackgroundDefault) \
+  E_CPONLY(CEF_ColorLiveCaptionBubbleButtonBackground) \
   E_CPONLY(CEF_ColorLiveCaptionBubbleButtonIcon) \
   E_CPONLY(CEF_ColorLiveCaptionBubbleButtonIconDisabled) \
   E_CPONLY(CEF_ColorLiveCaptionBubbleForegroundDefault) \
@@ -596,7 +597,7 @@
   E_CPONLY(CEF_ColorWebNativeControlSliderPressed) \
   E_CPONLY(CEF_ColorWindowBackground)
 
-#if defined(OS_CHROMEOS_ASH)
+#if defined(OS_CHROMEOS)
 #define CHROMEOS_ASH_COLOR_IDS \
   /* Colors for illustrations */ \
   E_CPONLY(CEF_ColorNativeColor1) \
@@ -614,10 +615,6 @@
   E_CPONLY(CEF_ColorNativeMutedColor) \
   E_CPONLY(CEF_ColorNativeComplementColor) \
   E_CPONLY(CEF_ColorNativeOnGradientColor)
-#elif defined(OS_CHROMEOS_LACROS)
-#define CHROMEOS_ASH_COLOR_IDS
-#endif
-#if defined(OS_CHROMEOS)
 #define PLATFORM_SPECIFIC_COLOR_IDS \
   CHROMEOS_ASH_COLOR_IDS \
   /* NOTE: Nearly all of the following CrOS color ids will need to be re- */ \
@@ -802,6 +799,7 @@
   /* Batch Upload colors. */ \
   E_CPONLY(CEF_ColorBatchUploadBackground) \
   E_CPONLY(CEF_ColorBatchUploadDataBackground) \
+  E_CPONLY(CEF_ColorBatchUploadDataSeparator) \
   /* Compose colors */ \
   E_CPONLY(CEF_ColorComposeDialogBackground) \
   E_CPONLY(CEF_ColorComposeDialogDivider) \
@@ -828,6 +826,8 @@
   /* Desktop media tab list colors. */ \
   E_CPONLY(CEF_ColorDesktopMediaTabListBorder) \
   E_CPONLY(CEF_ColorDesktopMediaTabListPreviewBackground) \
+  /* Desktop to iOS promo bubble. */ \
+  E_CPONLY(CEF_ColorDesktopToIOSPromoFooterSubtitleLabel) \
   /* Common Download colors. */ \
   E_CPONLY(CEF_ColorDownloadItemIconDangerous) \
   E_CPONLY(CEF_ColorDownloadItemTextDangerous) \
@@ -992,7 +992,6 @@
   E_CPONLY(CEF_ColorNewTabPageMenuOuterShadow) \
   E_CPONLY(CEF_ColorNewTabPageMicBorderColor) \
   E_CPONLY(CEF_ColorNewTabPageMicIconColor) \
-  E_CPONLY(CEF_ColorNewTabPageMobilePromoDismissButton) \
   E_CPONLY(CEF_ColorNewTabPageModuleControlBorder) \
   E_CPONLY(CEF_ColorNewTabPageModuleContextMenuDivider) \
   E_CPONLY(CEF_ColorNewTabPageModuleBackground) \
@@ -1156,11 +1155,10 @@
   E_CPONLY(CEF_ColorProductSpecificationsIconButtonHoveredBackground) \
   E_CPONLY(CEF_ColorProductSpecificationsLink) \
   E_CPONLY(CEF_ColorProductSpecificationsPageBackground) \
-  E_CPONLY(CEF_ColorProductSpecificationsPrimaryTitle) \
-  E_CPONLY(CEF_ColorProductSpecificationsSecondaryTitle) \
   E_CPONLY(CEF_ColorProductSpecificationsSummaryBackground) \
   E_CPONLY(CEF_ColorProductSpecificationsSummaryBackgroundDragging) \
   E_CPONLY(CEF_ColorProductSpecificationsTonalButtonBackground) \
+  E_CPONLY(CEF_ColorProductSpecificationsTonalButtonIcon) \
   /* Profile Menu colors. */ \
   E_CPONLY(CEF_ColorProfileMenuBackground) \
   E_CPONLY(CEF_ColorProfileMenuHeaderBackground) \
@@ -1480,6 +1478,8 @@
   E_CPONLY(CEF_ColorTabThrobberPreconnect) \
   /* Tab Search colors */ \
   E_CPONLY(CEF_ColorTabSearchButtonBackground) \
+  E_CPONLY(CEF_ColorTabSearchButtonIcon) \
+  E_CPONLY(CEF_ColorTabSearchButtonIconBackground) \
   E_CPONLY(CEF_ColorTabSearchBackground) \
   E_CPONLY(CEF_ColorTabSearchButtonCRForegroundFrameActive) \
   E_CPONLY(CEF_ColorTabSearchButtonCRForegroundFrameInactive) \
