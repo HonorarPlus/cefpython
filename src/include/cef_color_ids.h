@@ -523,6 +523,7 @@
   E_CPONLY(CEF_ColorThrobber) \
   E_CPONLY(CEF_ColorThrobberPreconnect) \
   E_CPONLY(CEF_ColorToastBackground) \
+  E_CPONLY(CEF_ColorToastBackgroundProminent) \
   E_CPONLY(CEF_ColorToastButton) \
   E_CPONLY(CEF_ColorToastForeground) \
   E_CPONLY(CEF_ColorToggleButtonHover) \
@@ -860,7 +861,7 @@
   E_CPONLY(CEF_ColorExtensionMenuIconDisabled) \
   E_CPONLY(CEF_ColorExtensionMenuPinButtonIcon) \
   E_CPONLY(CEF_ColorExtensionMenuPinButtonIconDisabled) \
-  E_CPONLY(CEF_ColorExtensionsMenuHighlightedBackground) \
+  E_CPONLY(CEF_ColorExtensionsMenuContainerBackground) \
   E_CPONLY(CEF_ColorExtensionsToolbarControlsBackground) \
   E_CPONLY(CEF_ColorExtensionsMenuText) \
   E_CPONLY(CEF_ColorExtensionsMenuSecondaryText) \
@@ -1129,9 +1130,11 @@
   E_CPONLY(CEF_ColorProductSpecificationsDisclosureGradientStart) \
   E_CPONLY(CEF_ColorProductSpecificationsDisclosureSummaryBackground) \
   E_CPONLY(CEF_ColorProductSpecificationsDivider) \
+  E_CPONLY(CEF_ColorProductSpecificationsGradientIcon) \
   E_CPONLY(CEF_ColorProductSpecificationsHorizontalCarouselScrollbarThumb) \
   E_CPONLY(CEF_ColorProductSpecificationsIcon) \
   E_CPONLY(CEF_ColorProductSpecificationsIconButtonBackground) \
+  E_CPONLY(CEF_ColorProductSpecificationsIconButtonHoveredBackground) \
   E_CPONLY(CEF_ColorProductSpecificationsLink) \
   E_CPONLY(CEF_ColorProductSpecificationsPageBackground) \
   E_CPONLY(CEF_ColorProductSpecificationsPrimaryTitle) \
@@ -1229,33 +1232,33 @@
   E_CPONLY(CEF_ColorReadAnythingPreviousReadAloudHighlightLight) \
   E_CPONLY(CEF_ColorReadAnythingPreviousReadAloudHighlightYellow) \
   /* Realbox colors. */ \
-  E_CPONLY(CEF_ColorRealboxAnswerIconBackground) \
-  E_CPONLY(CEF_ColorRealboxAnswerIconForeground) \
-  E_CPONLY(CEF_ColorRealboxBackground) \
-  E_CPONLY(CEF_ColorRealboxBackgroundHovered) \
-  E_CPONLY(CEF_ColorRealboxBorder) \
-  E_CPONLY(CEF_ColorRealboxForeground) \
-  E_CPONLY(CEF_ColorRealboxLensVoiceIconBackground) \
-  E_CPONLY(CEF_ColorRealboxPlaceholder) \
-  E_CPONLY(CEF_ColorRealboxResultsActionChip) \
-  E_CPONLY(CEF_ColorRealboxResultsActionChipIcon) \
-  E_CPONLY(CEF_ColorRealboxResultsActionChipFocusOutline) \
-  E_CPONLY(CEF_ColorRealboxResultsBackground) \
-  E_CPONLY(CEF_ColorRealboxResultsBackgroundHovered) \
-  E_CPONLY(CEF_ColorRealboxResultsButtonHover) \
-  E_CPONLY(CEF_ColorRealboxResultsDimSelected) \
-  E_CPONLY(CEF_ColorRealboxResultsFocusIndicator) \
-  E_CPONLY(CEF_ColorRealboxResultsForeground) \
-  E_CPONLY(CEF_ColorRealboxResultsForegroundDimmed) \
-  E_CPONLY(CEF_ColorRealboxResultsIcon) \
-  E_CPONLY(CEF_ColorRealboxResultsIconFocusedOutline) \
-  E_CPONLY(CEF_ColorRealboxResultsIconSelected) \
-  E_CPONLY(CEF_ColorRealboxResultsUrl) \
-  E_CPONLY(CEF_ColorRealboxResultsUrlSelected) \
-  E_CPONLY(CEF_ColorRealboxSearchIconBackground) \
-  E_CPONLY(CEF_ColorRealboxSelectionBackground) \
-  E_CPONLY(CEF_ColorRealboxSelectionForeground) \
-  E_CPONLY(CEF_ColorRealboxShadow) \
+  E_CPONLY(CEF_ColorSearchboxAnswerIconBackground) \
+  E_CPONLY(CEF_ColorSearchboxAnswerIconForeground) \
+  E_CPONLY(CEF_ColorSearchboxBackground) \
+  E_CPONLY(CEF_ColorSearchboxBackgroundHovered) \
+  E_CPONLY(CEF_ColorSearchboxBorder) \
+  E_CPONLY(CEF_ColorSearchboxForeground) \
+  E_CPONLY(CEF_ColorSearchboxLensVoiceIconBackground) \
+  E_CPONLY(CEF_ColorSearchboxPlaceholder) \
+  E_CPONLY(CEF_ColorSearchboxResultsActionChip) \
+  E_CPONLY(CEF_ColorSearchboxResultsActionChipIcon) \
+  E_CPONLY(CEF_ColorSearchboxResultsActionChipFocusOutline) \
+  E_CPONLY(CEF_ColorSearchboxResultsBackground) \
+  E_CPONLY(CEF_ColorSearchboxResultsBackgroundHovered) \
+  E_CPONLY(CEF_ColorSearchboxResultsButtonHover) \
+  E_CPONLY(CEF_ColorSearchboxResultsDimSelected) \
+  E_CPONLY(CEF_ColorSearchboxResultsFocusIndicator) \
+  E_CPONLY(CEF_ColorSearchboxResultsForeground) \
+  E_CPONLY(CEF_ColorSearchboxResultsForegroundDimmed) \
+  E_CPONLY(CEF_ColorSearchboxResultsIcon) \
+  E_CPONLY(CEF_ColorSearchboxResultsIconFocusedOutline) \
+  E_CPONLY(CEF_ColorSearchboxResultsIconSelected) \
+  E_CPONLY(CEF_ColorSearchboxResultsUrl) \
+  E_CPONLY(CEF_ColorSearchboxResultsUrlSelected) \
+  E_CPONLY(CEF_ColorSearchboxSearchIconBackground) \
+  E_CPONLY(CEF_ColorSearchboxSelectionBackground) \
+  E_CPONLY(CEF_ColorSearchboxSelectionForeground) \
+  E_CPONLY(CEF_ColorSearchboxShadow) \
   /* The colors used for saved tab group chips on the bookmark bar. */ \
   E_CPONLY(CEF_ColorSavedTabGroupForegroundGrey) \
   E_CPONLY(CEF_ColorSavedTabGroupForegroundBlue) \
@@ -1454,6 +1457,7 @@
   E_CPONLY(CEF_ColorTabThrobber) \
   E_CPONLY(CEF_ColorTabThrobberPreconnect) \
   /* Tab Search colors */ \
+  E_CPONLY(CEF_ColorTabSearchButtonBackground) \
   E_CPONLY(CEF_ColorTabSearchBackground) \
   E_CPONLY(CEF_ColorTabSearchButtonCRForegroundFrameActive) \
   E_CPONLY(CEF_ColorTabSearchButtonCRForegroundFrameInactive) \
