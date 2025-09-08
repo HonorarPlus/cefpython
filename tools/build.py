@@ -698,9 +698,9 @@ def build_cefpython_module():
     oldpyxfiles = glob.glob("./*.pyx")
     print("")
     print("[build.py] Cleanup: remove pyx files in build_cefpython/")
-    for pyxfile in oldpyxfiles:
-        if os.path.exists(pyxfile):
-            os.remove(pyxfile)
+    #for pyxfile in oldpyxfiles:
+        #if os.path.exists(pyxfile):
+            #os.remove(pyxfile)
 
     # Check if built succeeded after pyx files were removed
     if ret != 0:

@@ -697,7 +697,9 @@ using CefPdfPrintSettings = CefStructBase<CefPdfPrintSettingsTraits>;
 ///
 class CefBoxLayoutSettings : public cef_box_layout_settings_t {
  public:
-  CefBoxLayoutSettings() : cef_box_layout_settings_t{} {}
+  CefBoxLayoutSettings() : cef_box_layout_settings_t{} {
+    cross_axis_alignment = CEF_AXIS_ALIGNMENT_STRETCH;
+  }
   CefBoxLayoutSettings(const cef_box_layout_settings_t& r)
       : cef_box_layout_settings_t(r) {}
 };
@@ -747,5 +749,15 @@ struct CefMediaSinkDeviceInfoTraits {
 /// Class representing MediaSink device info.
 ///
 using CefMediaSinkDeviceInfo = CefStructBase<CefMediaSinkDeviceInfoTraits>;
+
+///
+/// Class representing accelerated paint info.
+///
+class CefAcceleratedPaintInfo : public cef_accelerated_paint_info_t {
+ public:
+  CefAcceleratedPaintInfo() : cef_accelerated_paint_info_t{} {}
+  CefAcceleratedPaintInfo(const cef_accelerated_paint_info_t& r)
+      : cef_accelerated_paint_info_t(r) {}
+};
 
 #endif  // CEF_INCLUDE_INTERNAL_CEF_TYPES_WRAPPERS_H_

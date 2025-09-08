@@ -72,11 +72,11 @@ void RenderHandler::OnPaint(CefRefPtr<CefBrowser> browser,
 void RenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
                                        PaintElementType type,
                                        const RectList& dirtyRects,
-                                       void* shared_handle)
+                                       const CefAcceleratedPaintInfo& paintInfo)
 {
     REQUIRE_UI_THREAD();
     RenderHandler_OnAcceleratedPaint(browser, type, const_cast<RectList&>(dirtyRects),
-                                     shared_handle);
+                                     paintInfo);
 }
 
 

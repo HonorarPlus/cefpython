@@ -271,6 +271,8 @@ cdef extern from "include/internal/cef_types.h":
         TS_PROCESS_WAS_KILLED,
         TS_PROCESS_CRASHED,
         TS_PROCESS_OOM,
+        TS_LAUNCH_FAILED,
+        TS_INTEGRITY_FAILURE,
 
     ctypedef enum cef_errorcode_t:
         ERR_NONE = 0,
@@ -460,3 +462,20 @@ cdef extern from "include/internal/cef_types.h":
         CEF_DOWNLOAD_INTERRUPT_REASON_USER_SHUTDOWN = 41,
         CEF_DOWNLOAD_INTERRUPT_REASON_CRASH = 50
     ctypedef cef_download_interrupt_reason_t DownloadInterruptReason
+
+    ctypedef enum cef_color_variant_t:  
+        CEF_COLOR_VARIANT_SYSTEM,
+        CEF_COLOR_VARIANT_LIGHT,
+        CEF_COLOR_VARIANT_DARK,
+        CEF_COLOR_VARIANT_TONAL_SPOT,
+        CEF_COLOR_VARIANT_NEUTRAL,
+        CEF_COLOR_VARIANT_VIBRANT,
+        CEF_COLOR_VARIANT_EXPRESSIVE,
+
+    ctypedef void* CefSharedTextureHandle 
+
+    ctypedef struct cef_accelerated_paint_info_t:
+        CefSharedTextureHandle shared_texture_handle
+        cef_color_type_t format
+        
+    ctypedef cef_accelerated_paint_info_t CefAcceleratedPaintInfo

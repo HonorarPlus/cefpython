@@ -15,16 +15,11 @@ cdef extern from "include/internal/cef_types.h":
         int bottom;
         int right;
 
-    ctypedef enum cef_main_axis_alignment_t:
-        CEF_MAIN_AXIS_ALIGNMENT_START,
-        CEF_MAIN_AXIS_ALIGNMENT_CENTER,
-        CEF_MAIN_AXIS_ALIGNMENT_END,
-
-    ctypedef enum cef_cross_axis_alignment_t:
-        CEF_CROSS_AXIS_ALIGNMENT_STRETCH,
-        CEF_CROSS_AXIS_ALIGNMENT_START,
-        CEF_CROSS_AXIS_ALIGNMENT_CENTER,
-        CEF_CROSS_AXIS_ALIGNMENT_END,
+    ctypedef enum cef_axis_alignment_t:
+        CEF_AXIS_ALIGNMENT_START,
+        CEF_AXIS_ALIGNMENT_CENTER,
+        CEF_AXIS_ALIGNMENT_END,
+        CEF_AXIS_ALIGNMENT_STRETCH,
 
     ctypedef struct CefBoxLayoutSettings:
         int horizontal;
@@ -32,8 +27,8 @@ cdef extern from "include/internal/cef_types.h":
         int inside_border_vertical_spacing;
         cef_insets_t inside_border_insets;
         int between_child_spacing;
-        cef_main_axis_alignment_t main_axis_alignment;
-        cef_cross_axis_alignment_t cross_axis_alignment;
+        cef_axis_alignment_t main_axis_alignment;
+        cef_axis_alignment_t cross_axis_alignment;
         int minimum_cross_axis_size;
         int default_flex;
 

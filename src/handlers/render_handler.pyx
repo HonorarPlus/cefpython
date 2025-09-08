@@ -23,6 +23,13 @@ DRAG_OPERATION_MOVE    = cef_types.DRAG_OPERATION_MOVE
 DRAG_OPERATION_DELETE  = cef_types.DRAG_OPERATION_DELETE
 DRAG_OPERATION_EVERY   = cef_types.DRAG_OPERATION_EVERY
 
+cdef dict CefToPyPaintInfo(const cef_types.CefAcceleratedPaintInfo& cefPaintInfo):
+    pyPaintInfo = {
+        "shared_texture_handle": <object>PyLong_FromVoidPtr(cefPaintInfo.shared_texture_handle),
+        "format": cefPaintInfo.format
+    }
+    return pyPaintInfo
+
 
 cdef public cpp_bool RenderHandler_GetRootScreenRect(
         CefRefPtr[CefBrowser] cefBrowser,
@@ -222,11 +229,12 @@ cdef public void RenderHandler_OnAcceleratedPaint(
         CefRefPtr[CefBrowser] cefBrowser,
         cef_types.cef_paint_element_type_t paintElementType,
         cpp_vector[CefRect]& cefDirtyRects,
-        void* shared_handle
+        const cef_types.CefAcceleratedPaintInfo& sharedHandle
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef list pyDirtyRects = []
     cdef list pyRect
+    cdef dict pyPaintInfo
     # TODO: cefDirtyRects should be const, but const_iterator is
     #       not yet implemented in libcpp.vector.
     cdef cpp_vector[CefRect].iterator iterator
@@ -239,6 +247,8 @@ cdef public void RenderHandler_OnAcceleratedPaint(
             pyRect = [cefRect.x, cefRect.y, cefRect.width, cefRect.height]
             pyDirtyRects.append(pyRect)
             preinc(iterator)
+            
+        pyPaintInfo = CefToPyPaintInfo(sharedHandle)
 
         # In CEF 1 width and height were fetched using GetSize(),
         # but in CEF 3 they are passed as arguments to OnPaint().
@@ -250,7 +260,7 @@ cdef public void RenderHandler_OnAcceleratedPaint(
                     browser=pyBrowser,
                     element_type=paintElementType,
                     dirty_rects=pyDirtyRects,
-                    shared_handle=<object>shared_handle)
+                    shared_handle=pyPaintInfo)
         else:
             return
     except:
