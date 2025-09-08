@@ -942,6 +942,8 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
   /// Returns the extension hosted in this browser or NULL if no extension is
   /// hosted. See CefRequestContext::LoadExtension for details.
   ///
+  /// WARNING: This method is deprecated and will be removed in ~M127.
+  ///
   /*--cef()--*/
   virtual CefRefPtr<CefExtension> GetExtension() = 0;
 
@@ -949,6 +951,8 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
   /// Returns true if this browser is hosting an extension background script.
   /// Background hosts do not have a window and are not displayable. See
   /// CefRequestContext::LoadExtension for details.
+  ///
+  /// WARNING: This method is deprecated and will be removed in ~M127.
   ///
   /*--cef()--*/
   virtual bool IsBackgroundHost() = 0;
@@ -1018,6 +1022,13 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
   ///
   /*--cef()--*/
   virtual bool IsRenderProcessUnresponsive() = 0;
+
+  ///
+  /// Returns the runtime style for this browser (ALLOY or CHROME). See
+  /// cef_runtime_style_t documentation for details.
+  ///
+  /*--cef(default_retval=CEF_RUNTIME_STYLE_DEFAULT)--*/
+  virtual cef_runtime_style_t GetRuntimeStyle() = 0;
 };
 
 #endif  // CEF_INCLUDE_CEF_BROWSER_H_

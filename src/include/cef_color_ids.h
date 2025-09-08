@@ -40,6 +40,7 @@
 
 // Undefine the macros that will be defined in this file.
 // This avoids previous definition conflicts with Chromium.
+#undef CHROMEOS_ASH_COLOR_IDS
 #undef CHROME_COLOR_IDS
 #undef CHROME_PLATFORM_SPECIFIC_COLOR_IDS
 #undef COLOR_IDS
@@ -599,8 +600,30 @@
   E_CPONLY(CEF_ColorWebNativeControlSliderPressed) \
   E_CPONLY(CEF_ColorWindowBackground)
 
+#if defined(OS_CHROMEOS_ASH)
+#define CHROMEOS_ASH_COLOR_IDS \
+  /* Colors for illustrations */ \
+  E_CPONLY(CEF_ColorNativeColor1) \
+  E_CPONLY(CEF_ColorNativeColor1Shade1) \
+  E_CPONLY(CEF_ColorNativeColor1Shade2) \
+  E_CPONLY(CEF_ColorNativeColor2) \
+  E_CPONLY(CEF_ColorNativeColor3) \
+  E_CPONLY(CEF_ColorNativeColor4) \
+  E_CPONLY(CEF_ColorNativeColor5) \
+  E_CPONLY(CEF_ColorNativeColor6) \
+  E_CPONLY(CEF_ColorNativeBaseColor) \
+  E_CPONLY(CEF_ColorNativeSecondaryColor) \
+  E_CPONLY(CEF_ColorNativeOnPrimaryContainerColor) \
+  E_CPONLY(CEF_ColorNativeAnalogColor) \
+  E_CPONLY(CEF_ColorNativeMutedColor) \
+  E_CPONLY(CEF_ColorNativeComplementColor) \
+  E_CPONLY(CEF_ColorNativeOnGradientColor)
+#elif defined(OS_CHROMEOS_LACROS)
+#define CHROMEOS_ASH_COLOR_IDS
+#endif
 #if defined(OS_CHROMEOS)
 #define PLATFORM_SPECIFIC_COLOR_IDS \
+  CHROMEOS_ASH_COLOR_IDS \
   /* NOTE: Nearly all of the following CrOS color ids will need to be re- */ \
   /* evaluated once CrOS fully supports the color pipeline. */ \
   E_CPONLY(CEF_ColorAshActionLabelFocusRingEdit) \
@@ -643,16 +666,8 @@
   E_CPONLY(CEF_ColorCrosSystemHighlightBorder) \
   E_CPONLY(CEF_ColorCrosSystemHighlightBorder1) \
   \
-  E_CPONLY(CEF_ColorNativeColor1) \
-  E_CPONLY(CEF_ColorNativeColor1Shade1) \
-  E_CPONLY(CEF_ColorNativeColor1Shade2) \
-  E_CPONLY(CEF_ColorNativeColor2) \
-  E_CPONLY(CEF_ColorNativeColor3) \
-  E_CPONLY(CEF_ColorNativeColor4) \
-  E_CPONLY(CEF_ColorNativeColor5) \
-  E_CPONLY(CEF_ColorNativeColor6) \
-  E_CPONLY(CEF_ColorNativeBaseColor) \
-  E_CPONLY(CEF_ColorNativeSecondaryColor)
+  E_CPONLY(CEF_ColorCrosSysPositive) \
+  E_CPONLY(CEF_ColorCrosSysComplementVariant)
 #elif defined(OS_LINUX)
 #define PLATFORM_SPECIFIC_COLOR_IDS \
   E_CPONLY(CEF_ColorNativeButtonBorder)\
@@ -736,7 +751,9 @@
   E_CPONLY(CEF_ColorAppMenuHighlightSeverityHigh) \
   E_CPONLY(CEF_ColorAppMenuHighlightSeverityMedium) \
   E_CPONLY(CEF_ColorAppMenuHighlightDefault) \
+  E_CPONLY(CEF_ColorAppMenuHighlightPrimary) \
   E_CPONLY(CEF_ColorAppMenuExpandedForegroundDefault) \
+  E_CPONLY(CEF_ColorAppMenuExpandedForegroundPrimary) \
   E_CPONLY(CEF_ColorAppMenuChipInkDropHover) \
   E_CPONLY(CEF_ColorAppMenuChipInkDropRipple) \
   /* Avatar colors. */ \
@@ -791,6 +808,8 @@
   E_CPONLY(CEF_ColorComposeDialogResultForeground) \
   E_CPONLY(CEF_ColorComposeDialogResultForegroundWhileLoading) \
   E_CPONLY(CEF_ColorComposeDialogResultIcon) \
+  E_CPONLY(CEF_ColorComposeDialogResultButtonsDivider) \
+  E_CPONLY(CEF_ColorComposeDialogResultContainerScrollbarThumb) \
   E_CPONLY(CEF_ColorComposeDialogScrollbarThumb) \
   E_CPONLY(CEF_ColorComposeDialogTitle) \
   E_CPONLY(CEF_ColorComposeDialogTextarea) \
@@ -799,6 +818,7 @@
   E_CPONLY(CEF_ColorComposeDialogTextareaReadonlyBackground) \
   E_CPONLY(CEF_ColorComposeDialogTextareaReadonlyForeground) \
   E_CPONLY(CEF_ColorComposeDialogTextareaIcon) \
+  E_CPONLY(CEF_ColorComposeDialogSelectOptionDisabled) \
   /* Desktop media tab list colors. */ \
   E_CPONLY(CEF_ColorDesktopMediaTabListBorder) \
   E_CPONLY(CEF_ColorDesktopMediaTabListPreviewBackground) \
@@ -812,6 +832,7 @@
   E_CPONLY(CEF_ColorDownloadBubbleInfoIcon) \
   E_CPONLY(CEF_ColorDownloadBubbleRowHover) \
   E_CPONLY(CEF_ColorDownloadBubbleShowAllDownloadsIcon) \
+  E_CPONLY(CEF_ColorDownloadBubblePrimaryIcon) \
   /* Download shelf colors. */ \
   E_CPONLY(CEF_ColorDownloadItemForeground) \
   E_CPONLY(CEF_ColorDownloadItemForegroundDangerous) \
@@ -983,6 +1004,9 @@
   E_CPONLY(CEF_ColorNewTabPageWallpaperSearchButtonBackground) \
   E_CPONLY(CEF_ColorNewTabPageWallpaperSearchButtonBackgroundHovered) \
   E_CPONLY(CEF_ColorNewTabPageWallpaperSearchButtonForeground) \
+  /* New Tab Page Colors for Doodle Share Button. */ \
+  E_CPONLY(CEF_ColorNewTabPageDoodleShareButtonBackground) \
+  E_CPONLY(CEF_ColorNewTabPageDoodleShareButtonIcon) \
   /* Omnibox colors. */ \
   E_CPONLY(CEF_ColorOmniboxAnswerIconBackground) \
   E_CPONLY(CEF_ColorOmniboxAnswerIconForeground) \
@@ -1285,6 +1309,7 @@
   E_CPONLY(CEF_ColorSidePanelFilterChipBackgroundSelected) \
   E_CPONLY(CEF_ColorSidePanelHeaderButtonIcon) \
   E_CPONLY(CEF_ColorSidePanelHeaderButtonIconDisabled) \
+  E_CPONLY(CEF_ColorSidePanelHoverResizeAreaHandle) \
   E_CPONLY(CEF_ColorSidePanelResizeAreaHandle) \
   E_CPONLY(CEF_ColorSidePanelScrollbarThumb) \
   E_CPONLY(CEF_ColorSidePanelTextfieldBorder) \
@@ -1573,6 +1598,7 @@ typedef enum {
 #include "include/base/internal/cef_color_id_macros.inc"
 
 // Undefine the macros that were defined in this file.
+#undef CHROMEOS_ASH_COLOR_IDS
 #undef CHROME_COLOR_IDS
 #undef CHROME_PLATFORM_SPECIFIC_COLOR_IDS
 #undef COLOR_IDS
