@@ -768,6 +768,8 @@
   E_CPONLY(CEF_ColorAvatarButtonIncognitoHover) \
   E_CPONLY(CEF_ColorAvatarButtonNormalRipple) \
   E_CPONLY(CEF_ColorAvatarStrokeLight) \
+  E_CPONLY(CEF_ColorAvatarStroke) \
+  E_CPONLY(CEF_ColorAvatarFillForContrast) \
   /* Bookmark bar colors. */ \
   E_CPONLY(CEF_ColorBookmarkBarBackground) \
   E_CPONLY(CEF_ColorBookmarkBarForeground) \
@@ -895,6 +897,8 @@
   /* Intent Picker colors. */ \
   E_CPONLY(CEF_ColorIntentPickerItemBackgroundHovered) \
   E_CPONLY(CEF_ColorIntentPickerItemBackgroundSelected) \
+  /* Hover Button colors */ \
+  E_CPONLY(CEF_ColorHoverButtonBackgroundHovered) \
   /* Lens overlay colors. */ \
   E_CPONLY(CEF_ColorLensOverlayToastBackground) \
   E_CPONLY(CEF_ColorLensOverlayToastButtonText) \
@@ -1117,13 +1121,18 @@
   E_CPONLY(CEF_ColorPipWindowSkipAdButtonBorder) \
   /* Product Specifications colors */ \
   E_CPONLY(CEF_ColorProductSpecificationsButtonBackground) \
+  E_CPONLY(CEF_ColorProductSpecificationsCitationBackground) \
+  E_CPONLY(CEF_ColorProductSpecificationsDetailChipBackground) \
   E_CPONLY(CEF_ColorProductSpecificationsDisclosureBackground) \
   E_CPONLY(CEF_ColorProductSpecificationsDisclosureForeground) \
   E_CPONLY(CEF_ColorProductSpecificationsDisclosureGradientEnd) \
   E_CPONLY(CEF_ColorProductSpecificationsDisclosureGradientStart) \
   E_CPONLY(CEF_ColorProductSpecificationsDisclosureSummaryBackground) \
   E_CPONLY(CEF_ColorProductSpecificationsDivider) \
+  E_CPONLY(CEF_ColorProductSpecificationsHorizontalCarouselScrollbarThumb) \
   E_CPONLY(CEF_ColorProductSpecificationsIcon) \
+  E_CPONLY(CEF_ColorProductSpecificationsIconButtonBackground) \
+  E_CPONLY(CEF_ColorProductSpecificationsLink) \
   E_CPONLY(CEF_ColorProductSpecificationsPageBackground) \
   E_CPONLY(CEF_ColorProductSpecificationsPrimaryTitle) \
   E_CPONLY(CEF_ColorProductSpecificationsSecondaryTitle) \
