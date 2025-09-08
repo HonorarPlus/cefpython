@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2025 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,7 +33,7 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=8f347a95168778ec0e686cdef93be3bc517e2f68$
+// $hash=f9659ff9b227bf7416ba893c4627c49e40f8561e$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_FRAME_CAPI_H_
@@ -97,6 +97,11 @@ typedef struct _cef_frame_t {
   /// Execute paste in this frame.
   ///
   void(CEF_CALLBACK* paste)(struct _cef_frame_t* self);
+
+  ///
+  /// Execute paste and match style in this frame.
+  ///
+  void(CEF_CALLBACK* paste_and_match_style)(struct _cef_frame_t* self);
 
   ///
   /// Execute delete in this frame.
