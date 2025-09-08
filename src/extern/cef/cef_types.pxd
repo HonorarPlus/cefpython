@@ -39,7 +39,6 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t browser_subprocess_path
         cef_string_t framework_dir_path
         cef_string_t main_bundle_path
-        int chrome_runtime
         int multi_threaded_message_loop
         int external_message_pump
         int windowless_rendering_enabled
@@ -47,7 +46,6 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t cache_path
         cef_string_t root_cache_path
         int persist_session_cookies
-        int persist_user_preferences
         cef_string_t user_agent
         cef_string_t user_agent_product
         cef_string_t locale
@@ -57,7 +55,6 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t javascript_flags
         cef_string_t resources_dir_path
         cef_string_t locales_dir_path
-        int pack_loading_disabled
         int remote_debugging_port
         int uncaught_exception_stack_size
         cef_color_t background_color

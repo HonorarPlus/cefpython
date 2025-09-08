@@ -62,8 +62,6 @@ cdef void SetApplicationSettings(
             cefAppSettings.cookieable_schemes_exclude_defaults = int(appSettings[key])
         elif key == "no_sandbox":
             cefAppSettings.no_sandbox = int(appSettings[key])
-        elif key == "chrome_runtime":
-            cefAppSettings.chrome_runtime = int(appSettings[key])
         elif key == "root_cache_path":
             cefString = new CefString(&cefAppSettings.root_cache_path)
             PyToCefStringPointer(appSettings[key], cefString)
@@ -105,8 +103,6 @@ cdef void SetApplicationSettings(
             cefString = new CefString(&cefAppSettings.locales_dir_path)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
-        elif key == "pack_loading_disabled":
-            cefAppSettings.pack_loading_disabled = int(appSettings[key])
         elif key == "uncaught_exception_stack_size":
             cefAppSettings.uncaught_exception_stack_size = <int>int(appSettings[key])
         elif key == "browser_subprocess_path":
@@ -120,9 +116,6 @@ cdef void SetApplicationSettings(
         elif key == "background_color":
             cefAppSettings.background_color = \
                     <cef_types.uint32_t>int(appSettings[key])
-        elif key == "persist_user_preferences":
-            cefAppSettings.persist_user_preferences = \
-                    int(appSettings[key])
         elif key == "windowless_rendering_enabled":
             cefAppSettings.windowless_rendering_enabled = \
                     int(appSettings[key])

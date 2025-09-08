@@ -387,9 +387,6 @@ struct CefSettingsTraits {
                    &target->framework_dir_path, copy);
     cef_string_set(src->main_bundle_path.str, src->main_bundle_path.length,
                    &target->main_bundle_path, copy);
-#if !defined(DISABLE_ALLOY_BOOTSTRAP)
-    target->chrome_runtime = src->chrome_runtime;
-#endif
     target->multi_threaded_message_loop = src->multi_threaded_message_loop;
     target->external_message_pump = src->external_message_pump;
     target->windowless_rendering_enabled = src->windowless_rendering_enabled;
@@ -400,7 +397,6 @@ struct CefSettingsTraits {
     cef_string_set(src->root_cache_path.str, src->root_cache_path.length,
                    &target->root_cache_path, copy);
     target->persist_session_cookies = src->persist_session_cookies;
-    target->persist_user_preferences = src->persist_user_preferences;
 
     cef_string_set(src->user_agent.str, src->user_agent.length,
                    &target->user_agent, copy);
@@ -419,7 +415,6 @@ struct CefSettingsTraits {
                    &target->resources_dir_path, copy);
     cef_string_set(src->locales_dir_path.str, src->locales_dir_path.length,
                    &target->locales_dir_path, copy);
-    target->pack_loading_disabled = src->pack_loading_disabled;
     target->remote_debugging_port = src->remote_debugging_port;
     target->uncaught_exception_stack_size = src->uncaught_exception_stack_size;
     target->background_color = src->background_color;
@@ -466,7 +461,6 @@ struct CefRequestContextSettingsTraits {
     cef_string_set(src->cache_path.str, src->cache_path.length,
                    &target->cache_path, copy);
     target->persist_session_cookies = src->persist_session_cookies;
-    target->persist_user_preferences = src->persist_user_preferences;
     cef_string_set(src->accept_language_list.str,
                    src->accept_language_list.length,
                    &target->accept_language_list, copy);
@@ -765,5 +759,64 @@ class CefAcceleratedPaintInfo : public cef_accelerated_paint_info_t {
   CefAcceleratedPaintInfo(const cef_accelerated_paint_info_t& r)
       : cef_accelerated_paint_info_t(r) {}
 };
+
+struct CefTaskInfoTraits {
+  using struct_type = cef_task_info_t;
+
+  static inline void init(struct_type* s) {}
+
+  static inline void clear(struct_type* s) { cef_string_clear(&s->title); }
+
+  static inline void set(const struct_type* src,
+                         struct_type* target,
+                         bool copy) {
+    target->id = src->id;
+    target->type = src->type;
+    target->is_killable = src->is_killable;
+    cef_string_set(src->title.str, src->title.length, &target->title, copy);
+    target->cpu_usage = src->cpu_usage;
+    target->number_of_processors = src->number_of_processors;
+    target->memory = src->memory;
+    target->gpu_memory = src->gpu_memory;
+    target->is_gpu_memory_inflated = src->is_gpu_memory_inflated;
+  }
+};
+
+///
+/// Class representing task information.
+///
+using CefTaskInfo = CefStructBase<CefTaskInfoTraits>;
+
+struct CefLinuxWindowPropertiesTraits {
+  using struct_type = cef_linux_window_properties_t;
+
+  static inline void init(struct_type* s) {}
+
+  static inline void clear(struct_type* s) {
+    cef_string_clear(&s->wayland_app_id);
+    cef_string_clear(&s->wm_class_class);
+    cef_string_clear(&s->wm_class_name);
+    cef_string_clear(&s->wm_role_name);
+  }
+
+  static inline void set(const struct_type* src,
+                         struct_type* target,
+                         bool copy) {
+    cef_string_set(src->wayland_app_id.str, src->wayland_app_id.length,
+                   &target->wayland_app_id, copy);
+    cef_string_set(src->wm_class_class.str, src->wm_class_class.length,
+                   &target->wm_class_class, copy);
+    cef_string_set(src->wm_class_name.str, src->wm_class_name.length,
+                   &target->wm_class_name, copy);
+    cef_string_set(src->wm_role_name.str, src->wm_role_name.length,
+                   &target->wm_role_name, copy);
+  }
+};
+
+///
+/// Class representing the Linux-specific window properties required
+/// for the window managers to correct group and display the window.
+///
+using CefLinuxWindowProperties = CefStructBase<CefLinuxWindowPropertiesTraits>;
 
 #endif  // CEF_INCLUDE_INTERNAL_CEF_TYPES_WRAPPERS_H_
