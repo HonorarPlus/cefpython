@@ -1,4 +1,4 @@
-Cython >= 3.0.10
+Cython == 3.0.12
 docopt >= 0.6.2
 cx-freeze >= 7.0.0
 setuptools >= 68.2.2
