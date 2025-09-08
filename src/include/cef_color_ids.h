@@ -237,6 +237,7 @@
   E_CPONLY(CEF_ColorSysStateHeaderHover) \
   E_CPONLY(CEF_ColorSysStateHeaderHoverInactive) \
   E_CPONLY(CEF_ColorSysStateHeaderSelect) \
+  E_CPONLY(CEF_ColorSysStateInactiveRing) \
   /* Effects. */ \
   E_CPONLY(CEF_ColorSysShadow) \
   /* AI. */ \
@@ -283,9 +284,10 @@
   \
   /* Further UI element colors */ \
   E_CPONLY(CEF_ColorAppMenuProfileRowBackground) \
-  E_CPONLY(CEF_ColorAppMenuProfileRowBackgroundHovered) \
   E_CPONLY(CEF_ColorAppMenuProfileRowChipBackground) \
   E_CPONLY(CEF_ColorAppMenuProfileRowChipHovered) \
+  E_CPONLY(CEF_ColorAppMenuRowBackgroundHovered) \
+  E_CPONLY(CEF_ColorAppMenuUpgradeRowBackground) \
   E_CPONLY(CEF_ColorAvatarHeaderArt) \
   E_CPONLY(CEF_ColorAvatarIconGuest) \
   E_CPONLY(CEF_ColorAvatarIconIncognito) \
@@ -435,17 +437,9 @@
   E_CPONLY(CEF_ColorNotificationInputForeground) \
   E_CPONLY(CEF_ColorNotificationInputPlaceholderForeground) \
   E_CPONLY(CEF_ColorOverlayScrollbarFill) \
-  E_CPONLY(CEF_ColorOverlayScrollbarFillDark) \
-  E_CPONLY(CEF_ColorOverlayScrollbarFillLight) \
   E_CPONLY(CEF_ColorOverlayScrollbarFillHovered) \
-  E_CPONLY(CEF_ColorOverlayScrollbarFillHoveredDark) \
-  E_CPONLY(CEF_ColorOverlayScrollbarFillHoveredLight) \
   E_CPONLY(CEF_ColorOverlayScrollbarStroke) \
-  E_CPONLY(CEF_ColorOverlayScrollbarStrokeDark) \
-  E_CPONLY(CEF_ColorOverlayScrollbarStrokeLight) \
   E_CPONLY(CEF_ColorOverlayScrollbarStrokeHovered) \
-  E_CPONLY(CEF_ColorOverlayScrollbarStrokeHoveredDark) \
-  E_CPONLY(CEF_ColorOverlayScrollbarStrokeHoveredLight) \
   E_CPONLY(CEF_ColorProgressBar) \
   E_CPONLY(CEF_ColorProgressBarBackground) \
   E_CPONLY(CEF_ColorProgressBarPaused) \
@@ -757,13 +751,14 @@
   E_CPONLY(CEF_ColorAppMenuChipInkDropHover) \
   E_CPONLY(CEF_ColorAppMenuChipInkDropRipple) \
   /* Avatar colors. */ \
-  /* TODO(crbug.com/1422119): Refactor the Avatar Button colors as Profile */ \
+  /* TODO(crbug.com/40259490): Refactor the Avatar Button colors as Profile */ \
   /* Menu Button colors. */ \
   E_CPONLY(CEF_ColorAvatarButtonHighlightDefault) \
   E_CPONLY(CEF_ColorAvatarButtonHighlightNormal) \
   E_CPONLY(CEF_ColorAvatarButtonHighlightSyncError) \
   E_CPONLY(CEF_ColorAvatarButtonHighlightSyncPaused) \
   E_CPONLY(CEF_ColorAvatarButtonHighlightSigninPaused) \
+  E_CPONLY(CEF_ColorAvatarButtonHighlightExplicitText) \
   E_CPONLY(CEF_ColorAvatarButtonHighlightIncognito) \
   E_CPONLY(CEF_ColorAvatarButtonHighlightNormalForeground) \
   E_CPONLY(CEF_ColorAvatarButtonHighlightDefaultForeground) \
@@ -974,6 +969,7 @@
   E_CPONLY(CEF_ColorNewTabPageModuleControlBorder) \
   E_CPONLY(CEF_ColorNewTabPageModuleContextMenuDivider) \
   E_CPONLY(CEF_ColorNewTabPageModuleBackground) \
+  E_CPONLY(CEF_ColorNewTabPageModuleIconBackground) \
   E_CPONLY(CEF_ColorNewTabPageModuleElementDivider) \
   E_CPONLY(CEF_ColorNewTabPageModuleIconContainerBackground) \
   E_CPONLY(CEF_ColorNewTabPageModuleItemBackground) \
@@ -1032,6 +1028,7 @@
   E_CPONLY(CEF_ColorOmniboxResultsBackground) \
   E_CPONLY(CEF_ColorOmniboxResultsBackgroundHovered) \
   E_CPONLY(CEF_ColorOmniboxResultsBackgroundSelected) \
+  E_CPONLY(CEF_ColorOmniboxResultsBackgroundIPH) \
   E_CPONLY(CEF_ColorOmniboxResultsButtonBorder) \
   E_CPONLY(CEF_ColorOmniboxResultsButtonIcon) \
   E_CPONLY(CEF_ColorOmniboxResultsButtonIconSelected) \
@@ -1077,6 +1074,8 @@
   E_CPONLY(CEF_ColorPageInfoChosenObjectDeleteButtonIconDisabled) \
   E_CPONLY(CEF_ColorPageInfoIconHover) \
   E_CPONLY(CEF_ColorPageInfoIconPressed) \
+  E_CPONLY(CEF_ColorPageInfoLensOverlayBackground) \
+  E_CPONLY(CEF_ColorPageInfoLensOverlayForeground) \
   E_CPONLY(CEF_ColorPageInfoPermissionBlockedOnSystemLevelDisabled) \
   E_CPONLY(CEF_ColorPageInfoPermissionForeground) \
   E_CPONLY(CEF_ColorPageInfoPermissionUsedIcon) \
@@ -1107,7 +1106,13 @@
   E_CPONLY(CEF_ColorPipWindowSkipAdButtonBackground) \
   E_CPONLY(CEF_ColorPipWindowSkipAdButtonBorder) \
   /* Product Specifications colors */ \
+  E_CPONLY(CEF_ColorProductSpecificationsButtonBackground) \
+  E_CPONLY(CEF_ColorProductSpecificationsTonalButtonBackground) \
   E_CPONLY(CEF_ColorProductSpecificationsContentBackground) \
+  E_CPONLY(CEF_ColorProductSpecificationsDivider) \
+  E_CPONLY(CEF_ColorProductSpecificationsPageBackground) \
+  E_CPONLY(CEF_ColorProductSpecificationsPrimaryTitle) \
+  E_CPONLY(CEF_ColorProductSpecificationsSecondaryTitle) \
   E_CPONLY(CEF_ColorProductSpecificationsSummaryBackground) \
   /* Profile Menu colors. */ \
   E_CPONLY(CEF_ColorProfileMenuBackground) \
