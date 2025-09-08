@@ -187,8 +187,9 @@
   E_CPONLY(CEF_ColorSysWhite) \
   /* Inverse. */ \
   E_CPONLY(CEF_ColorSysInversePrimary) \
-  E_CPONLY(CEF_ColorSysInverseSurface) \
   E_CPONLY(CEF_ColorSysInverseOnSurface) \
+  E_CPONLY(CEF_ColorSysInverseSurface) \
+  E_CPONLY(CEF_ColorSysInverseSurfacePrimary) \
   /* Surfaces. */ \
   E_CPONLY(CEF_ColorSysSurface) \
   E_CPONLY(CEF_ColorSysSurface1) \
@@ -225,6 +226,7 @@
   E_CPONLY(CEF_ColorSysStateRippleNeutralOnProminent) \
   E_CPONLY(CEF_ColorSysStateRippleNeutralOnSubtle) \
   E_CPONLY(CEF_ColorSysStateRipplePrimary) \
+  E_CPONLY(CEF_ColorSysStateScrim) \
   E_CPONLY(CEF_ColorSysStateFocusRing) \
   E_CPONLY(CEF_ColorSysStateFocusHighlight) \
   E_CPONLY(CEF_ColorSysStateTextHighlight) \
@@ -288,6 +290,7 @@
   E_CPONLY(CEF_ColorAppMenuProfileRowChipHovered) \
   E_CPONLY(CEF_ColorAppMenuRowBackgroundHovered) \
   E_CPONLY(CEF_ColorAppMenuUpgradeRowBackground) \
+  E_CPONLY(CEF_ColorAppMenuUpgradeRowSubstringForeground) \
   E_CPONLY(CEF_ColorAvatarHeaderArt) \
   E_CPONLY(CEF_ColorAvatarIconGuest) \
   E_CPONLY(CEF_ColorAvatarIconIncognito) \
@@ -416,6 +419,7 @@
   E_CPONLY(CEF_ColorMenuDropmarker) \
   E_CPONLY(CEF_ColorMenuIcon) \
   E_CPONLY(CEF_ColorMenuIconDisabled) \
+  E_CPONLY(CEF_ColorMenuIconOnEmphasizedBackground) \
   E_CPONLY(CEF_ColorMenuItemBackgroundAlertedInitial) \
   E_CPONLY(CEF_ColorMenuItemBackgroundAlertedTarget) \
   E_CPONLY(CEF_ColorMenuItemBackgroundHighlighted) \
@@ -803,7 +807,6 @@
   E_CPONLY(CEF_ColorComposeDialogResultForeground) \
   E_CPONLY(CEF_ColorComposeDialogResultForegroundWhileLoading) \
   E_CPONLY(CEF_ColorComposeDialogResultIcon) \
-  E_CPONLY(CEF_ColorComposeDialogResultButtonsDivider) \
   E_CPONLY(CEF_ColorComposeDialogResultContainerScrollbarThumb) \
   E_CPONLY(CEF_ColorComposeDialogScrollbarThumb) \
   E_CPONLY(CEF_ColorComposeDialogTitle) \
@@ -895,6 +898,8 @@
   /* Intent Picker colors. */ \
   E_CPONLY(CEF_ColorIntentPickerItemBackgroundHovered) \
   E_CPONLY(CEF_ColorIntentPickerItemBackgroundSelected) \
+  /* Lens overlay colors. */ \
+  E_CPONLY(CEF_ColorLensOverlayToastBackground) \
   /* Location bar colors. */ \
   E_CPONLY(CEF_ColorLocationBarBackground) \
   E_CPONLY(CEF_ColorLocationBarBackgroundHovered) \
@@ -969,6 +974,9 @@
   E_CPONLY(CEF_ColorNewTabPageModuleControlBorder) \
   E_CPONLY(CEF_ColorNewTabPageModuleContextMenuDivider) \
   E_CPONLY(CEF_ColorNewTabPageModuleBackground) \
+  E_CPONLY(CEF_ColorNewTabPageModuleCalendarEventCollapsedBackground) \
+  E_CPONLY(CEF_ColorNewTabPageModuleCalendarEventExpandedBackground) \
+  E_CPONLY(CEF_ColorNewTabPageModuleCalendarEventTimeStatusBackground) \
   E_CPONLY(CEF_ColorNewTabPageModuleIconBackground) \
   E_CPONLY(CEF_ColorNewTabPageModuleElementDivider) \
   E_CPONLY(CEF_ColorNewTabPageModuleIconContainerBackground) \
@@ -1072,10 +1080,10 @@
   E_CPONLY(CEF_ColorPageInfoBackgroundTonal) \
   E_CPONLY(CEF_ColorPageInfoChosenObjectDeleteButtonIcon) \
   E_CPONLY(CEF_ColorPageInfoChosenObjectDeleteButtonIconDisabled) \
+  E_CPONLY(CEF_ColorPageInfoForeground) \
+  E_CPONLY(CEF_ColorPageInfoForegroundTonal) \
   E_CPONLY(CEF_ColorPageInfoIconHover) \
   E_CPONLY(CEF_ColorPageInfoIconPressed) \
-  E_CPONLY(CEF_ColorPageInfoLensOverlayBackground) \
-  E_CPONLY(CEF_ColorPageInfoLensOverlayForeground) \
   E_CPONLY(CEF_ColorPageInfoPermissionBlockedOnSystemLevelDisabled) \
   E_CPONLY(CEF_ColorPageInfoPermissionForeground) \
   E_CPONLY(CEF_ColorPageInfoPermissionUsedIcon) \
@@ -1112,6 +1120,7 @@
   E_CPONLY(CEF_ColorProductSpecificationsDivider) \
   E_CPONLY(CEF_ColorProductSpecificationsPageBackground) \
   E_CPONLY(CEF_ColorProductSpecificationsPrimaryTitle) \
+  E_CPONLY(CEF_ColorProductSpecificationsIcon) \
   E_CPONLY(CEF_ColorProductSpecificationsSecondaryTitle) \
   E_CPONLY(CEF_ColorProductSpecificationsSummaryBackground) \
   /* Profile Menu colors. */ \
