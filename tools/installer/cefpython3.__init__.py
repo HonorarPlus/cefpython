@@ -71,5 +71,7 @@ elif sys.version_info[:2] == (3, 12):
     from . import cefpython_py312 as cefpython
 elif sys.version_info[:2] == (3, 13):
     from . import cefpython_py313 as cefpython
+elif sys.version_info[:2] == (3, 14):
+    from . import cefpython_py314 as cefpython
 else:
     raise Exception("Python version not supported: " + sys.version)

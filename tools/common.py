@@ -496,6 +496,8 @@ def get_msvs_for_python(vs_prefix=False):
         return "VS2022" if vs_prefix else "2022"
     elif sys.version_info[:2] == (3, 13):
         return "VS2022" if vs_prefix else "2022"
+    elif sys.version_info[:2] == (3, 14):
+        return "VS2022" if vs_prefix else "2022"
     else:
         print("ERROR: This version of Python is not supported")
         sys.exit(1)
