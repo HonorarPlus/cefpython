@@ -23,6 +23,10 @@ import os
 import platform
 import subprocess
 import sys
+
+if sys.platform == "win32":
+    import msilib
+
 import sysconfig
 
 # The setuptools package is not installed by default on a clean
@@ -151,6 +155,7 @@ def main():
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
             "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
             "Topic :: Desktop Environment",
             "Topic :: Internet",
             "Topic :: Internet :: WWW/HTTP",

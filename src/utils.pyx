@@ -42,29 +42,33 @@ cpdef py_bool IsThread(int threadID):
 #       unicode strings and writing them to file (codecs.open).
 #       This change is required to work with Cython 0.20.
 
-cpdef object Debug(py_string msg):
-    """Print debug message. Will be shown only when settings.debug=True."""
-    # In Python 3 str or bytes may be passed
-    if type(msg) != str and type(msg) == bytes:
-        msg = msg.decode("utf-8", "replace")
-    # Convert to str in case other kind of object was passed
-    msg = str(msg)
-    msg = "[Browser process] " + msg
-    # CEF logging is initialized only after CEF was initialized.
-    # Otherwise the default is LOGSEVERITY_INFO and log_file is
-    # none.
-    if g_cef_initialized or g_debug:
-        cef_log_info(PyStringToChar(msg))
+cpdef bytes toBytes(object input):
+    """ Convert input to bytes string."""
+    if input is None:
+        return b""
+    elif isinstance(input, bytes):
+        return input
+    else:
+        return str(input).encode("utf-8", "replace")
 
-cdef void NonCriticalError(py_string msg) except *:
+cpdef object Debug(object message):
+    """Print debug message. Will be shown only when settings.debug=True."""
+    cdef bytes msg_bytes
+    msg_bytes = toBytes(message)
+    msg_bytes = b"[Browser process] " + msg_bytes
+    if g_cef_initialized or g_debug:
+        cef_log_info(msg_bytes)
+    return None
+
+cdef void NonCriticalError(object msg) except *:
     """Notify about error gently. Does not terminate application."""
-    # In Python 3 str or bytes may be passed
-    if type(msg) != str and type(msg) == bytes:
-        msg = msg.decode("utf-8", "replace")
-    # Convert to str in case other kind of object was passed
-    msg = str(msg)
-    msg = "[Browser process] " + msg
-    cef_log_error(PyStringToChar(msg))
+    cdef bytes msg_bytes
+    if isinstance(msg, bytes):
+        msg_bytes = msg
+    else:
+        msg_bytes = str(msg).encode("utf-8", "replace")
+    msg_bytes = b"[Browser process] " + msg_bytes
+    cef_log_error(msg_bytes)
 
 cpdef str GetSystemError():
     IF UNAME_SYSNAME == "Windows":

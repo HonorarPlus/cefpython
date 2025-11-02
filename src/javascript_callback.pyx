@@ -33,7 +33,7 @@ cdef class JavascriptCallback:
                 browser.GetMainFrame().SendProcessMessage(
                         cef_types.PID_RENDERER,
                         self.frame.GetIdentifier(),
-                        "ExecuteJavascriptCallback",
+                        str("ExecuteJavascriptCallback"),
                         [self.callbackId] + list(args))
             else:
                 # This code probably ain't needed

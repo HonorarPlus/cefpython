@@ -22,7 +22,7 @@ cdef object CheckForCefPythonMessageHash(CefRefPtr[CefBrowser] cefBrowser,
     # TODO: this could be sent using CefBinaryNamedString in the future,
     #       see this topic "Sending custom data types using process messaging":
     #       http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10881
-    cdef py_string cefPythonMessageHash = "####cefpython####"
+    cdef py_string cefPythonMessageHash = str("####cefpython####")
     cdef JavascriptCallback jsCallback
     cdef py_string jsonData
     cdef object message

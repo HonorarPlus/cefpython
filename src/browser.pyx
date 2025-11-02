@@ -231,7 +231,17 @@ cdef class PyBrowser:
         if self.imageBuffer:
             free(self.imageBuffer)
 
-    cpdef py_void SetClientCallback(self, py_string name, object callback):
+    cpdef py_void SetClientCallback(self, object cname, object callback):
+        cdef bytes name_bytes
+        cdef str name_str
+
+        if isinstance(cname, bytes):
+            name_bytes = cname
+            name_str = name_bytes.decode("utf-8", "replace")
+        else:
+            name_str = str(cname)
+            name_bytes = name_str.encode("utf-8", "replace")
+
         if not self.allowedClientCallbacks:
             # DisplayHandler
             self.allowedClientCallbacks += [
@@ -287,10 +297,10 @@ cdef class PyBrowser:
                                             "OnBeforeDownload",
                                             "OnDownloadUpdated"]
 
-        if name not in self.allowedClientCallbacks:
+        if name_str not in self.allowedClientCallbacks:
             raise Exception("Browser.SetClientCallback() failed: unknown "
-                            "callback: %s" % name)
-        self.clientCallbacks[name] = callback
+                            "callback: %s" % name_str)
+        self.clientCallbacks[name_bytes] = callback
 
     cpdef py_void SetClientHandler(self, object clientHandler):
         if not hasattr(clientHandler, "__class__"):
@@ -307,7 +317,13 @@ cdef class PyBrowser:
             if key and key[0] != '_':
                 self.SetClientCallback(key, method)
 
-    cpdef object GetClientCallback(self, py_string name):
+    cpdef object GetClientCallback(self, object cname):
+        cdef bytes name
+        if isinstance(cname, bytes):
+            name = cname
+        else:
+            name = str(cname).encode("utf-8", "replace")
+        
         if name in self.clientCallbacks:
             return self.clientCallbacks[name]
 
@@ -353,8 +369,15 @@ cdef class PyBrowser:
             NonCriticalError("GetImage not implemented on this platform")
             return None
 
-    cpdef object GetSetting(self, py_string key):
+    cpdef object GetSetting(self, object okey):
         cdef int browser_id = self.GetIdentifier()
+        
+        cdef bytes key
+        if isinstance(okey, bytes):
+            key = okey
+        else:
+            key = str(okey).encode("utf-8", "replace")
+            
         if browser_id in g_browser_settings:
             if key in g_browser_settings[browser_id]:
                 return g_browser_settings[browser_id][key]
@@ -421,7 +444,7 @@ cdef class PyBrowser:
         self.GetMainFrame().ExecuteFunction(*args)
 
     cpdef py_void ExecuteJavascript(self, py_string jsCode,
-            py_string scriptUrl="", int startLine=1):
+            py_string scriptUrl=str(None), int startLine=1):
         self.GetMainFrame().ExecuteJavascript(jsCode, scriptUrl, startLine)
 
     cpdef py_void Find(self, py_string searchText,
