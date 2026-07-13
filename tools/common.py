@@ -13,6 +13,7 @@ import re
 import shutil
 import struct
 import sys
+import sysconfig
 import tempfile
 
 # These sample apps will be deleted when creating setup/wheel packages
@@ -220,8 +221,39 @@ SUBPROCESS_EXE = os.path.join(BUILD_SUBPROCESS,
 
 VS_PLATFORM_ARG = "x86" if ARCH32 else "amd64"
 
-VS2022_VCVARS = (r"C:\Program Files\Microsoft Visual Studio"
-                 r"\2022\Community\VC\Auxiliary\Build\vcvarsall.bat")
+VS2026_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio"
+                 r"\18\BuildTools\VC\Auxiliary\Build\vcvarsall.bat")
+
+VS2022_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio"
+                 r"\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat")
+
+VISUAL_STUDIO_TOOLCHAINS = (
+    ("2026", VS2026_VCVARS),
+    ("2022", VS2022_VCVARS),
+)
+ACTIVE_MSVC_VERSION, ACTIVE_MSVC_VCVARS = next(
+    ((version, vcvars_path) for version, vcvars_path in VISUAL_STUDIO_TOOLCHAINS
+     if os.path.exists(vcvars_path)),
+    VISUAL_STUDIO_TOOLCHAINS[-1],
+)
+ACTIVE_VISUAL_STUDIO_ROOT = os.path.realpath(
+    os.path.join(os.path.dirname(ACTIVE_MSVC_VCVARS), "..", "..", ".."))
+VISUAL_STUDIO_BUILD_TOOL_ROOTS = tuple(
+    os.path.realpath(os.path.join(os.path.dirname(vcvars_path), "..", "..", ".."))
+    for _, vcvars_path in VISUAL_STUDIO_TOOLCHAINS
+)
+ACTIVE_MSVC_CMAKE_DIR = next(
+    (os.path.join(root, "Common7", "IDE", "CommonExtensions", "Microsoft", "CMake", "CMake", "bin")
+     for root in VISUAL_STUDIO_BUILD_TOOL_ROOTS
+     if os.path.isdir(os.path.join(root, "Common7", "IDE", "CommonExtensions", "Microsoft", "CMake", "CMake", "bin"))),
+    "",
+)
+ACTIVE_MSVC_NINJA_DIR = next(
+    (os.path.join(root, "Common7", "IDE", "CommonExtensions", "Microsoft", "CMake", "Ninja")
+     for root in VISUAL_STUDIO_BUILD_TOOL_ROOTS
+     if os.path.isdir(os.path.join(root, "Common7", "IDE", "CommonExtensions", "Microsoft", "CMake", "Ninja"))),
+    "",
+)
 
 VS2019_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio"
                  r"\2019\Community\VC\Auxiliary\Build\vcvarsall.bat")
@@ -276,6 +308,10 @@ def get_python_include_path():
     #    ~/.pyenv/versions/2.7.13/include/python2.7
     # 3) ~/.pyenv/versions/3.4.6/include/python2.7m
     # 4) /usr/include/python2.7
+    configured_include_dir = sysconfig.get_path("include")
+    if os.path.isfile(os.path.join(configured_include_dir, "Python.h")):
+        return configured_include_dir
+
     base_dir = os.path.dirname(sys.executable)
     try_dirs = ["{base_dir}/include",
                 "{base_dir}/../include/python{ver}",
@@ -490,14 +526,8 @@ def get_msvs_for_python(vs_prefix=False):
         return "VS2019" if vs_prefix else "2019"
     elif sys.version_info[:2] == (3, 10):
         return "VS2019" if vs_prefix else "2019"
-    elif sys.version_info[:2] == (3, 11):
-        return "VS2022" if vs_prefix else "2022"
-    elif sys.version_info[:2] == (3, 12):
-        return "VS2022" if vs_prefix else "2022"
-    elif sys.version_info[:2] == (3, 13):
-        return "VS2022" if vs_prefix else "2022"
-    elif sys.version_info[:2] == (3, 14):
-        return "VS2022" if vs_prefix else "2022"
+    elif (3, 11) <= sys.version_info[:2] <= (3, 14):
+        return "VS{version}".format(version=ACTIVE_MSVC_VERSION) if vs_prefix else ACTIVE_MSVC_VERSION
     else:
         print("ERROR: This version of Python is not supported")
         sys.exit(1)

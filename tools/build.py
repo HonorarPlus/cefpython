@@ -67,6 +67,7 @@ import glob
 import shutil
 import subprocess
 import re
+from packaging.version import Version
 
 # raw_input() was renamed to input() in Python 3
 try:
@@ -227,8 +228,8 @@ def check_cython_version():
         print("[build.py] ERROR: Cython is not installed ({0} required)"
               .format(require_version))
         sys.exit(1)
-    if version != require_version:
-        print("[build.py] ERROR: Wrong Cython version: {0}. Required: {1}"
+    if Version(version) < Version(require_version):
+        print("[build.py] ERROR: Cython version is too old: {0}. Required: {1}+"
               .format(version, require_version))
         sys.exit(1)
     print("[build.py] Cython version: {0}".format(version))
@@ -274,6 +275,9 @@ def setup_environ():
             "C:\\Windows\\System32\\Wbem",
             get_python_path(),
         ]
+        existing_paths = os.environ.get("PATH", "").split(os.pathsep)
+        path.extend(existing_path for existing_path in existing_paths
+                    if existing_path and existing_path not in path)
         os.environ["PATH"] = os.pathsep.join(path)
         print("[build.py] environ PATH: {path}"
               .format(path=os.environ["PATH"]))
@@ -397,7 +401,10 @@ def fix_cefpython_api_header_file():
 def compile_cpp_projects_with_setuptools():
     """Use setuptools to build static libraries / executable."""
     compile_cpp_projects = os.path.join(TOOLS_DIR, "build_cpp_projects.py")
-    retcode = subprocess.call([sys.executable, compile_cpp_projects])
+    command = [sys.executable, compile_cpp_projects]
+    if REBUILD_CPP:
+        command.append("--force")
+    retcode = subprocess.call(command)
     if retcode != 0:
         print("[build.py] ERROR: Failed to compile C++ projects")
         sys.exit(1)
@@ -770,7 +777,7 @@ def build_cefpython_module():
     if ENABLE_LINE_TRACING:
         enable_line_tracing = "--enable-line-tracing"
 
-    command = ("\"{python}\" {tools_dir}/cython_setup.py build_ext"
+    command = ("\"{python}\" \"{tools_dir}/cython_setup.py\" build_ext"
                " {enable_profiling} {enable_line_tracing}"
                .format(python=sys.executable, tools_dir=TOOLS_DIR,
                        enable_profiling=enable_profiling,
@@ -803,7 +810,8 @@ def build_cefpython_module():
                   " programmatically now.")
             args = list()
             args.append("\"{python}\"".format(python=sys.executable))
-            args.append(os.path.join(TOOLS_DIR, os.path.basename(__file__)))
+            args.append("\"{script}\"".format(
+                script=os.path.join(TOOLS_DIR, os.path.basename(__file__))))
             assert os.path.basename(__file__) in sys.argv[0]
             args.extend(SYS_ARGV_ORIGINAL[1:])
             command = " ".join(args)
@@ -875,11 +883,7 @@ def install_and_run():
     # Make setup installer
     print("[build.py] Make setup installer")
     make_tool = os.path.join(TOOLS_DIR, "make_installer.py")
-    command = ("\"{python}\" {make_tool} --version {version}"
-               .format(python=sys.executable,
-                       make_tool=make_tool,
-                       version=VERSION))
-    ret = os.system(command)
+    ret = subprocess.call([sys.executable, make_tool, "--version", VERSION])
     if ret != 0:
         print("[build.py] ERROR while making installer package")
         sys.exit(1)
@@ -887,10 +891,13 @@ def install_and_run():
     # Install
     print("[build.py] Install the cefpython package")
     os.chdir(setup_installer_dir)
-    command = ("\"{python}\" setup.py install"
-               .format(python=sys.executable))
-    command = sudo_command(command, python=sys.executable)
-    ret = os.system(command)
+    if WINDOWS:
+        ret = subprocess.call([sys.executable, "setup.py", "install"])
+    else:
+        command = ("\"{python}\" setup.py install"
+                   .format(python=sys.executable))
+        command = sudo_command(command, python=sys.executable)
+        ret = os.system(command)
     if ret != 0:
         print("[build.py] ERROR while installing package")
         sys.exit(1)
@@ -902,10 +909,7 @@ def install_and_run():
     # Run unittests
     print("[build.py] Run unittests")
     test_runner = os.path.join(UNITTESTS_DIR, "_test_runner.py")
-    command = ("\"{python}\" {test_runner}"
-               .format(python=sys.executable,
-                       test_runner=test_runner))
-    ret = os.system(command)
+    ret = subprocess.call([sys.executable, test_runner])
     if ret != 0:
         print("[build.py] ERROR while running unit tests")
         sys.exit(1)
@@ -920,11 +924,10 @@ def install_and_run():
         if HELLO_WORLD_FLAG:
             flags += " --hello-world"
         run_examples = os.path.join(TOOLS_DIR, "run_examples.py")
-        command = ("\"{python}\" {run_examples} {flags}"
-                   .format(python=sys.executable,
-                           run_examples=run_examples,
-                           flags=flags))
-        ret = os.system(command)
+        command = [sys.executable, run_examples]
+        if flags:
+            command.append(flags.strip())
+        ret = subprocess.call(command)
         if ret != 0:
             print("[build.py] ERROR while running examples")
             sys.exit(1)

@@ -47,6 +47,7 @@ subprocess_MACROS = MACROS + [
 # Compiler args
 COMPILER_ARGS = [
     "/EHsc",
+    "/std:c++17",
 ]
 subprocess_COMPILER_ARGS = [
     "/MT",

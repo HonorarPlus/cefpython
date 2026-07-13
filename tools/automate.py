@@ -184,7 +184,7 @@ def setup_options(docopt_args):
         Options.build_dir = os.path.realpath(Options.build_dir)
     else:
         Options.build_dir = os.path.join(Options.cefpython_dir, "build")
-    if " " in Options.build_dir:
+    if " " in Options.build_dir and not Options.prebuilt_cef:
         print("[automate.py] ERROR: Build dir cannot contain spaces")
         print(">> " + Options.build_dir)
         sys.exit(1)
@@ -196,7 +196,7 @@ def setup_options(docopt_args):
         Options.cef_build_dir = os.path.realpath(Options.cef_build_dir)
     else:
         Options.cef_build_dir = Options.build_dir
-    if " " in Options.cef_build_dir:
+    if " " in Options.cef_build_dir and not Options.prebuilt_cef:
         print("[automate.py] ERROR: CEF build dir cannot contain spaces")
         print(">> " + Options.cef_build_dir)
         sys.exit(1)
@@ -389,55 +389,58 @@ def build_cef_projects():
         assert os.path.exists(cef_binary)
         Options.cef_binary = cef_binary
 
-    # Set build directory
-    build_cefclient_dir = os.path.join(Options.cef_binary,
-                                       "build_cefclient")
-    cefclient_exe = os.path.join(build_cefclient_dir, "tests", "cefclient",
-                                 Options.build_type,
-                                 "cefclient" + APP_EXT)
-
-    # Check whether already built
-    already_built = False
-    if os.path.exists(cefclient_exe):
-        already_built = True
-    elif os.path.exists(build_cefclient_dir):
-        # Last build failed, clean directory
-        assert build_cefclient_dir
-        shutil.rmtree(build_cefclient_dir)
-        print("[automate.py] Create build_cefclient/ dir in cef_binary*/ dir")
-        os.makedirs(build_cefclient_dir)
+    if Options.prebuilt_cef:
+        print("[automate.py] Skip optional CEF sample apps for prebuilt CEF")
     else:
-        print("[automate.py] Create build_cefclient/ dir in cef_binary*/ dir")
-        os.makedirs(build_cefclient_dir)
+        # Set build directory
+        build_cefclient_dir = os.path.join(Options.cef_binary,
+                                           "build_cefclient")
+        cefclient_exe = os.path.join(build_cefclient_dir, "tests", "cefclient",
+                                     Options.build_type,
+                                     "cefclient" + APP_EXT)
 
-    # Build cefclient, cefsimple, ceftests
-    if already_built:
-        print("[automate.py] Already built: cefclient, cefsimple, ceftests")
-    else:
-        print("[automate.py] Build cefclient, cefsimple, ceftests")
-        # Cmake
-        command = prepare_build_command()
-        command.extend(["cmake", "-G", "Ninja"])
-        command.append("-DCMAKE_BUILD_TYPE="+Options.build_type)
-        if MAC:
-            command.append("-DPROJECT_ARCH=x86_64")
-        command.append("..")
-        run_command(command, build_cefclient_dir)
-        print("[automate.py] OK")
-        # Ninja
-        command = prepare_build_command()
-        # On Mac cefclient fails with XCode 5:
-        # > cefclient_mac.mm:22:29: error: property 'mainMenu' not found
-        if MAC:
-            # Build only cefsimple
-            command.extend(["ninja", "-j", Options.ninja_jobs,
-                            "cefsimple"])
+        # Check whether already built
+        already_built = False
+        if os.path.exists(cefclient_exe):
+            already_built = True
+        elif os.path.exists(build_cefclient_dir):
+            # Last build failed, clean directory
+            assert build_cefclient_dir
+            shutil.rmtree(build_cefclient_dir)
+            print("[automate.py] Create build_cefclient/ dir in cef_binary*/ dir")
+            os.makedirs(build_cefclient_dir)
         else:
-            command.extend(["ninja", "-j", Options.ninja_jobs,
-                            "cefclient", "cefsimple", "ceftests"])
-        run_command(command, build_cefclient_dir)
-        print("[automate.py] OK")
-        assert os.path.exists(cefclient_exe)
+            print("[automate.py] Create build_cefclient/ dir in cef_binary*/ dir")
+            os.makedirs(build_cefclient_dir)
+
+        # Build cefclient, cefsimple, ceftests
+        if already_built:
+            print("[automate.py] Already built: cefclient, cefsimple, ceftests")
+        else:
+            print("[automate.py] Build cefclient, cefsimple, ceftests")
+            # Cmake
+            command = prepare_build_command()
+            command.extend(["cmake", "-G", "Ninja"])
+            command.append("-DCMAKE_BUILD_TYPE="+Options.build_type)
+            if MAC:
+                command.append("-DPROJECT_ARCH=x86_64")
+            command.append("..")
+            run_command(command, build_cefclient_dir)
+            print("[automate.py] OK")
+            # Ninja
+            command = prepare_build_command()
+            # On Mac cefclient fails with XCode 5:
+            # > cefclient_mac.mm:22:29: error: property 'mainMenu' not found
+            if MAC:
+                # Build only cefsimple
+                command.extend(["ninja", "-j", Options.ninja_jobs,
+                                "cefsimple"])
+            else:
+                command.extend(["ninja", "-j", Options.ninja_jobs,
+                                "cefclient", "cefsimple", "ceftests"])
+            run_command(command, build_cefclient_dir)
+            print("[automate.py] OK")
+            assert os.path.exists(cefclient_exe)
 
     # Build libcef_dll_wrapper libs
     if WINDOWS:
@@ -682,7 +685,7 @@ def prepare_build_command(build_lib=False, vcvars=None):
             command.append(VS_PLATFORM_ARG)
         else:
             if int(Options.cef_branch) >= 5359:
-                command.append(VS2022_VCVARS)
+                command.append(ACTIVE_MSVC_VCVARS)
             elif int(Options.cef_branch) >= 2704:
                 command.append(VS2019_VCVARS)
             else:
@@ -751,8 +754,6 @@ def create_prebuilt_binaries():
             "build_cefclient", "tests", "cefclient",
             Options.build_type,
             "cefclient" + APP_EXT)
-    if not MAC:
-        assert os.path.exists(cefclient)
     if LINUX:
         # On Windows resources/*.html files are embedded inside exe
         cefclient_files = os.path.join(
@@ -768,8 +769,6 @@ def create_prebuilt_binaries():
             "build_cefclient", "tests", "cefsimple",
             Options.build_type,
             "cefsimple" + APP_EXT)
-    if not MAC:
-        assert os.path.exists(cefsimple)
 
     # ceftests
     ceftests = os.path.join(
@@ -777,8 +776,6 @@ def create_prebuilt_binaries():
             "build_cefclient", "tests", "ceftests",
             Options.build_type,
             "ceftests" + APP_EXT)
-    if not MAC:
-        assert os.path.exists(ceftests)
     if LINUX:
         # On Windows resources/*.html files are embedded inside exe
         ceftests_files = os.path.join(
@@ -800,8 +797,10 @@ def create_prebuilt_binaries():
     if not MAC:
         # Currently do not copy apps on Mac, as they take lots of
         # additional space (cefsimple is 157 MB).
-        copy_app(cefclient)
-        copy_app(cefsimple)
+        if os.path.exists(cefclient):
+            copy_app(cefclient)
+        if os.path.exists(cefsimple):
+            copy_app(cefsimple)
         #copy_app(ceftests)
 
     # END: Copy cefclient, cefsimple, ceftests
@@ -863,13 +862,7 @@ def create_prebuilt_binaries():
 
 def get_available_python_compilers():
     all_python_compilers = OrderedDict([
-        ("2022", VS2022_VCVARS),
-        # skip oldies
-        #("2019", VS2019_VCVARS),
-        #("2015", VS2015_VCVARS),
-        #("2013", VS2013_VCVARS),
-        #("2010", VS2010_VCVARS),
-        #("2008", VS2008_VCVARS),
+        (ACTIVE_MSVC_VERSION, ACTIVE_MSVC_VCVARS),
     ])
     ret_compilers = OrderedDict()
     for msvs in all_python_compilers:
@@ -893,6 +886,13 @@ def getenv():
     env = os.environ
 
     # PATH
+    if WINDOWS:
+        visual_studio_tool_paths = [ACTIVE_MSVC_CMAKE_DIR, ACTIVE_MSVC_NINJA_DIR]
+        current_paths = env.get("PATH", "").split(os.pathsep)
+        env["PATH"] = os.pathsep.join(
+            visual_studio_tool_paths
+            + [current_path for current_path in current_paths
+               if current_path and current_path not in visual_studio_tool_paths])
     if Options.build_cef:
         if os.path.exists(Options.depot_tools_dir):
             env["PATH"] = Options.depot_tools_dir + os.pathsep + env["PATH"]
@@ -977,7 +977,7 @@ def run_git(command_line, working_dir):
 def run_automate_git():
     """Run CEF automate-git.py using Python 2.7."""
     script = os.path.join(Options.cefpython_dir, "tools", "automate-git.py")
-    """
+    r"""
     Example automate-git.py command:
         C:\chromium>call python automate-git.py --download-dir=./test/
         --branch=2526 --no-debug-build --verbose-build
