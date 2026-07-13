@@ -49,7 +49,7 @@ public:
     void OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
                             PaintElementType type,
                             const RectList& dirtyRects,
-                            void* shared_handle) override;
+                            const CefAcceleratedPaintInfo& paint_info) override;
 
     void OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser,
                                double x,

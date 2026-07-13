@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,15 +33,18 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=7dc00d6af4e26812b78e47ec707f8d271c043a8e$
+// $hash=e8529b32fc68c4882aac30846f4af359e9f3a21e$
 //
 
 #ifndef CEF_INCLUDE_CAPI_TEST_CEF_TEST_SERVER_CAPI_H_
 #define CEF_INCLUDE_CAPI_TEST_CEF_TEST_SERVER_CAPI_H_
 #pragma once
 
-#if !defined(BUILDING_CEF_SHARED) && !defined(WRAPPING_CEF_SHARED) && \
-    !defined(UNIT_TEST)
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
+
+#if !defined(WRAPPING_CEF_SHARED) && !defined(UNIT_TEST)
 #error This file can be included for unit tests only
 #endif
 
@@ -64,6 +67,8 @@ struct _cef_test_server_handler_t;
 /// connections (e.g. for communicating between applications on localhost). The
 /// functions of this structure are safe to call from any thread in the brower
 /// process unless otherwise indicated.
+///
+/// NOTE: This struct is allocated DLL-side.
 ///
 typedef struct _cef_test_server_t {
   ///
@@ -104,7 +109,7 @@ typedef struct _cef_test_server_t {
 /// started. The server will continue running until Stop is called.
 ///
 CEF_EXPORT cef_test_server_t* cef_test_server_create_and_start(
-    uint16 port,
+    uint16_t port,
     int https_server,
     cef_test_cert_type_t https_cert_type,
     struct _cef_test_server_handler_t* handler);
@@ -114,6 +119,8 @@ CEF_EXPORT cef_test_server_t* cef_test_server_create_and_start(
 /// be created for each cef_test_server_t::CreateAndStart call (the "dedicated
 /// server thread"), and the functions of this structure will be called on that
 /// thread. See related documentation on cef_test_server_t::CreateAndStart.
+///
+/// NOTE: This struct is allocated client-side.
 ///
 typedef struct _cef_test_server_handler_t {
   ///
@@ -139,6 +146,8 @@ typedef struct _cef_test_server_handler_t {
 /// structure are safe to call from any thread in the brower process unless
 /// otherwise indicated.
 ///
+/// NOTE: This struct is allocated DLL-side.
+///
 typedef struct _cef_test_server_connection_t {
   ///
   /// Base structure.
@@ -151,7 +160,7 @@ typedef struct _cef_test_server_connection_t {
   /// the size of |data| in bytes. The contents of |data| will be copied. The
   /// connection will be closed automatically after the response is sent.
   ///
-  void(CEF_CALLBACK* send_http200response)(
+  void(CEF_CALLBACK* send_http200_response)(
       struct _cef_test_server_connection_t* self,
       const cef_string_t* content_type,
       const void* data,
@@ -161,7 +170,7 @@ typedef struct _cef_test_server_connection_t {
   /// Send an HTTP 404 "Not Found" response. The connection will be closed
   /// automatically after the response is sent.
   ///
-  void(CEF_CALLBACK* send_http404response)(
+  void(CEF_CALLBACK* send_http404_response)(
       struct _cef_test_server_connection_t* self);
 
   ///
@@ -169,7 +178,7 @@ typedef struct _cef_test_server_connection_t {
   /// associated error message. The connection will be closed automatically
   /// after the response is sent.
   ///
-  void(CEF_CALLBACK* send_http500response)(
+  void(CEF_CALLBACK* send_http500_response)(
       struct _cef_test_server_connection_t* self,
       const cef_string_t* error_message);
 
@@ -188,6 +197,27 @@ typedef struct _cef_test_server_connection_t {
       const void* data,
       size_t data_size,
       cef_string_multimap_t extra_headers);
+
+#if CEF_API_ADDED(CEF_EXPERIMENTAL)
+  ///
+  /// Send a custom HTTP response using raw header data. |header_data| is the
+  /// complete raw HTTP response header block, including the status line (e.g.
+  /// "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"), and
+  /// |header_data_size| is its size in bytes. |response_data| is the response
+  /// content and |response_data_size| is its size in bytes. The contents of
+  /// both buffers will be copied. Unlike the other Send functions, the header
+  /// bytes are sent verbatim and are not subject to CefString (UTF-8)
+  /// conversion, which allows sending raw non-ASCII header values (e.g. a non-
+  /// UTF-8 Content-Disposition filename) for testing purposes. The connection
+  /// will be closed automatically after the response is sent.
+  ///
+  void(CEF_CALLBACK* send_http_response_with_raw_headers)(
+      struct _cef_test_server_connection_t* self,
+      const void* header_data,
+      size_t header_data_size,
+      const void* response_data,
+      size_t response_data_size);
+#endif
 } cef_test_server_connection_t;
 
 #ifdef __cplusplus

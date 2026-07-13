@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,12 +33,16 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=988d13daa86a6ed89d2116e44d2307ee01c63c08$
+// $hash=5fc4b50be8c13c3f8cc4e50e29475f3d12a17324$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_XML_READER_CAPI_H_
 #define CEF_INCLUDE_CAPI_CEF_XML_READER_CAPI_H_
 #pragma once
+
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
 
 #include "include/capi/cef_base_capi.h"
 #include "include/capi/cef_stream_capi.h"
@@ -51,6 +55,8 @@ extern "C" {
 /// Structure that supports the reading of XML data via the libxml streaming
 /// API. The functions of this structure should only be called on the thread
 /// that creates the object.
+///
+/// NOTE: This struct is allocated DLL-side.
 ///
 typedef struct _cef_xml_reader_t {
   ///

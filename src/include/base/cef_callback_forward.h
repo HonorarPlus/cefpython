@@ -28,13 +28,13 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef INCLUDE_BASE_CEF_CALLBACK_FORWARD_H_
-#define INCLUDE_BASE_CEF_CALLBACK_FORWARD_H_
+#ifndef CEF_INCLUDE_BASE_CEF_CALLBACK_FORWARD_H_
+#define CEF_INCLUDE_BASE_CEF_CALLBACK_FORWARD_H_
 #pragma once
 
 #if defined(USING_CHROMIUM_INCLUDES)
 // When building CEF include the Chromium header directly.
-#include "base/callback_forward.h"
+#include "base/functional/callback_forward.h"
 #else  // !USING_CHROMIUM_INCLUDES
 // The following is substantially similar to the Chromium implementation.
 // If the Chromium implementation diverges the below implementation should be
@@ -58,6 +58,6 @@ using RepeatingClosure = RepeatingCallback<void()>;
 
 }  // namespace base
 
-#endif  // !!USING_CHROMIUM_INCLUDES
+#endif  // !USING_CHROMIUM_INCLUDES
 
-#endif  // INCLUDE_BASE_CEF_CALLBACK_FORWARD_H_
+#endif  // CEF_INCLUDE_BASE_CEF_CALLBACK_FORWARD_H_

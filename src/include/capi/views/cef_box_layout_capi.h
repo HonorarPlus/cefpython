@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,12 +33,16 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=fe404a2a9d429c6de2a00a8e27efe553e93e792d$
+// $hash=6e37425c5a10213bcca51711f9a46046a603c328$
 //
 
 #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_BOX_LAYOUT_CAPI_H_
 #define CEF_INCLUDE_CAPI_VIEWS_CEF_BOX_LAYOUT_CAPI_H_
 #pragma once
+
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
 
 #include "include/capi/views/cef_layout_capi.h"
 
@@ -55,6 +59,8 @@ struct _cef_view_t;
 /// host's bounds provide insufficient space, child views will be clamped.
 /// Excess space will not be distributed. Methods must be called on the browser
 /// process UI thread unless otherwise indicated.
+///
+/// NOTE: This struct is allocated DLL-side.
 ///
 typedef struct _cef_box_layout_t {
   ///

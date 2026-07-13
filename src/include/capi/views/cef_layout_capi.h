@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,12 +33,16 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=01c57abc0a004118040b58bdcec07dfd32827d4f$
+// $hash=4ee2f21d072b059be8134c9243ccf2ed6cd4324e$
 //
 
 #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_LAYOUT_CAPI_H_
 #define CEF_INCLUDE_CAPI_VIEWS_CEF_LAYOUT_CAPI_H_
 #pragma once
+
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
 
 #include "include/capi/cef_base_capi.h"
 
@@ -53,6 +57,8 @@ struct _cef_fill_layout_t;
 /// A Layout handles the sizing of the children of a Panel according to
 /// implementation-specific heuristics. Methods must be called on the browser
 /// process UI thread unless otherwise indicated.
+///
+/// NOTE: This struct is allocated DLL-side.
 ///
 typedef struct _cef_layout_t {
   ///

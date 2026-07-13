@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,12 +33,16 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=66198e92ec123e753bb427a0b92d73672610136e$
+// $hash=94b151a21f09333ee313b0e58556b5f7f7681cfa$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_SHARED_PROCESS_MESSAGE_BUILDER_CAPI_H_
 #define CEF_INCLUDE_CAPI_CEF_SHARED_PROCESS_MESSAGE_BUILDER_CAPI_H_
 #pragma once
+
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
 
 #include "include/capi/cef_process_message_capi.h"
 
@@ -50,6 +54,8 @@ extern "C" {
 /// Structure that builds a cef_process_message_t containing a shared memory
 /// region. This structure is not thread-safe but may be used exclusively on a
 /// different thread from the one which constructed it.
+///
+/// NOTE: This struct is allocated DLL-side.
 ///
 typedef struct _cef_shared_process_message_builder_t {
   ///

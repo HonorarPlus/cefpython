@@ -203,7 +203,9 @@ def set_compiler_options(options):
         #
         # The above warning LNK4217 is caused by the warning below which occurs
         # when building the client_handler.lib static library:
-        extra_compile_args.extend(["/EHsc", "/std:c++17", "/wd4305"])
+        extra_compile_args.extend([
+            "/EHsc", "/std:c++20", "/DCEF_API_VERSION=15000", "/DNOMINMAX", "/wd4305"
+        ])
         extra_link_args.extend(["/ignore:4217"])
 
     if LINUX or MAC:
@@ -215,13 +217,14 @@ def set_compiler_options(options):
 
         extra_compile_args.extend([
                 "-DNDEBUG",
-                "-std=gnu++11",
+                "-std=gnu++20",
+                "-DCEF_API_VERSION=15000",
         ])
 
     if LINUX:
         os.environ["CC"] = "g++"
         os.environ["CXX"] = "g++"
-        extra_compile_args.extend(["-std=gnu++11"])
+        extra_compile_args.extend(["-std=gnu++20"])
 
         # Fix "ImportError ... undefined symbol ..." caused by CEF's
         # include/base/ headers by adding the -flto flag (Issue #230).
@@ -280,7 +283,7 @@ def set_compiler_options(options):
 
         # LINKER ARGS
         extra_link_args.extend([
-                "-mmacosx-version-min=10.9",
+                "-mmacosx-version-min=12.0",
                 "-Wl,-search_paths_first",
                 "-F"+os.path.join(CEF_BINARIES_LIBRARIES, "bin"),
                 "-framework", "Chromium Embedded Framework",

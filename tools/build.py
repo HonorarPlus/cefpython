@@ -718,6 +718,8 @@ def generate_cefpython_module_variables():
             .format(hashes["CEF_API_HASH_PLATFORM"]))
     ret += ('__cef_api_hash_universal__ = "{0}"\n'
             .format(hashes["CEF_API_HASH_UNIVERSAL"]))
+    ret += ('__cef_api_version__ = {0}\n'
+            .format(hashes["CEF_API_VERSION"]))
     ret += ('__cef_commit_hash__ = "{0}"\n'
             .format(version["CEF_COMMIT_HASH"]))
     ret += ('__cef_commit_number__ = "{0}"\n'

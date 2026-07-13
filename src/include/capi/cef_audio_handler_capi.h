@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,12 +33,16 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=4e243df31e29bc6e473d56e371ed6328d948959c$
+// $hash=e3c50af52b94e7fd0f4a4648f1f07bf5b3f09e2c$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_AUDIO_HANDLER_CAPI_H_
 #define CEF_INCLUDE_CAPI_CEF_AUDIO_HANDLER_CAPI_H_
 #pragma once
+
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
 
 #include "include/capi/cef_base_capi.h"
 #include "include/capi/cef_browser_capi.h"
@@ -49,6 +53,8 @@ extern "C" {
 
 ///
 /// Implement this structure to handle audio events.
+///
+/// NOTE: This struct is allocated client-side.
 ///
 typedef struct _cef_audio_handler_t {
   ///
@@ -93,7 +99,7 @@ typedef struct _cef_audio_handler_t {
                                              struct _cef_browser_t* browser,
                                              const float** data,
                                              int frames,
-                                             int64 pts);
+                                             int64_t pts);
 
   ///
   /// Called on the UI thread when the stream has stopped. OnAudioSteamStopped

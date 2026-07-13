@@ -273,7 +273,7 @@ cdef public void RenderHandler_OnScrollOffsetChanged(
 cdef public cpp_bool RenderHandler_StartDragging(
         CefRefPtr[CefBrowser] cef_browser,
         CefRefPtr[CefDragData] cef_drag_data,
-        uint32 allowed_ops,
+        uint32_t allowed_ops,
         int x, int y
         ) except * with gil:
     cdef PyBrowser browser
@@ -302,7 +302,7 @@ cdef public cpp_bool RenderHandler_StartDragging(
 
 cdef public void RenderHandler_UpdateDragCursor(
         CefRefPtr[CefBrowser] cef_browser,
-        uint32 operation,
+        uint32_t operation,
         ) except * with gil:
     cdef PyBrowser browser
     try:

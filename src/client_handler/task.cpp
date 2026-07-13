@@ -17,7 +17,7 @@ void PostTaskWrapper(int threadId, int taskId) {
     );
 }
 
-void PostDelayedTaskWrapper(int threadId, int64 delay_ms, int taskId) {
+void PostDelayedTaskWrapper(int threadId, int64_t delay_ms, int taskId) {
     CefPostDelayedTask(
             static_cast<CefThreadId>(threadId),
             CefCreateClosureTask(base::BindOnce(

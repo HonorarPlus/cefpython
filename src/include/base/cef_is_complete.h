@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Marshall A. Greenblatt. Portions copyright (c) 2015
+// Copyright (c) 2024 Marshall A. Greenblatt. Portions copyright (c) 2024
 // Google Inc. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,33 +28,31 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef INCLUDE_BASE_CEF_PTR_UTIL_H_
-#define INCLUDE_BASE_CEF_PTR_UTIL_H_
+#ifndef CEF_INCLUDE_BASE_CEF_IS_COMPLETE_H_
+#define CEF_INCLUDE_BASE_CEF_IS_COMPLETE_H_
 #pragma once
 
 #if defined(USING_CHROMIUM_INCLUDES)
 // When building CEF include the Chromium header directly.
-#include "base/memory/ptr_util.h"
+#include "base/types/is_complete.h"
 #else  // !USING_CHROMIUM_INCLUDES
 // The following is substantially similar to the Chromium implementation.
 // If the Chromium implementation diverges the below implementation should be
 // updated to match.
 
-#include <memory>
-#include <utility>
+#include <type_traits>
 
 namespace base {
 
-///
-/// Helper to transfer ownership of a raw pointer to a std::unique_ptr<T>.
-/// Note that std::unique_ptr<T> has very different semantics from
-/// std::unique_ptr<T[]>: do not use this helper for array allocations.
-///
+/// True if `T` is completely defined.
 template <typename T>
-std::unique_ptr<T> WrapUnique(T* ptr) {
-  return std::unique_ptr<T>(ptr);
-}
+concept IsComplete = requires { sizeof(T); } ||
+                     // Function types must be included explicitly since you
+                     // cannot apply `sizeof()` to a function type.
+                     std::is_function_v<std::remove_cvref_t<T>>;
 
 }  // namespace base
 
-#endif  // INCLUDE_BASE_CEF_PTR_UTIL_H_
+#endif  // !USING_CHROMIUM_INCLUDES
+
+#endif  // CEF_INCLUDE_BASE_CEF_IS_COMPLETE_H_

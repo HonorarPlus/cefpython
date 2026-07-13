@@ -4,6 +4,8 @@
 
 include "cefpython.pyx"
 
+cimport cef_types
+
 cdef void SetCefWindowInfo(
         CefWindowInfo& cefWindowInfo,
         WindowInfo windowInfo
@@ -74,15 +76,31 @@ cdef void SetCefWindowInfo(
     if windowInfo.windowType == "offscreen":
         cefWindowInfo.SetAsWindowless(
                 <CefWindowHandle>windowInfo.parentWindowHandle)
+    elif windowInfo.runtimeStyle == "chrome":
+        cefWindowInfo.runtime_style = cef_types.CEF_RUNTIME_STYLE_CHROME
+    elif windowInfo.runtimeStyle == "default":
+        cefWindowInfo.runtime_style = cef_types.CEF_RUNTIME_STYLE_DEFAULT
+    else:
+        # Preserve CEFPython's historical Alloy behavior for windowed apps.
+        cefWindowInfo.runtime_style = cef_types.CEF_RUNTIME_STYLE_ALLOY
+
+    IF UNAME_SYSNAME == "Windows":
+        if windowInfo.initiallyHidden:
+            # CefWindowInfo::SetAsPopup/SetAsChild add WS_VISIBLE by default.
+            cefWindowInfo.style &= ~<cef_types.uint32>0x10000000
 
 cdef class WindowInfo:
     cdef public str windowType
     cdef public WindowHandle parentWindowHandle
     cdef public list windowRect # [left, top, right, bottom]
     cdef public py_string windowName
+    cdef public str runtimeStyle
+    cdef public py_bool initiallyHidden
 
     def __init__(self, title=""):
         self.windowName = str("")
+        self.runtimeStyle = "chrome" if GetAppSetting("chrome_runtime") else "alloy"
+        self.initiallyHidden = False
         if title:
             self.windowName = title
 
@@ -136,6 +154,23 @@ cdef class WindowInfo:
                     % parentWindowHandle)
         self.parentWindowHandle = parentWindowHandle
         self.windowType = "offscreen"
+
+    cpdef py_void SetRuntimeStyle(self, str runtime_style):
+        """Set the per-browser runtime style."""
+        runtime_style = runtime_style.lower()
+        if runtime_style not in ("alloy", "chrome", "default"):
+            raise ValueError("runtime_style must be 'alloy', 'chrome', or 'default'")
+        if self.windowType == "offscreen" and runtime_style == "chrome":
+            raise ValueError("Windowless browsers require the Alloy runtime style")
+        self.runtimeStyle = runtime_style
+
+    cpdef py_void SetInitiallyHidden(self, py_bool initially_hidden):
+        """Create a Windows browser without showing its native window."""
+        IF UNAME_SYSNAME == "Windows":
+            self.initiallyHidden = bool(initially_hidden)
+        ELSE:
+            if initially_hidden:
+                raise NotImplementedError("Initially hidden windows are currently supported only on Windows")
 
     cpdef py_void SetTransparentPainting(self,
             py_bool transparentPainting):

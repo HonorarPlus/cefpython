@@ -43,7 +43,8 @@ cdef void SetApplicationSettings(
                 or key == "downloads_enabled"\
                 or key == "context_menu" \
                 or key == "auto_zooming"\
-                or key == "app_user_model_id":
+                or key == "app_user_model_id"\
+                or key == "chrome_runtime":
             # CEF Python only options. These are not to be found in CEF.
             continue
         elif key == "accept_language_list":
@@ -60,8 +61,6 @@ cdef void SetApplicationSettings(
             del cefString
         elif key == "cookieable_schemes_exclude_defaults":
             cefAppSettings.cookieable_schemes_exclude_defaults = int(appSettings[key])
-        elif key == "chrome_runtime":
-            cefAppSettings.chrome_runtime = int(appSettings[key])
         elif key == "root_cache_path":
             cefString = new CefString(&cefAppSettings.root_cache_path)
             PyToCefStringPointer(appSettings[key], cefString)
@@ -104,7 +103,7 @@ cdef void SetApplicationSettings(
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
         elif key == "pack_loading_disabled":
-            cefAppSettings.pack_loading_disabled = int(appSettings[key])
+            Debug("DEPRECATED: 'pack_loading_disabled' setting")
         elif key == "uncaught_exception_stack_size":
             cefAppSettings.uncaught_exception_stack_size = <int>int(appSettings[key])
         elif key == "browser_subprocess_path":
@@ -119,12 +118,9 @@ cdef void SetApplicationSettings(
             cefAppSettings.background_color = \
                     <cef_types.uint32>int(appSettings[key])
         elif key == "persist_user_preferences":
-            cefAppSettings.persist_user_preferences = \
-                    int(appSettings[key])
+            Debug("DEPRECATED: 'persist_user_preferences' setting")
         elif key == "user_data_path":
-            cefString = new CefString(&cefAppSettings.user_data_path)
-            PyToCefStringPointer(appSettings[key], cefString)
-            del cefString
+            Debug("DEPRECATED: 'user_data_path' setting")
         elif key == "windowless_rendering_enabled":
             cefAppSettings.windowless_rendering_enabled = \
                     int(appSettings[key])
@@ -153,9 +149,7 @@ cdef void SetBrowserSettings(
             # CEF Python only options. These are not to be found in CEF.
             continue
         elif key == "accept_language_list":
-            cefString = new CefString(&cefBrowserSettings.accept_language_list)
-            PyToCefStringPointer(browserSettings[key], cefString)
-            del cefString
+            Debug("DEPRECATED: browser 'accept_language_list' setting; use the application setting")
         elif key == "background_color":
             cefBrowserSettings.background_color = \
                     <cef_types.uint32>int(browserSettings[key])
@@ -269,10 +263,7 @@ cdef void SetBrowserSettings(
             else:
                 cefBrowserSettings.local_storage = cef_types.STATE_ENABLED
         elif key == "databases_disabled":
-            if browserSettings[key]:
-                cefBrowserSettings.databases = cef_types.STATE_DISABLED
-            else:
-                cefBrowserSettings.databases = cef_types.STATE_ENABLED
+            Debug("DEPRECATED: 'databases_disabled' setting")
         elif key == "webgl_disabled":
             if browserSettings[key]:
                 cefBrowserSettings.webgl = cef_types.STATE_DISABLED

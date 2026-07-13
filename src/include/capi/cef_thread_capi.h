@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,12 +33,16 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=b5b17f2a66283495e19978a5bbc36b47d9b61507$
+// $hash=53b8613138e0e5f5c39616af2b68cff457a85728$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_THREAD_CAPI_H_
 #define CEF_INCLUDE_CAPI_CEF_THREAD_CAPI_H_
 #pragma once
+
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
 
 #include "include/capi/cef_task_capi.h"
 #include "include/internal/cef_thread_internal.h"
@@ -57,6 +61,8 @@ extern "C" {
 /// This structure should only be used for tasks that require a dedicated
 /// thread. In most cases you can post tasks to an existing CEF thread instead
 /// of creating a new one; see cef_task.h for details.
+///
+/// NOTE: This struct is allocated DLL-side.
 ///
 typedef struct _cef_thread_t {
   ///

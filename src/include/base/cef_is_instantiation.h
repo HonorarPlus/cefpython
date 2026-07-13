@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Marshall A. Greenblatt. Portions copyright (c) 2011
+// Copyright (c) 2023 Marshall A. Greenblatt. Portions copyright (c) 2023
 // Google Inc. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,62 +28,46 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// base::AutoReset<> is useful for setting a variable to a new value only within
-// a particular scope. An base::AutoReset<> object resets a variable to its
-// original value upon destruction, making it an alternative to writing
-// "var = false;" or "var = old_val;" at all of a block's exit points.
-//
-// This should be obvious, but note that an base::AutoReset<> instance should
-// have a shorter lifetime than its scoped_variable, to prevent invalid memory
-// writes when the base::AutoReset<> object is destroyed.
-
-#ifndef CEF_INCLUDE_BASE_CEF_AUTO_RESET_H_
-#define CEF_INCLUDE_BASE_CEF_AUTO_RESET_H_
+#ifndef CEF_INCLUDE_BASE_CEF_IS_INSTANTIATION_H_
+#define CEF_INCLUDE_BASE_CEF_IS_INSTANTIATION_H_
 #pragma once
 
 #if defined(USING_CHROMIUM_INCLUDES)
 // When building CEF include the Chromium header directly.
-#include "base/auto_reset.h"
+#include "base/types/is_instantiation.h"
 #else  // !USING_CHROMIUM_INCLUDES
 // The following is substantially similar to the Chromium implementation.
 // If the Chromium implementation diverges the below implementation should be
 // updated to match.
 
-#include <utility>
+#include <type_traits>
 
 namespace base {
+namespace cef_internal {
 
-template <typename T>
-class AutoReset {
- public:
-  template <typename U>
-  AutoReset(T* scoped_variable, U&& new_value)
-      : scoped_variable_(scoped_variable),
-        original_value_(
-            std::exchange(*scoped_variable_, std::forward<U>(new_value))) {}
+// True if and only if `T` is `C<Types...>` for some set of types, i.e. `T` is
+// an instantiation of the template `C`.
+//
+// This is false by default. We specialize it to true below for pairs of
+// arguments that satisfy the condition.
+template <typename T, template <typename...> class C>
+inline constexpr bool is_instantiation_v = false;
 
-  AutoReset(AutoReset&& other)
-      : scoped_variable_(std::exchange(other.scoped_variable_, nullptr)),
-        original_value_(std::move(other.original_value_)) {}
+template <template <typename...> class C, typename... Ts>
+inline constexpr bool is_instantiation_v<C<Ts...>, C> = true;
 
-  AutoReset& operator=(AutoReset&& rhs) {
-    scoped_variable_ = std::exchange(rhs.scoped_variable_, nullptr);
-    original_value_ = std::move(rhs.original_value_);
-    return *this;
-  }
+}  // namespace cef_internal
 
-  ~AutoReset() {
-    if (scoped_variable_)
-      *scoped_variable_ = std::move(original_value_);
-  }
-
- private:
-  T* scoped_variable_;
-  T original_value_;
-};
+/// True if and only if the type `T` is an instantiation of the template `C`
+/// with some set of type arguments.
+///
+/// Note that there is no allowance for reference or const/volatile qualifiers;
+/// if these are a concern you probably want to feed through `std::decay_t<T>`.
+template <typename T, template <typename...> class C>
+concept is_instantiation = cef_internal::is_instantiation_v<T, C>;
 
 }  // namespace base
 
 #endif  // !USING_CHROMIUM_INCLUDES
 
-#endif  // CEF_INCLUDE_BASE_CEF_AUTO_RESET_H_
+#endif  // CEF_INCLUDE_BASE_CEF_IS_INSTANTIATION_H_

@@ -82,7 +82,14 @@ def main():
         (EXAMPLES_DIR, "*"), (SETUP_DIR, "examples/"),
     ]
     perform_copy_operations(copy_operations)
-    delete_cef_sample_apps(caller_script=__file__, bin_dir=PKG_DIR)
+    for sample_app_name in CEF_SAMPLE_APPS + ["bootstrap", "bootstrapc"]:
+        sample_app_path = os.path.join(PKG_DIR, sample_app_name + APP_EXT)
+        if os.path.exists(sample_app_path):
+            os.remove(sample_app_path)
+    expected_module = MODULE_NAME
+    for module_path in glob.glob(os.path.join(PKG_DIR, "cefpython_py*." + MODULE_EXT)):
+        if os.path.basename(module_path) != expected_module:
+            os.remove(module_path)
 
     # Linux only operations
     if LINUX:
@@ -94,11 +101,6 @@ def main():
             (SETUP_DIR, "examples/kivy-select-boxes/")
         ]
         perform_copy_operations(copy_operations_linux)
-
-    # Create empty debug.log files so that package uninstalls cleanly
-    # in case examples or CEF tests were launched. See Issue #149.
-    create_empty_log_file(os.path.join(PKG_DIR, "debug.log"))
-    create_empty_log_file(os.path.join(PKG_DIR, "examples/debug.log"))
 
     copy_cpp_extension_dependencies_issue359(PKG_DIR)
 
@@ -315,23 +317,6 @@ def delete_files_by_pattern(pattern):
     files = glob.glob(pattern)
     for f in files:
         os.remove(f)
-
-
-def create_empty_log_file(log_file):
-    # Normalize unix slashes on Windows
-    log_file = log_file.replace("/", os.path.sep)
-    print("[make_installer.py] Create: {file}"
-          .format(file=short_dst_path(log_file)))
-    with open(log_file, "wb") as fo:
-        fo.write("".encode("utf-8"))
-    # On Linux and Mac chmod so that for cases when package is
-    # installed using sudo. When wheel package is created it
-    # will remember file permissions set.
-    if LINUX or MAC:
-        command = "chmod 666 {file}".format(file=log_file)
-        print("[make_installer.py] {command}"
-              .format(command=command.replace(SETUP_DIR, "")))
-        subprocess.check_call(command, shell=True)
 
 
 def copy_cpp_extension_dependencies_issue359(pkg_dir):

@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,12 +33,16 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=28371116427e9457ea366c9f0546cd5eefd8f08a$
+// $hash=8edc937354e13b5abf3d27260f44124af6f35ca3$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_REGISTRATION_CAPI_H_
 #define CEF_INCLUDE_CAPI_CEF_REGISTRATION_CAPI_H_
 #pragma once
+
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
 
 #include "include/capi/cef_base_capi.h"
 
@@ -48,6 +52,8 @@ extern "C" {
 
 ///
 /// Generic callback structure used for managing the lifespan of a registration.
+///
+/// NOTE: This struct is allocated DLL-side.
 ///
 typedef struct _cef_registration_t {
   ///

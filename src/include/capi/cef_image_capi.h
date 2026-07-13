@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,12 +33,16 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=f679dc1ec87e99bed6843d4f4dbbe04585a827bd$
+// $hash=8292dd774e0f10dc3f1265855d4ee49dcc822a0a$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_IMAGE_CAPI_H_
 #define CEF_INCLUDE_CAPI_CEF_IMAGE_CAPI_H_
 #pragma once
+
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
 
 #include "include/capi/cef_base_capi.h"
 #include "include/capi/cef_values_capi.h"
@@ -54,6 +58,8 @@ extern "C" {
 /// then the image at scale factor 2.0 should be 200x200 pixels -- both images
 /// will display with a DIP size of 100x100 units. The functions of this
 /// structure can be called on any browser process thread.
+///
+/// NOTE: This struct is allocated DLL-side.
 ///
 typedef struct _cef_image_t {
   ///

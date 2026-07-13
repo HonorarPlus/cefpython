@@ -11,6 +11,7 @@ cdef extern from "include/internal/cef_ptr.h":
         CefRefPtr(const CefRefPtr[T]& r)
         # noinspection PyUnresolvedReferences
         T* get()
+        void reset()
         # noinspection PyUnresolvedReferences
         void swap(CefRefPtr[T]& r)
         # noinspection PyUnresolvedReferences

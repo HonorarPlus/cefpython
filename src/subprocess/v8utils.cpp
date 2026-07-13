@@ -49,7 +49,7 @@ void V8ValueAppendToCefListValue(CefRefPtr<CefV8Value> v8Value,
     } else if (v8Value->IsInt()) {
         listValue->SetInt((int)listValue->GetSize(), v8Value->GetIntValue());
     } else if (v8Value->IsUInt()) {
-        uint32 uint32_value = v8Value->GetUIntValue();
+        uint32_t uint32_value = v8Value->GetUIntValue();
         CefRefPtr<CefBinaryValue> binaryValue = CefBinaryValue::Create(
             &uint32_value, sizeof(uint32_value));
         listValue->SetBinary((int)listValue->GetSize(), binaryValue);
@@ -140,7 +140,7 @@ CefRefPtr<CefDictionaryValue> V8ObjectToCefDictionaryValue(
         } else if (v8Value->IsInt()) {
             ret->SetInt(key, v8Value->GetIntValue());
         } else if (v8Value->IsUInt()) {
-            uint32 uint32_value = v8Value->GetUIntValue();
+            uint32_t uint32_value = v8Value->GetUIntValue();
             CefRefPtr<CefBinaryValue> binaryValue = CefBinaryValue::Create(
                 &uint32_value, sizeof(uint32_value));
             ret->SetBinary(key, binaryValue);

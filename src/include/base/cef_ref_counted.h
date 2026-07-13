@@ -43,6 +43,8 @@
 
 #include <stddef.h>
 
+#include <concepts>
+#include <limits>
 #include <utility>
 
 #include "include/base/cef_atomic_ref_count.h"
@@ -50,7 +52,6 @@
 #include "include/base/cef_compiler_specific.h"
 #include "include/base/cef_logging.h"
 #include "include/base/cef_scoped_refptr.h"
-#include "include/base/cef_template_util.h"
 #include "include/base/cef_thread_checker.h"
 
 namespace base {
@@ -105,13 +106,16 @@ class RefCountedBase {
 
 #if DCHECK_IS_ON()
     DCHECK(!in_dtor_);
-    if (ref_count_ == 0)
+    if (ref_count_ == 0) {
       in_dtor_ = true;
+    }
 
-    if (ref_count_ >= 1)
+    if (ref_count_ >= 1) {
       DCHECK(CalledOnValidThread());
-    if (ref_count_ == 1)
+    }
+    if (ref_count_ == 1) {
       thread_checker_.DetachFromThread();
+    }
 #endif
 
     return ref_count_ == 0;
@@ -162,7 +166,7 @@ class RefCountedBase {
 #endif
 
   mutable uint32_t ref_count_ = 0;
-  static_assert(std::is_unsigned<decltype(ref_count_)>::value,
+  static_assert(std::is_unsigned_v<decltype(ref_count_)>,
                 "ref_count_ must be an unsigned type.");
 
 #if DCHECK_IS_ON()
@@ -196,9 +200,15 @@ class RefCountedThreadSafeBase {
 #endif
 
 // Release and AddRef are suitable for inlining on X86 because they generate
-// very small code threads. On other platforms (ARM), it causes a size
-// regression and is probably not worth it.
-#if defined(ARCH_CPU_X86_FAMILY)
+// very small code sequences.
+//
+// ARM64 devices supporting ARMv8.1-A atomic instructions generate very little
+// code, e.g. fetch_add() with acquire ordering is a single instruction (ldadd),
+// vs LL/SC in previous ARM architectures. Inline it there as well.
+//
+// On other platforms (e.g. ARM), it causes a size regression and is probably
+// not worth it.
+#if defined(ARCH_CPU_X86_FAMILY) || defined(__ARM_FEATURE_ATOMICS)
   // Returns true if the object should self-delete.
   bool Release() const { return ReleaseImpl(); }
   void AddRef() const { AddRefImpl(); }
@@ -224,23 +234,25 @@ class RefCountedThreadSafeBase {
   ALWAYS_INLINE void AddRefImpl() const {
 #if DCHECK_IS_ON()
     DCHECK(!in_dtor_);
-    DCHECK(!needs_adopt_ref_)
-        << "This RefCounted object is created with non-zero reference count."
-        << " The first reference to such a object has to be made by AdoptRef or"
-        << " MakeRefCounted.";
+    // This RefCounted object is created with non-zero reference count.
+    // The first reference to such a object has to be made by AdoptRef or
+    // MakeRefCounted.
+    DCHECK(!needs_adopt_ref_);
 #endif
-    ref_count_.Increment();
+    CHECK(ref_count_.Increment() != std::numeric_limits<int>::max());
   }
 
   ALWAYS_INLINE void AddRefWithCheckImpl() const {
 #if DCHECK_IS_ON()
     DCHECK(!in_dtor_);
-    DCHECK(!needs_adopt_ref_)
-        << "This RefCounted object is created with non-zero reference count."
-        << " The first reference to such a object has to be made by AdoptRef or"
-        << " MakeRefCounted.";
+    // This RefCounted object is created with non-zero reference count.
+    // The first reference to such a object has to be made by AdoptRef or
+    // MakeRefCounted.
+    DCHECK(!needs_adopt_ref_);
 #endif
-    CHECK(ref_count_.Increment() > 0);
+    int pre_increment_count = ref_count_.Increment();
+    CHECK(pre_increment_count > 0);
+    CHECK(pre_increment_count != std::numeric_limits<int>::max());
   }
 
   ALWAYS_INLINE bool ReleaseImpl() const {
@@ -290,6 +302,17 @@ class ScopedAllowCrossThreadRefCountAccess final {
 using ScopedAllowCrossThreadRefCountAccess =
     cef_subtle::ScopedAllowCrossThreadRefCountAccess;
 
+// Concept to detect ref-counted types. This matches Chromium's definition.
+template <typename T>
+concept IsRefCountedType = requires(T& x) {
+  // There are no additional constraints on `AddRef()` and `Release()` since
+  // `scoped_refptr`, for better or worse, seamlessly interoperates with other
+  // non-base types that happen to implement the same signatures (e.g. COM's
+  // `IUnknown`).
+  x.AddRef();
+  x.Release();
+};
+
 ///
 /// The reference count starts from zero by default, and we intended to migrate
 /// to start-from-one ref count. Put REQUIRE_ADOPTION_FOR_REFCOUNTED_TYPE() to
@@ -306,20 +329,19 @@ using ScopedAllowCrossThreadRefCountAccess =
 ///    that has zero ref count. That tends to happen on custom deleter that
 ///    delays the deletion.
 ///    TODO(tzik): Implement invalid acquisition detection.
-///  - Behavior parity to Blink's WTF::RefCounted, whose count starts from one.
-///    And start-from-one ref count is a step to merge WTF::RefCounted into
-///    base::RefCounted.
+///  - Behavior parity to Blink's blink::RefCounted, whose count starts from
+///    one. And start-from-one ref count is a step to merge blink::RefCounted
+///    into base::RefCounted.
 ///
-#define REQUIRE_ADOPTION_FOR_REFCOUNTED_TYPE()                 \
-  static constexpr ::base::cef_subtle::StartRefCountFromOneTag \
-      kRefCountPreference = ::base::cef_subtle::kStartRefCountFromOneTag
+#define REQUIRE_ADOPTION_FOR_REFCOUNTED_TYPE() \
+  using RefCountPreferenceTag = ::base::cef_subtle::StartRefCountFromOneTag
 
 template <class T, typename Traits>
 class RefCounted;
 
 ///
 /// Default traits for RefCounted<T>.  Deletes the object when its ref count
-/// reaches 0. Overload to delete it on a different thread etc.
+/// reaches 0.  Overload to delete it on a different thread etc.
 ///
 template <typename T>
 struct DefaultRefCountedTraits {
@@ -329,8 +351,8 @@ struct DefaultRefCountedTraits {
 };
 
 ///
-/// A base class for reference counted classes. Otherwise, known as a cheap
-/// knock-off of WebKit's RefCounted<T> class. To use this, just extend your
+/// A base class for reference counted classes.  Otherwise, known as a cheap
+/// knock-off of WebKit's RefCounted<T> class.  To use this, just extend your
 /// class from it like so:
 ///
 /// <pre>
@@ -359,10 +381,10 @@ struct DefaultRefCountedTraits {
 template <class T, typename Traits = DefaultRefCountedTraits<T>>
 class RefCounted : public cef_subtle::RefCountedBase {
  public:
-  static constexpr cef_subtle::StartRefCountFromZeroTag kRefCountPreference =
-      cef_subtle::kStartRefCountFromZeroTag;
+  using RefCountPreferenceTag = cef_subtle::StartRefCountFromZeroTag;
 
-  RefCounted() : cef_subtle::RefCountedBase(T::kRefCountPreference) {}
+  RefCounted()
+      : cef_subtle::RefCountedBase(cef_subtle::GetRefCountPreference<T>()) {}
 
   RefCounted(const RefCounted&) = delete;
   RefCounted& operator=(const RefCounted&) = delete;
@@ -396,8 +418,8 @@ template <class T, typename Traits>
 class RefCountedThreadSafe;
 
 ///
-/// Default traits for RefCountedThreadSafe<T>. Deletes the object when its ref
-/// count reaches 0. Overload to delete it on a different thread etc.
+/// Default traits for RefCountedThreadSafe<T>.  Deletes the object when its ref
+/// count reaches 0.  Overload to delete it on a different thread etc.
 ///
 template <typename T>
 struct DefaultRefCountedThreadSafeTraits {
@@ -433,16 +455,16 @@ struct DefaultRefCountedThreadSafeTraits {
 template <class T, typename Traits = DefaultRefCountedThreadSafeTraits<T>>
 class RefCountedThreadSafe : public cef_subtle::RefCountedThreadSafeBase {
  public:
-  static constexpr cef_subtle::StartRefCountFromZeroTag kRefCountPreference =
-      cef_subtle::kStartRefCountFromZeroTag;
+  using RefCountPreferenceTag = cef_subtle::StartRefCountFromZeroTag;
 
-  explicit RefCountedThreadSafe()
-      : cef_subtle::RefCountedThreadSafeBase(T::kRefCountPreference) {}
+  RefCountedThreadSafe()
+      : cef_subtle::RefCountedThreadSafeBase(
+            cef_subtle::GetRefCountPreference<T>()) {}
 
   RefCountedThreadSafe(const RefCountedThreadSafe&) = delete;
   RefCountedThreadSafe& operator=(const RefCountedThreadSafe&) = delete;
 
-  void AddRef() const { AddRefImpl(T::kRefCountPreference); }
+  void AddRef() const { AddRefImpl(cef_subtle::GetRefCountPreference<T>()); }
 
   void Release() const {
     if (cef_subtle::RefCountedThreadSafeBase::Release()) {
@@ -482,7 +504,7 @@ class RefCountedData
   RefCountedData(const T& in_value) : data(in_value) {}
   RefCountedData(T&& in_value) : data(std::move(in_value)) {}
   template <typename... Args>
-  explicit RefCountedData(in_place_t, Args&&... args)
+  explicit RefCountedData(std::in_place_t, Args&&... args)
       : data(std::forward<Args>(args)...) {}
 
   T data;
@@ -495,11 +517,6 @@ class RefCountedData
 template <typename T>
 bool operator==(const RefCountedData<T>& lhs, const RefCountedData<T>& rhs) {
   return lhs.data == rhs.data;
-}
-
-template <typename T>
-bool operator!=(const RefCountedData<T>& lhs, const RefCountedData<T>& rhs) {
-  return !(lhs == rhs);
 }
 
 }  // namespace base

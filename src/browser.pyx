@@ -149,7 +149,7 @@ cdef void RemovePyBrowser(int browserId) except *:
         # noinspection PyUnresolvedReferences
         Debug("del g_pyBrowsers[%s]" % browserId)
         pyBrowser = g_pyBrowsers[browserId]
-        pyBrowser.cefBrowser.swap(<CefRefPtr[CefBrowser]?>nullptr)
+        pyBrowser.cefBrowser.reset()
         del pyBrowser
         del g_pyBrowsers[browserId]
         g_unreferenced_browsers.append(browserId)
@@ -460,16 +460,23 @@ cdef class PyBrowser:
                 "Browser.GetFocusedFrame() may only be called on UI thread")
         return GetPyFrame(self.GetCefBrowser().get().GetFocusedFrame())
 
-    cpdef PyFrame GetFrame(self, py_string name):
+    cpdef PyFrame GetFrameByName(self, py_string name):
         assert IsThread(TID_UI), (
-                "Browser.GetFrame() may only be called on the UI thread")
+                "Browser.GetFrameByName() may only be called on the UI thread")
         cdef CefString cefName
         PyToCefString(name, cefName)
-        return GetPyFrame(self.GetCefBrowser().get().GetFrame(cefName))
+        return GetPyFrame(self.GetCefBrowser().get().GetFrameByName(cefName))
 
-    cpdef object GetFrameByIdentifier(self, object identifier):
-        return GetPyFrame(self.GetCefBrowser().get().GetFrame(
-                <int64>identifier))
+    cpdef PyFrame GetFrame(self, py_string name):
+        """Return a frame by name for backward compatibility."""
+        return self.GetFrameByName(name)
+
+    cpdef PyFrame GetFrameByIdentifier(self, object identifier):
+        assert IsThread(TID_UI), (
+                "Browser.GetFrameByIdentifier() may only be called on the UI thread")
+        cdef CefString cefIdentifier
+        PyToCefString(identifier, cefIdentifier)
+        return GetPyFrame(self.GetCefBrowser().get().GetFrameByIdentifier(cefIdentifier))
 
     cpdef list GetFrameNames(self):
         assert IsThread(TID_UI), (
@@ -619,6 +626,10 @@ cdef class PyBrowser:
                     # either pass NULL or GetWindowHandle().
                     <CefWindowHandle>self.GetOpenerWindowHandle(),
                     PyToCefStringValue("DevTools"))
+            # CEF 150 does not support Alloy for the special DevTools
+            # browser. Select Chrome explicitly instead of depending on the
+            # default style of this independently-created popup.
+            window_info.runtime_style = cef_types.CEF_RUNTIME_STYLE_CHROME
         cdef CefBrowserSettings settings
         cdef CefPoint inspect_element_at
         self.GetCefBrowserHost().get().ShowDevTools(
@@ -760,7 +771,7 @@ cdef class PyBrowser:
         if "type" in pyEvent:
             cefEvent.type = int(pyEvent["type"])
         if "modifiers" in pyEvent:
-            cefEvent.modifiers = <uint32>pyEvent["modifiers"]
+            cefEvent.modifiers = <uint32_t>pyEvent["modifiers"]
         # Always set CefKeyEvent.windows_key_code in SendKeyEvent, even on
         # Linux. When sending key event for 'backspace' on Linux and setting
         # "native_key_code", "character", "unmodified_character" it doesn't
@@ -836,7 +847,7 @@ cdef class PyBrowser:
     # -------------------------------------------------------------------------
 
     cpdef py_void DragTargetDragEnter(self, DragData drag_data, int x, int y,
-                                      uint32 allowed_ops):
+                                      uint32_t allowed_ops):
         cdef CefMouseEvent mouse_event
         mouse_event.x = x
         mouse_event.y = y
@@ -844,7 +855,7 @@ cdef class PyBrowser:
                 drag_data.cef_drag_data, mouse_event,
                 <cef_types.cef_drag_operations_mask_t>allowed_ops)
 
-    cpdef py_void DragTargetDragOver(self, int x, int y, uint32 allowed_ops):
+    cpdef py_void DragTargetDragOver(self, int x, int y, uint32_t allowed_ops):
         cdef CefMouseEvent mouse_event
         mouse_event.x = x
         mouse_event.y = y
@@ -860,7 +871,7 @@ cdef class PyBrowser:
         mouse_event.y = y
         self.GetCefBrowserHost().get().DragTargetDrop(mouse_event)
 
-    cpdef py_void DragSourceEndedAt(self, int x, int y, uint32 operation):
+    cpdef py_void DragSourceEndedAt(self, int x, int y, uint32_t operation):
         self.GetCefBrowserHost().get().DragSourceEndedAt(
                 x, y, <cef_types.cef_drag_operations_mask_t>operation)
 

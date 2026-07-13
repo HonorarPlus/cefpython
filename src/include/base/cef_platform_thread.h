@@ -32,8 +32,9 @@
 // the low-level platform-specific abstraction to the OS's threading interface.
 // You should instead be using a message-loop driven Thread, see thread.h.
 
-#ifndef CEF_INCLUDE_BASE_PLATFORM_THREAD_H_
-#define CEF_INCLUDE_BASE_PLATFORM_THREAD_H_
+#ifndef CEF_INCLUDE_BASE_CEF_PLATFORM_THREAD_H_
+#define CEF_INCLUDE_BASE_CEF_PLATFORM_THREAD_H_
+#pragma once
 
 #if defined(USING_CHROMIUM_INCLUDES)
 // When building CEF include the Chromium header directly.
@@ -43,7 +44,6 @@
 // If the Chromium implementation diverges the below implementation should be
 // updated to match.
 
-#include "include/base/cef_basictypes.h"
 #include "include/base/cef_build.h"
 #include "include/internal/cef_thread_internal.h"
 
@@ -108,4 +108,4 @@ inline PlatformThreadRef CurrentRef() {
 
 #endif  // !USING_CHROMIUM_INCLUDES
 
-#endif  // CEF_INCLUDE_BASE_PLATFORM_THREAD_H_
+#endif  // CEF_INCLUDE_BASE_CEF_PLATFORM_THREAD_H_

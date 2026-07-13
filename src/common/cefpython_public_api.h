@@ -17,6 +17,13 @@
 // Python.h must be included first otherwise error on Linux:
 // >> error: "_POSIX_C_SOURCE" redefined
 #include "Python.h"
+#include <cstdint>
+
+// CEF 133 removed these legacy Chromium integer aliases. Keep them at the
+// CEFPython public boundary until all downstream callbacks use stdint names.
+using int64 = int64_t;
+using uint32 = uint32_t;
+using char16 = char16_t;
 
 
 // Includes required by "cefpython_fixed.h".

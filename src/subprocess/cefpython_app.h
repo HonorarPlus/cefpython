@@ -52,7 +52,7 @@ class CefPythonApp :
 
 //   CefRefPtr<CefPrintHandler> GetPrintHandler() override;
 
-  void OnScheduleMessagePumpWork(int64 delay_ms) override;
+  void OnScheduleMessagePumpWork(int64_t delay_ms) override;
 
 
   // ---------------------------------------------------------------------------

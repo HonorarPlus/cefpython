@@ -226,9 +226,17 @@ from libc.stdlib cimport atoi
 # "from ... cimport *", this is important to know in pxd files.
 
 # noinspection PyUnresolvedReferences
-from libc.stdint cimport uint64_t
+from libc.stdint cimport int64_t, uint32_t, uint64_t
 # noinspection PyUnresolvedReferences
 from libc.stdint cimport uintptr_t
+
+cdef extern from *:
+    """
+    #include <cstdint>
+    using int64 = int64_t;
+    using uint32 = uint32_t;
+    using char16 = char16_t;
+    """
 
 # noinspection PyUnresolvedReferences
 ctypedef uintptr_t WindowHandle
@@ -538,7 +546,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         g_commandLineSwitches["app-user-model-id"] =\
                 application_settings["app_user_model_id"]
     if "chrome_runtime" in application_settings:
-        application_settings["chrome_runtime"] = 1
+        application_settings["chrome_runtime"] = bool(application_settings["chrome_runtime"])
 
     # ------------------------------------------------------------------------
     # Paths
@@ -601,6 +609,8 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         application_settings["cache_path"] = ""
     if not "root_cache_path" in application_settings:
         application_settings["root_cache_path"] = ""
+    if application_settings["cache_path"] and not application_settings["root_cache_path"]:
+        application_settings["root_cache_path"] = application_settings["cache_path"]
     if not application_settings["cache_path"] and \
        not application_settings["root_cache_path"]:
         g_commandLineSwitches["disable-gpu-shader-disk-cache"] = ""
@@ -637,9 +647,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     if GetAppSetting("external_message_pump")\
             and not g_external_message_pump.get():
         Debug("Create external message pump")
-        # Using .reset() here to assign new instance was causing
-        # MainMessageLoopExternalPump destructor to be called. Strange.
-        g_external_message_pump.swap(MainMessageLoopExternalPump.Create())
+        g_external_message_pump.reset(MainMessageLoopExternalPump.Create().release())
 
     Debug("CefInitialize()")
     cdef cpp_bool ret
@@ -1008,28 +1016,37 @@ cpdef py_void SetGlobalClientHandler(object clientHandler):
             SetGlobalClientCallback(key, method)
 
 cpdef object GetGlobalClientCallback(object cname):
-    cdef bytes name
+    cdef bytes name_bytes
+    cdef str name_str
     if isinstance(cname, bytes):
-        name = cname
+        name_bytes = cname
+        name_str = name_bytes.decode("utf-8", "replace")
     else:
-        name = str(cname).encode("utf-8", "replace")
+        name_str = str(cname)
+        name_bytes = name_str.encode("utf-8", "replace")
 
     global g_globalClientCallbacks
-    if name in g_globalClientCallbacks:
-        return g_globalClientCallbacks[name]
-    else:
-        return None
+    if name_str in g_globalClientCallbacks:
+        return g_globalClientCallbacks[name_str]
+    if name_bytes in g_globalClientCallbacks:
+        return g_globalClientCallbacks[name_bytes]
+    return None
 
 cpdef object GetAppSetting(object skey):
-    cdef bytes key
+    cdef bytes key_bytes
+    cdef str key_str
     if isinstance(skey, bytes):
-        key = skey
+        key_bytes = skey
+        key_str = key_bytes.decode("utf-8", "replace")
     else:
-        key = str(skey).encode("utf-8", "replace")
+        key_str = str(skey)
+        key_bytes = key_str.encode("utf-8", "replace")
 
     global g_applicationSettings
-    if key in g_applicationSettings:
-        return g_applicationSettings[key]
+    if key_str in g_applicationSettings:
+        return g_applicationSettings[key_str]
+    if key_bytes in g_applicationSettings:
+        return g_applicationSettings[key_bytes]
     return None
 
 cpdef dict GetVersion():
@@ -1041,6 +1058,7 @@ cpdef dict GetVersion():
         cef_version=__cef_version__,
         cef_api_hash_platform=__cef_api_hash_platform__,
         cef_api_hash_universal=__cef_api_hash_universal__,
+        cef_api_version=__cef_api_version__,
         cef_commit_hash=__cef_commit_hash__,
         cef_commit_number=__cef_commit_number__,
     )

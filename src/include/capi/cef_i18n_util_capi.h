@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,12 +33,16 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=14f7f979f668fdae0f080daa39f3c1b2e92162f9$
+// $hash=3c0ad2bdd219c14ab4671cfbc5ec249261397f84$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_I18N_UTIL_CAPI_H_
 #define CEF_INCLUDE_CAPI_CEF_I18N_UTIL_CAPI_H_
 #pragma once
+
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
 
 #include "include/capi/cef_base_capi.h"
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,12 +33,16 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=88a2e2e9e1b0e7a692aca78be34ce1620c936336$
+// $hash=6c1d545d323c5261f6af254948de10b87752c5a8$
 //
 
 #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_LABEL_BUTTON_CAPI_H_
 #define CEF_INCLUDE_CAPI_VIEWS_CEF_LABEL_BUTTON_CAPI_H_
 #pragma once
+
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
 
 #include "include/capi/cef_image_capi.h"
 #include "include/capi/views/cef_button_capi.h"
@@ -53,6 +57,8 @@ struct _cef_menu_button_t;
 ///
 /// LabelButton is a button with optional text and/or icon. Methods must be
 /// called on the browser process UI thread unless otherwise indicated.
+///
+/// NOTE: This struct is allocated DLL-side.
 ///
 typedef struct _cef_label_button_t {
   ///
@@ -113,14 +119,15 @@ typedef struct _cef_label_button_t {
 
   ///
   /// Sets the font list. The format is "<FONT_FAMILY_LIST>,[STYLES] <SIZE>",
-  /// where: - FONT_FAMILY_LIST is a comma-separated list of font family names,
+  /// where:
+  /// - FONT_FAMILY_LIST is a comma-separated list of font family names,
   /// - STYLES is an optional space-separated list of style names (case-
-  /// sensitive
-  ///   "Bold" and "Italic" are supported), and
+  ///   sensitive "Bold" and "Italic" are supported), and
   /// - SIZE is an integer font size in pixels with the suffix "px".
   ///
-  /// Here are examples of valid font description strings: - "Arial, Helvetica,
-  /// Bold Italic 14px" - "Arial, 14px"
+  /// Here are examples of valid font description strings:
+  /// - "Arial, Helvetica, Bold Italic 14px"
+  /// - "Arial, 14px"
   ///
   void(CEF_CALLBACK* set_font_list)(struct _cef_label_button_t* self,
                                     const cef_string_t* font_list);

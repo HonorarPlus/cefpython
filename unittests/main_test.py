@@ -140,7 +140,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         if "--debug-warning" in sys.argv:
             settings["debug"] = True
             settings["log_severity"] = cef.LOGSEVERITY_WARNING
-        cef.Initialize(settings)
+        cef.Initialize(settings, switches={"disable-popup-blocking": ""})
         subtest_message("cef.Initialize() ok")
 
         # CRL set file

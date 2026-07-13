@@ -87,6 +87,7 @@ import glob
 import shutil
 import multiprocessing
 from collections import OrderedDict
+from prepare_cef import prepare_cef
 #from setuptools.msvc import msvc9_query_vcvarsall
 
 # Constants
@@ -260,14 +261,16 @@ def build_cef():
 def prebuilt_cef():
     """Use prebuilt binaries."""
 
-    # TODO: Option to download CEF prebuilt binaries from GitHub Releases,
-    #       eg. tag 'upstream-cef47'.
+    if not Options.x86:
+        Options.cef_binary = str(prepare_cef(CEF_POSTFIX2))
 
     # Find cef_binary directory in the build directory
     postfix2 = CEF_POSTFIX2
     if Options.x86:
         postfix2 = get_cef_postfix2_for_arch("32bit")
-    if Options.cef_version:
+    if Options.cef_binary:
+        cef_binary = Options.cef_binary
+    elif Options.cef_version:
         cef_binary = os.path.join(Options.build_dir,
                                   "cef_binary_{cef_version}_{os}{sep}"
                                   .format(cef_version=Options.cef_version,
@@ -279,7 +282,7 @@ def prebuilt_cef():
                                   .format(cef_branch=Options.cef_branch,
                                           os=postfix2,
                                           sep=os.sep))
-    dirs = glob.glob(cef_binary)
+    dirs = [cef_binary] if os.path.isdir(cef_binary) else glob.glob(cef_binary)
     if len(dirs) == 1:
         Options.cef_binary = dirs[0]
     else:
@@ -358,9 +361,6 @@ def update_cef_patches():
 def build_cef_projects():
     """Build cefclient, cefsimple, ceftests, libcef_dll_wrapper."""
     print("[automate.py] Build cef projects...")
-
-    if WINDOWS:
-        fix_cmake_variables_permanently_windows()
 
     fix_cef_include_files()
 
@@ -466,22 +466,29 @@ def build_all_wrapper_libraries_windows():
 
 
 def build_wrapper_library_windows(runtime_library, msvs, vcvars):
-    # When building library cmake variables file is being modified
-    # for the /MD build. If the build fails and variables aren't
-    # restored then the next /MT build would be broken. Make sure
-    # that original contents of cmake variables files is always
-    # restored.
-    fix_cmake_variables_for_MD_library(try_undo=True)
-
     # Command to build libcef_dll_wrapper
     cmake_wrapper = prepare_build_command(build_lib=True, vcvars=vcvars)
-    cmake_wrapper.extend(["cmake", "-G", "Ninja",
-                         "-DCMAKE_BUILD_TYPE="+Options.build_type, ".."])
+    compiler_glob = os.path.join(ACTIVE_VISUAL_STUDIO_ROOT, "VC", "Tools", "MSVC", "*", "bin",
+                                 "Hostx64", "x64", "cl.exe")
+    compiler_paths = sorted(glob.glob(compiler_glob), reverse=True)
+    if not compiler_paths:
+        raise RuntimeError("Could not locate the active MSVC compiler")
+    runtime_flag = "/MT" if runtime_library == RUNTIME_MT else "/MD"
+    cmake_wrapper.extend([
+        os.path.join(ACTIVE_MSVC_CMAKE_DIR, "cmake.exe"),
+        "-G", "Ninja",
+        "-DCMAKE_BUILD_TYPE=" + Options.build_type,
+        "-Dapi_version=15000",
+        "-DCEF_RUNTIME_LIBRARY_FLAG=" + runtime_flag,
+        "-DCMAKE_C_COMPILER=" + compiler_paths[0],
+        "-DCMAKE_CXX_COMPILER=" + compiler_paths[0],
+        Options.cef_binary,
+    ])
 
     # Build directory and library path
     build_wrapper_dir = os.path.join(
-            Options.cef_binary,
-            "build_wrapper_{runtime_library}_VS{msvs}"
+            Options.build_dir,
+            "w150_{runtime_library}_VS{msvs}"
             .format(runtime_library=runtime_library, msvs=msvs))
     wrapper_lib = os.path.join(build_wrapper_dir, "libcef_dll_wrapper",
                                "libcef_dll_wrapper{ext}".format(ext=LIB_EXT))
@@ -511,8 +518,6 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
         # Run cmake
         old_gyp_msvs_version = Options.gyp_msvs_version
         Options.gyp_msvs_version = msvs
-        if runtime_library == RUNTIME_MD:
-            fix_cmake_variables_for_MD_library()
         env = getenv()
         if msvs == "2010":
             # When Using WinSDK 7.1 vcvarsall.bat doesn't work. Use
@@ -527,13 +532,11 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
                     env[env_key] = env_value.encode("utf-8")
         run_command(cmake_wrapper, working_dir=build_wrapper_dir, env=env)
         Options.gyp_msvs_version = old_gyp_msvs_version
-        if runtime_library == RUNTIME_MD:
-            fix_cmake_variables_for_MD_library(undo=True)
         print("[automate.py] cmake OK")
 
         # Run ninja
         ninja_wrapper = prepare_build_command(build_lib=True, vcvars=vcvars)
-        ninja_wrapper.extend(["ninja", "-j", Options.ninja_jobs,
+        ninja_wrapper.extend([os.path.join(ACTIVE_MSVC_NINJA_DIR, "ninja.exe"), "-j", Options.ninja_jobs,
                               "libcef_dll_wrapper"])
         run_command(ninja_wrapper, working_dir=build_wrapper_dir)
         print("[automate.py] ninja OK")
@@ -733,6 +736,9 @@ def create_prebuilt_binaries():
     cpdir(os.path.join(src, Options.build_type), bindir)
     if not MAC:
         cpdir(os.path.join(src, "Resources"), bindir)
+    if WINDOWS:
+        for bootstrap_path in glob.glob(os.path.join(bindir, "bootstrap*.exe")):
+            os.remove(bootstrap_path)
 
     # Fix id in CEF framework on Mac (currently it expects Frameworks/ dir)
     if MAC:
@@ -815,13 +821,13 @@ def create_prebuilt_binaries():
             os.makedirs(vs_subdir)
             # MT library
             libsrc = os.path.join(
-                    src, "build_wrapper_MT_VS{msvs}".format(msvs=msvs),
+                    Options.build_dir, "w150_MT_VS{msvs}".format(msvs=msvs),
                     "libcef_dll_wrapper", "libcef_dll_wrapper.lib")
             libdst = os.path.join(vs_subdir, "libcef_dll_wrapper_MT.lib")
             shutil.copy(libsrc, libdst)
             # MD library
             libsrc = os.path.join(
-                    src, "build_wrapper_MD_VS{msvs}".format(msvs=msvs),
+                    Options.build_dir, "w150_MD_VS{msvs}".format(msvs=msvs),
                     "libcef_dll_wrapper", "libcef_dll_wrapper.lib")
             libdst = os.path.join(vs_subdir, "libcef_dll_wrapper_MD.lib")
             shutil.copy(libsrc, libdst)
@@ -959,6 +965,8 @@ def run_command(command, working_dir, env=None):
           working_dir+"'...")
     if isinstance(command, str):
         args = shlex.split(command.replace("\\", "\\\\"))
+    elif platform.system() == "Windows":
+        args = subprocess.list2cmdline(command)
     else:
         args = command
     if not env:

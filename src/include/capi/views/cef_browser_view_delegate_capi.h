@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,15 +33,20 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=0e7953aa553f6987fa0142a9c4848ca59d68fb69$
+// $hash=24d75fec9771153753f998292fd7daf15d8e4883$
 //
 
 #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_BROWSER_VIEW_DELEGATE_CAPI_H_
 #define CEF_INCLUDE_CAPI_VIEWS_CEF_BROWSER_VIEW_DELEGATE_CAPI_H_
 #pragma once
 
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
+
 #include "include/capi/cef_client_capi.h"
 #include "include/capi/views/cef_view_delegate_capi.h"
+#include "include/cef_api_hash.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,6 +59,8 @@ struct _cef_browser_view_t;
 /// Implement this structure to handle BrowserView events. The functions of this
 /// structure will be called on the browser process UI thread unless otherwise
 /// indicated.
+///
+/// NOTE: This struct is allocated client-side.
 ///
 typedef struct _cef_browser_view_delegate_t {
   ///
@@ -119,7 +126,56 @@ typedef struct _cef_browser_view_delegate_t {
   /// documentation.
   ///
   cef_chrome_toolbar_type_t(CEF_CALLBACK* get_chrome_toolbar_type)(
+      struct _cef_browser_view_delegate_t* self,
+      struct _cef_browser_view_t* browser_view);
+
+  ///
+  /// Return true (1) to create frameless windows for Document picture-in-
+  /// picture popups. Content in frameless windows should specify draggable
+  /// regions using "-webkit-app-region: drag" CSS.
+  ///
+  int(CEF_CALLBACK* use_frameless_window_for_picture_in_picture)(
+      struct _cef_browser_view_delegate_t* self,
+      struct _cef_browser_view_t* browser_view);
+
+  ///
+  /// Called when |browser_view| receives a gesture command. Return true (1) to
+  /// handle (or disable) a |gesture_command| or false (0) to propagate the
+  /// gesture to the browser for default handling. With Chrome style these
+  /// commands can also be handled via cef_command_handler_t::OnChromeCommand.
+  ///
+  int(CEF_CALLBACK* on_gesture_command)(
+      struct _cef_browser_view_delegate_t* self,
+      struct _cef_browser_view_t* browser_view,
+      cef_gesture_command_t gesture_command);
+
+  ///
+  /// Optionally change the runtime style for this BrowserView. See
+  /// cef_runtime_style_t documentation for details.
+  ///
+  cef_runtime_style_t(CEF_CALLBACK* get_browser_runtime_style)(
       struct _cef_browser_view_delegate_t* self);
+
+#if CEF_API_ADDED(13601)
+  ///
+  /// Return true (1) to allow the use of JavaScript moveTo/By() and
+  /// resizeTo/By() (without user activation) with Document picture-in-picture
+  /// popups.
+  ///
+  int(CEF_CALLBACK* allow_move_for_picture_in_picture)(
+      struct _cef_browser_view_delegate_t* self,
+      struct _cef_browser_view_t* browser_view);
+#endif
+
+#if CEF_API_ADDED(14400)
+  ///
+  /// Return true (1) to allow opening Document picture-in-picture without user
+  /// activation. Default is false (0) (user activation required).
+  ///
+  int(CEF_CALLBACK* allow_picture_in_picture_without_user_activation)(
+      struct _cef_browser_view_delegate_t* self,
+      struct _cef_browser_view_t* browser_view);
+#endif
 } cef_browser_view_delegate_t;
 
 #ifdef __cplusplus

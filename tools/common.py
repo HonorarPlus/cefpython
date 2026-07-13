@@ -7,6 +7,7 @@
 
 import atexit
 import glob
+import json
 import os
 import platform
 import re
@@ -73,9 +74,9 @@ OS_POSTFIX2_ARCH = dict(
     MAC={"32bit": "mac32", "64bit": "mac64"},
 )
 CEF_POSTFIX2_ARCH = dict(
-    WINDOWS={"32bit": "windows32", "64bit": "windows64"},
-    LINUX={"32bit": "linux32", "64bit": "linux64"},
-    MAC={"64bit": "macosx64"},
+    WINDOWS={"32bit": "windows32", "64bit": "windows64", "x86_64": "windows64"},
+    LINUX={"32bit": "linux32", "64bit": "linux64", "x86_64": "linux64", "arm64": "linuxarm64"},
+    MAC={"64bit": "macosx64", "x86_64": "macosx64", "arm64": "macosarm64"},
 )
 PYPI_POSTFIX2_ARCH = dict(
     WINDOWS={"32bit": "win32", "64bit": "win_amd64"},
@@ -495,8 +496,16 @@ def get_cefpython_version():
 
 def get_cefpython_api_hash():
     """Get CEF API hash from the 'src/version/' directory."""
-    header_file = os.path.join(SRC_DIR, "version","cef_api_hash.h")
-    return get_version_from_file(header_file)
+    manifest_file = os.path.join(TOOLS_DIR, "cef_version.json")
+    with open(manifest_file, "r", encoding="utf-8") as file_object:
+        manifest = json.load(file_object)
+    platform_key = {"win": "windows", "mac": "macos", "linux": "linux"}[OS_POSTFIX]
+    platform_hash = manifest["api_hashes"][platform_key]
+    return {
+        "CEF_API_VERSION": str(manifest["api_version"]),
+        "CEF_API_HASH_PLATFORM": platform_hash,
+        "CEF_API_HASH_UNIVERSAL": platform_hash,
+    }
 
 
 def get_version_from_file(header_file):

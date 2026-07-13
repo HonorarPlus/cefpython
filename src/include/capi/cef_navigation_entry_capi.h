@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,12 +33,16 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=2822d96d72b7df816c0fefb4ce1cbba18add50ac$
+// $hash=ee67f69191a79e32a28a61ba27f4db880b8101f2$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_NAVIGATION_ENTRY_CAPI_H_
 #define CEF_INCLUDE_CAPI_CEF_NAVIGATION_ENTRY_CAPI_H_
 #pragma once
+
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
 
 #include "include/capi/cef_base_capi.h"
 #include "include/capi/cef_ssl_status_capi.h"
@@ -49,6 +53,8 @@ extern "C" {
 
 ///
 /// Structure used to represent an entry in navigation history.
+///
+/// NOTE: This struct is allocated DLL-side.
 ///
 typedef struct _cef_navigation_entry_t {
   ///

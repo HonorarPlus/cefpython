@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,15 +33,20 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=a38b506d8bc425f3de4809c02d0ec4bc558eb518$
+// $hash=20544adf29b2c74b85ae240905e8823afe1ab6ac$
 //
 
 #ifndef CEF_INCLUDE_CAPI_VIEWS_CEF_TEXTFIELD_CAPI_H_
 #define CEF_INCLUDE_CAPI_VIEWS_CEF_TEXTFIELD_CAPI_H_
 #pragma once
 
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
+
 #include "include/capi/views/cef_textfield_delegate_capi.h"
 #include "include/capi/views/cef_view_capi.h"
+#include "include/cef_api_hash.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,6 +56,8 @@ extern "C" {
 /// A Textfield supports editing of text. This control is custom rendered with
 /// no platform-specific code. Methods must be called on the browser process UI
 /// thread unless otherwise indicated.
+///
+/// NOTE: This struct is allocated DLL-side.
 ///
 typedef struct _cef_textfield_t {
   ///
@@ -145,52 +152,77 @@ typedef struct _cef_textfield_t {
   ///
   size_t(CEF_CALLBACK* get_cursor_position)(struct _cef_textfield_t* self);
 
+#if CEF_API_REMOVED(15000)
   ///
   /// Sets the text color.
   ///
   void(CEF_CALLBACK* set_text_color)(struct _cef_textfield_t* self,
                                      cef_color_t color);
+#else
+  uintptr_t set_text_color_removed;
+#endif
 
+#if CEF_API_REMOVED(15000)
   ///
   /// Returns the text color.
   ///
   cef_color_t(CEF_CALLBACK* get_text_color)(struct _cef_textfield_t* self);
+#else
+  uintptr_t get_text_color_removed;
+#endif
 
+#if CEF_API_REMOVED(15000)
   ///
   /// Sets the selection text color.
   ///
   void(CEF_CALLBACK* set_selection_text_color)(struct _cef_textfield_t* self,
                                                cef_color_t color);
+#else
+  uintptr_t set_selection_text_color_removed;
+#endif
 
+#if CEF_API_REMOVED(15000)
   ///
   /// Returns the selection text color.
   ///
   cef_color_t(CEF_CALLBACK* get_selection_text_color)(
       struct _cef_textfield_t* self);
+#else
+  uintptr_t get_selection_text_color_removed;
+#endif
 
+#if CEF_API_REMOVED(15000)
   ///
   /// Sets the selection background color.
   ///
   void(CEF_CALLBACK* set_selection_background_color)(
       struct _cef_textfield_t* self,
       cef_color_t color);
+#else
+  uintptr_t set_selection_background_color_removed;
+#endif
 
+#if CEF_API_REMOVED(15000)
   ///
   /// Returns the selection background color.
   ///
   cef_color_t(CEF_CALLBACK* get_selection_background_color)(
       struct _cef_textfield_t* self);
+#else
+  uintptr_t get_selection_background_color_removed;
+#endif
 
   ///
   /// Sets the font list. The format is "<FONT_FAMILY_LIST>,[STYLES] <SIZE>",
-  /// where: - FONT_FAMILY_LIST is a comma-separated list of font family names,
+  /// where:
+  /// - FONT_FAMILY_LIST is a comma-separated list of font family names,
   /// - STYLES is an optional space-separated list of style names (case-
-  /// sensitive
-  ///   "Bold" and "Italic" are supported), and
+  ///   sensitive "Bold" and "Italic" are supported), and
   /// - SIZE is an integer font size in pixels with the suffix "px".
   ///
-  /// Here are examples of valid font description strings: - "Arial, Helvetica,
-  /// Bold Italic 14px" - "Arial, 14px"
+  /// Here are examples of valid font description strings:
+  /// - "Arial, Helvetica, Bold Italic 14px"
+  /// - "Arial, 14px"
   ///
   void(CEF_CALLBACK* set_font_list)(struct _cef_textfield_t* self,
                                     const cef_string_t* font_list);
@@ -248,11 +280,15 @@ typedef struct _cef_textfield_t {
   cef_string_userfree_t(CEF_CALLBACK* get_placeholder_text)(
       struct _cef_textfield_t* self);
 
+#if CEF_API_REMOVED(15000)
   ///
   /// Sets the placeholder text color.
   ///
   void(CEF_CALLBACK* set_placeholder_text_color)(struct _cef_textfield_t* self,
                                                  cef_color_t color);
+#else
+  uintptr_t set_placeholder_text_color_removed;
+#endif
 
   ///
   /// Set the accessible name that will be exposed to assistive technology (AT).

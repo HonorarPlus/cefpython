@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2026 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,12 +33,16 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=f535e9560b9fde9b53fc4d8383905105ed029ea4$
+// $hash=ff324bb4bdfd3194a80bcc68efe1f42151d414a2$
 //
 
 #ifndef CEF_INCLUDE_CAPI_CEF_COMMAND_LINE_CAPI_H_
 #define CEF_INCLUDE_CAPI_CEF_COMMAND_LINE_CAPI_H_
 #pragma once
+
+#if defined(BUILDING_CEF_SHARED)
+#error This file cannot be included DLL-side
+#endif
 
 #include "include/capi/cef_base_capi.h"
 
@@ -56,6 +60,8 @@ extern "C" {
 /// arguments. Switch names should be lowercase ASCII and will be converted to
 /// such if necessary. Switch values will retain the original case and UTF8
 /// encoding. This structure can be used before cef_initialize() is called.
+///
+/// NOTE: This struct is allocated DLL-side.
 ///
 typedef struct _cef_command_line_t {
   ///
@@ -159,14 +165,14 @@ typedef struct _cef_command_line_t {
                                    cef_string_map_t switches);
 
   ///
-  /// Add a switch to the end of the command line. If the switch has no value
-  /// pass an NULL value string.
+  /// Add a switch to the end of the command line.
   ///
   void(CEF_CALLBACK* append_switch)(struct _cef_command_line_t* self,
                                     const cef_string_t* name);
 
   ///
-  /// Add a switch with the specified value to the end of the command line.
+  /// Add a switch with the specified value to the end of the command line. If
+  /// the switch has no value pass an NULL value string.
   ///
   void(CEF_CALLBACK* append_switch_with_value)(struct _cef_command_line_t* self,
                                                const cef_string_t* name,
@@ -195,6 +201,15 @@ typedef struct _cef_command_line_t {
   ///
   void(CEF_CALLBACK* prepend_wrapper)(struct _cef_command_line_t* self,
                                       const cef_string_t* wrapper);
+
+#if CEF_API_ADDED(14100)
+  ///
+  /// Remove a switch from the command line. If no such switch is present, this
+  /// has no effect.
+  ///
+  void(CEF_CALLBACK* remove_switch)(struct _cef_command_line_t* self,
+                                    const cef_string_t* name);
+#endif
 } cef_command_line_t;
 
 ///

@@ -33,16 +33,6 @@ bool RequestHandler::GetAuthCredentials(CefRefPtr<CefBrowser> browser,
 }
 
 
-bool RequestHandler::OnQuotaRequest(CefRefPtr<CefBrowser> browser,
-                                    const CefString& origin_url,
-                                    int64 new_size,
-                                    CefRefPtr<CefCallback> callback) {
-    REQUIRE_IO_THREAD();
-    return RequestHandler_OnQuotaRequest(browser, origin_url, new_size,
-                                         callback);
-}
-
-
 bool RequestHandler::OnCertificateError(
                                   CefRefPtr<CefBrowser> browser, // not used
                                   cef_errorcode_t cert_error,
@@ -57,7 +47,9 @@ bool RequestHandler::OnCertificateError(
 
 
 void RequestHandler::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
-                                               cef_termination_status_t status)
+                                               cef_termination_status_t status,
+                                               int error_code,
+                                               const CefString& error_string)
 {
     REQUIRE_UI_THREAD();
     LOG(ERROR) << "[Browser process] OnRenderProcessTerminated()";

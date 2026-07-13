@@ -31,13 +31,17 @@
 #define CEF_INCLUDE_INTERNAL_CEF_APP_WIN_H_
 #pragma once
 
+#if !defined(GENERATING_CEF_API_HASH)
 #include "include/base/cef_build.h"
+#endif
 
 #if defined(OS_WIN)
 
 #if defined(ARCH_CPU_32_BITS)
 #include <windows.h>
 #endif
+
+#include "include/internal/cef_export.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -85,13 +89,6 @@ CEF_EXPORT int cef_run_main_with_preferred_stack_size(mainPtr main,
                                                       int argc,
                                                       char* argv[]);
 #endif  // defined(ARCH_CPU_32_BITS)
-
-///
-/// Call during process startup to enable High-DPI support on Windows 7 or
-/// newer. Older versions of Windows should be left DPI-unaware because they do
-/// not support DirectWrite and GDI fonts are kerned very badly.
-///
-CEF_EXPORT void cef_enable_highdpi_support(void);
 
 ///
 /// Set to true (1) before calling Windows APIs like TrackPopupMenu that enter a

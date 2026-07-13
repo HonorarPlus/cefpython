@@ -12,7 +12,7 @@ bool ResourceHandler::ProcessRequest(CefRefPtr<CefRequest> request,
 }
 
 void ResourceHandler::GetResponseHeaders(CefRefPtr<CefResponse> response,
-                              int64& response_length,
+                              int64_t& response_length,
                               CefString& redirectUrl) {
     REQUIRE_IO_THREAD();
     ResourceHandler_GetResponseHeaders(resourceHandlerId_, response,

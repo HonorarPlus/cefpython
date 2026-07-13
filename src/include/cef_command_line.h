@@ -40,6 +40,7 @@
 
 #include <map>
 #include <vector>
+
 #include "include/cef_base.h"
 
 ///
@@ -168,18 +169,27 @@ class CefCommandLine : public virtual CefBaseRefCounted {
   virtual void GetSwitches(SwitchMap& switches) = 0;
 
   ///
-  /// Add a switch to the end of the command line. If the switch has no value
-  /// pass an empty value string.
+  /// Add a switch to the end of the command line.
   ///
   /*--cef()--*/
   virtual void AppendSwitch(const CefString& name) = 0;
 
   ///
-  /// Add a switch with the specified value to the end of the command line.
+  /// Add a switch with the specified value to the end of the command line. If
+  /// the switch has no value pass an empty value string.
   ///
   /*--cef()--*/
   virtual void AppendSwitchWithValue(const CefString& name,
                                      const CefString& value) = 0;
+
+#if CEF_API_ADDED(14100)
+  ///
+  /// Remove a switch from the command line. If no such switch is present, this
+  /// has no effect.
+  ///
+  /*--cef(added=14100)--*/
+  virtual void RemoveSwitch(const CefString& name) = 0;
+#endif
 
   ///
   /// True if there are remaining command line arguments.

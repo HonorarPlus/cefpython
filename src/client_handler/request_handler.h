@@ -30,11 +30,6 @@ public:
                             const CefString& scheme,
                             CefRefPtr<CefAuthCallback> callback) override;
 
-    bool OnQuotaRequest(CefRefPtr<CefBrowser> browser,
-                        const CefString& origin_url,
-                        int64 new_size,
-                        CefRefPtr<CefCallback> callback) override;
-
     bool OnCertificateError(CefRefPtr<CefBrowser> browser,
                             cef_errorcode_t cert_error,
                             const CefString& request_url,
@@ -42,7 +37,9 @@ public:
                             CefRefPtr<CefCallback> callback) override;
 
     void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
-                                   cef_termination_status_t status) override;
+                                   cef_termination_status_t status,
+                                   int error_code,
+                                   const CefString& error_string) override;
 
 private:
     IMPLEMENT_REFCOUNTING(RequestHandler);

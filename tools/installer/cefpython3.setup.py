@@ -80,8 +80,14 @@ if "bdist_wheel" in sys.argv:
     from wheel.bdist_wheel import bdist_wheel
 
     class custom_bdist_wheel(bdist_wheel):
+        def finalize_options(self):
+            bdist_wheel.finalize_options(self)
+            self.root_is_pure = False
+
         def get_tag(self):
-            tag = bdist_wheel.get_tag(self)
+            interpreter_tag = "cp{major}{minor}".format(
+                major=sys.version_info.major, minor=sys.version_info.minor
+            )
             platform_tag = sysconfig.get_platform()
             platform_tag = platform_tag.replace("-", "_")
             if platform.system() == "Linux":
@@ -94,8 +100,7 @@ if "bdist_wheel" in sys.argv:
                 platform_tag = ("macosx_10_6_intel"
                                 ".macosx_10_9_intel.macosx_10_9_x86_64"
                                 ".macosx_10_10_intel.macosx_10_10_x86_64")
-            tag = (tag[0], tag[1], platform_tag)
-            return tag
+            return interpreter_tag, interpreter_tag, platform_tag
 
     # Overwrite bdist_wheel command
     cmdclass["bdist_wheel"] = custom_bdist_wheel

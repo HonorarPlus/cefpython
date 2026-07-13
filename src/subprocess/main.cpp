@@ -22,7 +22,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 	        CefCommandLine::CreateCommandLine();
     command_line->InitFromString(GetCommandLineW());
     if (command_line->HasSwitch("enable-high-dpi-support")) {
-	    CefEnableHighDPISupport();
+	    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 	}
 
 	CefMainArgs mainArgs(hInstance);

@@ -140,8 +140,8 @@ cdef public void LifespanHandler_OnBeforeClose(
                 .get().FlushStore(<CefRefPtr[CefCompletionCallback]?>nullptr)
 
         browserId = pyBrowser.GetIdentifier()
-        pyBrowser.cefBrowser.swap(<CefRefPtr[CefBrowser]?>nullptr)
-        cefBrowser.swap(<CefRefPtr[CefBrowser]?>nullptr)
+        pyBrowser.cefBrowser.reset()
+        cefBrowser.reset()
         del pyBrowser
 
         RemovePythonCallbacksForBrowser(browserId)
