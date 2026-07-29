@@ -20,8 +20,9 @@ cdef void SetCefWindowInfo(
             # raise Exception("WindowInfo: parentWindowHandle is not set")
             pass
 
-    IF UNAME_SYSNAME == "Windows":
+    IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
         cdef CefRect windowRect
+    IF UNAME_SYSNAME == "Windows":
         cdef RECT rect2
         cdef CefString windowName
     ELIF UNAME_SYSNAME == "Linux":
@@ -49,12 +50,14 @@ cdef void SetCefWindowInfo(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowRect)
         ELIF UNAME_SYSNAME == "Darwin":
-            cefWindowInfo.SetAsChild(
-                    <CefWindowHandle>windowInfo.parentWindowHandle,
+            windowRect = CefRect(
                     int(windowInfo.windowRect[0]),
                     int(windowInfo.windowRect[1]),
                     int(windowInfo.windowRect[2]),
                     int(windowInfo.windowRect[3]))
+            cefWindowInfo.SetAsChild(
+                    <CefWindowHandle>windowInfo.parentWindowHandle,
+                    windowRect)
         ELIF UNAME_SYSNAME == "Linux":
             x = int(windowInfo.windowRect[0])
             y = int(windowInfo.windowRect[1])
@@ -76,13 +79,14 @@ cdef void SetCefWindowInfo(
     if windowInfo.windowType == "offscreen":
         cefWindowInfo.SetAsWindowless(
                 <CefWindowHandle>windowInfo.parentWindowHandle)
-    elif windowInfo.runtimeStyle == "chrome":
-        cefWindowInfo.runtime_style = cef_types.CEF_RUNTIME_STYLE_CHROME
-    elif windowInfo.runtimeStyle == "default":
-        cefWindowInfo.runtime_style = cef_types.CEF_RUNTIME_STYLE_DEFAULT
-    else:
-        # Preserve CEFPython's historical Alloy behavior for windowed apps.
-        cefWindowInfo.runtime_style = cef_types.CEF_RUNTIME_STYLE_ALLOY
+    IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
+        if windowInfo.runtimeStyle == "chrome":
+            cefWindowInfo.runtime_style = cef_types.CEF_RUNTIME_STYLE_CHROME
+        elif windowInfo.runtimeStyle == "default":
+            cefWindowInfo.runtime_style = cef_types.CEF_RUNTIME_STYLE_DEFAULT
+        else:
+            # Preserve CEFPython's historical Alloy behavior for windowed apps.
+            cefWindowInfo.runtime_style = cef_types.CEF_RUNTIME_STYLE_ALLOY
 
     IF UNAME_SYSNAME == "Windows":
         if windowInfo.initiallyHidden:
@@ -181,4 +185,3 @@ cdef class WindowInfo:
         else:
             raise Exception("This method is deprecated since v66, see "
                             "Migration Guide document.")
-

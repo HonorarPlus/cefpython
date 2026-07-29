@@ -31,6 +31,14 @@ if ARCH64:
     assert platform.architecture()[0] == "64bit"
 ARCH_STR = platform.architecture()[0]
 
+machine = platform.machine().lower()
+if machine in ("arm64", "aarch64"):
+    MACHINE_ARCH = "arm64"
+elif machine in ("amd64", "x86_64"):
+    MACHINE_ARCH = "x86_64"
+else:
+    MACHINE_ARCH = machine
+
 # Operating system architecture
 SYSTEM64 = platform.machine().endswith('64')
 SYSTEM32 = not SYSTEM64
@@ -54,8 +62,8 @@ if OS_POSTFIX == "win":
     OS_POSTFIX2 = "win32" if ARCH32 else "win64"
     CEF_POSTFIX2 = "windows32" if ARCH32 else "windows64"
 elif OS_POSTFIX == "mac":
-    OS_POSTFIX2 = "mac32" if ARCH32 else "mac64"
-    CEF_POSTFIX2 = "macosx32" if ARCH32 else "macosx64"
+    OS_POSTFIX2 = "mac32" if ARCH32 else "macarm64" if MACHINE_ARCH == "arm64" else "mac64"
+    CEF_POSTFIX2 = "macosx32" if ARCH32 else "macosarm64" if MACHINE_ARCH == "arm64" else "macosx64"
 elif OS_POSTFIX == "linux":
     OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
     CEF_POSTFIX2 = "linux32" if ARCH32 else "linux64"
@@ -71,7 +79,7 @@ MAC = SYSTEM if SYSTEM == "MAC" else False
 OS_POSTFIX2_ARCH = dict(
     WINDOWS={"32bit": "win32", "64bit": "win64"},
     LINUX={"32bit": "linux32", "64bit": "linux64"},
-    MAC={"32bit": "mac32", "64bit": "mac64"},
+    MAC={"32bit": "mac32", "64bit": "mac64", "x86_64": "mac64", "arm64": "macarm64"},
 )
 CEF_POSTFIX2_ARCH = dict(
     WINDOWS={"32bit": "windows32", "64bit": "windows64", "x86_64": "windows64"},
@@ -81,7 +89,7 @@ CEF_POSTFIX2_ARCH = dict(
 PYPI_POSTFIX2_ARCH = dict(
     WINDOWS={"32bit": "win32", "64bit": "win_amd64"},
     LINUX={"32bit": "manylinux1_i686", "64bit": "manylinux1_x86_64"},
-    MAC={"64bit": "x86_64"},
+    MAC={"64bit": "x86_64", "x86_64": "x86_64", "arm64": "arm64"},
 )
 
 # Python version eg. 27

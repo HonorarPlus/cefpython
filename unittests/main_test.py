@@ -130,6 +130,8 @@ class MainTest_IsolatedTest(unittest.TestCase):
             "log_severity": cef.LOGSEVERITY_ERROR,
             "log_file": "",
         }
+        if MAC:
+            settings["external_message_pump"] = True
         if not LINUX:
             # On Linux you get a lot of "X error received" messages
             # from Chromium's "x11_util.cc", so do not show them.
@@ -140,8 +142,12 @@ class MainTest_IsolatedTest(unittest.TestCase):
         if "--debug-warning" in sys.argv:
             settings["debug"] = True
             settings["log_severity"] = cef.LOGSEVERITY_WARNING
-        cef.Initialize(settings, switches={"disable-popup-blocking": ""})
+        switches = {"disable-popup-blocking": ""}
+        cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
+        if MAC:
+            self.assertFalse(cef.GetAppSetting(
+                    "macos_use_system_keychain"))
 
         # CRL set file
         certrevoc_dir = ""
@@ -281,6 +287,10 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # Make sure popup browser was destroyed
         self.assertIsInstance(cef.GetBrowserByIdentifier(MAIN_BROWSER_ID),
                               cef.PyBrowser)
+        for _ in range(500):
+            if cef.GetBrowserByIdentifier(POPUP_BROWSER_ID) is None:
+                break
+            do_message_loop_work(1)
         self.assertIsNone(cef.GetBrowserByIdentifier(POPUP_BROWSER_ID))
         subtest_message("cef.GetBrowserByIdentifier() ok")
 

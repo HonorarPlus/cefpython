@@ -13,5 +13,6 @@
 void MacInitialize();
 void MacShutdown();
 void MacSetWindowTitle(CefRefPtr<CefBrowser> browser, char* title);
+bool MacCloseBrowserWindow(CefRefPtr<CefBrowser> browser);
 
 #endif  // CEFPYTHON_UTIL_MAC_H_

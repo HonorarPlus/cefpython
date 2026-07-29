@@ -503,6 +503,76 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     if not application_settings:
         application_settings = {}
 
+    cdef str module_dir = GetModuleDirectory()
+    cdef str mac_frameworks_dir = ""
+    cdef str mac_main_bundle_dir = ""
+    cdef str configured_frameworks_dir = ""
+    cdef str configured_contents_dir = ""
+    cdef str configured_bundle_dir = ""
+    cdef bint mac_sandbox_supported = False
+
+    # CEF 150 uses the bootstrap loader on macOS. Load its function table
+    # before creating CefString values or invoking any other CEF API.
+    IF UNAME_SYSNAME == "Darwin":
+        mac_main_bundle_dir = os.path.join(module_dir, "cefpython3.app")
+        mac_frameworks_dir = os.path.join(
+                mac_main_bundle_dir, "Contents", "Frameworks")
+
+        # Chromium's macOS sandbox requires the browser executable, CEF
+        # framework and helper apps to share one real top-level app bundle.
+        # An ordinary Python interpreter cannot gain that relationship by
+        # pointing at a synthetic bundle, so use the sandbox only for a
+        # correctly packaged/frozen application.
+        cdef str executable_macos_dir = os.path.dirname(
+                os.path.abspath(sys.executable))
+        cdef str executable_contents_dir = os.path.dirname(
+                executable_macos_dir)
+        cdef str executable_bundle_dir = os.path.dirname(
+                executable_contents_dir)
+        cdef str executable_frameworks_dir = os.path.join(
+                executable_contents_dir, "Frameworks")
+        if os.path.basename(executable_macos_dir) == "MacOS" and \
+           os.path.basename(executable_contents_dir) == "Contents" and \
+           executable_bundle_dir.endswith(".app") and \
+           os.path.isdir(os.path.join(
+                   executable_frameworks_dir,
+                   "Chromium Embedded Framework.framework")) and \
+           os.path.isdir(os.path.join(
+                   executable_frameworks_dir,
+                   "cefpython3 Helper.app")):
+            mac_main_bundle_dir = executable_bundle_dir
+            mac_frameworks_dir = executable_frameworks_dir
+            mac_sandbox_supported = True
+
+        cdef str cef_framework_dir = application_settings.get(
+                "framework_dir_path",
+                os.path.join(mac_frameworks_dir,
+                             "Chromium Embedded Framework.framework"))
+        if not mac_sandbox_supported:
+            # Frozen Python launchers can report their executable directory as
+            # the module directory even when cefpython3 is stored elsewhere.
+            # Derive the synthetic main bundle from an explicitly configured
+            # framework bundle instead of constructing a nonexistent sibling
+            # of the launcher.
+            configured_frameworks_dir = os.path.dirname(
+                    cef_framework_dir)
+            configured_contents_dir = os.path.dirname(
+                    configured_frameworks_dir)
+            configured_bundle_dir = os.path.dirname(
+                    configured_contents_dir)
+            if os.path.basename(configured_frameworks_dir) == "Frameworks" \
+                    and os.path.basename(configured_contents_dir) == \
+                    "Contents" \
+                    and configured_bundle_dir.endswith(".app") \
+                    and os.path.isdir(configured_bundle_dir):
+                mac_main_bundle_dir = configured_bundle_dir
+                mac_frameworks_dir = configured_frameworks_dir
+        cdef bytes cef_framework_binary = os.fsencode(os.path.join(
+                cef_framework_dir, "Chromium Embedded Framework"))
+        if not cef_load_library(cef_framework_binary):
+            raise RuntimeError("Failed to load the CEF framework: "
+                               + os.fsdecode(cef_framework_binary))
+
     # Debug settings need to be set before Debug() is called
     # and before the CefPythonApp class is instantiated.
     global g_debug
@@ -547,15 +617,32 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
                 application_settings["app_user_model_id"]
     if "chrome_runtime" in application_settings:
         application_settings["chrome_runtime"] = bool(application_settings["chrome_runtime"])
+    IF UNAME_SYSNAME == "Darwin":
+        if "macos_use_system_keychain" not in application_settings:
+            application_settings["macos_use_system_keychain"] = False
+        else:
+            application_settings["macos_use_system_keychain"] = bool(
+                    application_settings["macos_use_system_keychain"])
+        if not application_settings["macos_use_system_keychain"]:
+            # Local applications should not trigger Chromium Safe Storage
+            # prompts unless they explicitly opt into Keychain-backed profile
+            # encryption. An explicitly supplied switch is preserved.
+            if "use-mock-keychain" not in g_commandLineSwitches:
+                g_commandLineSwitches["use-mock-keychain"] = ""
 
     # ------------------------------------------------------------------------
     # Paths
     # ------------------------------------------------------------------------
-    cdef str module_dir = GetModuleDirectory()
     if platform.system() == "Darwin":
         if  "framework_dir_path" not in application_settings:
             application_settings["framework_dir_path"] = os.path.join(
-                    module_dir, "Chromium Embedded Framework.framework")
+                    mac_frameworks_dir,
+                    "Chromium Embedded Framework.framework")
+        if "main_bundle_path" not in application_settings:
+            # Python is commonly launched outside of an application bundle.
+            # Give CEF a stable bundle identity so that the browser and its
+            # sandboxed helper processes use the same Mach rendezvous name.
+            application_settings["main_bundle_path"] = mac_main_bundle_dir
     if "locales_dir_path" not in application_settings:
         if platform.system() != "Darwin":
             application_settings["locales_dir_path"] = os.path.join(
@@ -568,8 +655,14 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
                     application_settings["framework_dir_path"],
                     "Resources")
     if "browser_subprocess_path" not in application_settings:
-        application_settings["browser_subprocess_path"] = os.path.join(
-                module_dir, "subprocess")
+        if platform.system() == "Darwin":
+            application_settings["browser_subprocess_path"] = os.path.join(
+                    mac_frameworks_dir, "cefpython3 Helper.app",
+                    "Contents", "MacOS",
+                    "cefpython3 Helper")
+        else:
+            application_settings["browser_subprocess_path"] = os.path.join(
+                    module_dir, "subprocess")
 
     # ------------------------------------------------------------------------
     # Mouse context menu
@@ -639,8 +732,13 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         g_applicationSettings[key] = copy.deepcopy(application_settings[key])
 
     cdef CefSettings cefApplicationSettings
-    # No sandboxing for the subprocesses
-    cefApplicationSettings.no_sandbox = 1
+    # macOS helper app bundles initialize CEF's subprocess sandbox. Preserve
+    # the historical default on other platforms until their bootstrap paths
+    # opt into sandbox support independently.
+    IF UNAME_SYSNAME == "Darwin":
+        cefApplicationSettings.no_sandbox = not mac_sandbox_supported
+    ELSE:
+        cefApplicationSettings.no_sandbox = 1
     SetApplicationSettings(application_settings, &cefApplicationSettings)
 
     # External message pump
@@ -760,8 +858,12 @@ def CreateBrowserSync(windowInfo=None,
     PyToCefString(navigateUrl, cefNavigateUrl)
 
     Debug("CefBrowser::CreateBrowserSync()")
+    cdef cpp_bool cefpythonOwnedTopLevelWindow = bool(
+            windowInfo.parentWindowHandle == 0
+            and windowInfo.windowType == "child")
     cdef CefRefPtr[ClientHandler] clientHandler =\
-            <CefRefPtr[ClientHandler]?>new ClientHandler()
+            <CefRefPtr[ClientHandler]?>new ClientHandler(
+                    cefpythonOwnedTopLevelWindow)
     cdef CefRefPtr[CefBrowser] cefBrowser
 
     # Request context - part 1/2.
@@ -983,9 +1085,12 @@ def Shutdown():
         MacShutdown()
 
 def SetOsModalLoop(py_bool modalLoop):
-    cdef cpp_bool cefModalLoop = bool(modalLoop)
-    with nogil:
-        CefSetOSModalLoop(cefModalLoop)
+    IF UNAME_SYSNAME == "Windows":
+        cdef cpp_bool cefModalLoop = bool(modalLoop)
+        with nogil:
+            CefSetOSModalLoop(cefModalLoop)
+    ELSE:
+        raise NotImplementedError("SetOsModalLoop is only supported on Windows")
 
 cpdef py_void SetGlobalClientCallback(py_string name, object callback):
     global g_globalClientCallbacks

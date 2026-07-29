@@ -25,6 +25,7 @@ Table of contents:
   * [javascript_flags](#javascript_flags)
   * [locale](#locale)
   * [locales_dir_path](#locales_dir_path)
+  * [macos_use_system_keychain](#macos_use_system_keychain)
   * [debug](#debug)
   * [log_file](#log_file)
   * [log_severity](#log_severity)
@@ -304,6 +305,28 @@ the locales directory must be located in the module directory. This value
 is ignored on Mac OS X where pack files are always loaded from the app  
 bundle Resources directory. Also configurable using the "locales-dir-path"  
 [command-line switch](CommandLineSwitches.md).
+
+
+### macos_use_system_keychain
+
+(bool)
+macOS only. Default: False
+
+Set to true to let Chromium use the macOS Keychain for profile encryption.
+By default, CEF Python supplies Chromium's `use-mock-keychain` switch to
+prevent blocking "Chromium Safe Storage" permission dialogs in local
+applications.
+
+The mock keychain is Chromium testing infrastructure and does not provide
+Keychain-backed protection for cookies, tokens, or other encrypted profile
+data. Applications that store sensitive data in a persistent
+[cache_path](#cache_path) should consider enabling the system Keychain.
+Choose one mode for each persistent profile: changing modes can make existing
+encrypted profile data unreadable.
+
+An explicit `use-mock-keychain` command-line switch takes precedence over this
+setting. This setting has no effect on Windows or Linux, which use different
+credential-storage mechanisms.
 
 
 ### debug

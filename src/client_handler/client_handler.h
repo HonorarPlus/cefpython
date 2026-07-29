@@ -37,7 +37,8 @@ class ClientHandler : public CefClient,
                       public RequestHandler
 {
 public:
-    ClientHandler(){}
+    explicit ClientHandler(bool owns_top_level_window = false)
+        : LifespanHandler(owns_top_level_window) {}
     virtual ~ClientHandler(){}
 
     CefRefPtr<CefContextMenuHandler> GetContextMenuHandler() override {

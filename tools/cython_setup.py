@@ -49,10 +49,10 @@ if MAC:
     g_generate_extern_c_macro_definition_old = (
             ModuleNode.generate_extern_c_macro_definition)
 
-    def generate_extern_c_macro_definition(self, code):
+    def generate_extern_c_macro_definition(self, code, is_cpp):
         # This code is written by Cython to both cefpython API header file
         # and cefpython module cpp file.
-        g_generate_extern_c_macro_definition_old(self, code)
+        g_generate_extern_c_macro_definition_old(self, code, is_cpp)
         code.putln("// Added by: cefpython/tools/cython_setup.py")
         code.putln("#undef PyMODINIT_FUNC")
 
@@ -285,9 +285,7 @@ def set_compiler_options(options):
         extra_link_args.extend([
                 "-mmacosx-version-min=12.0",
                 "-Wl,-search_paths_first",
-                "-F"+os.path.join(CEF_BINARIES_LIBRARIES, "bin"),
-                "-framework", "Chromium Embedded Framework",
-                "-Wl,-rpath,@loader_path/",  # ending slash is crucial!
+                "-framework", "AppKit",
         ])
         if not FAST_FLAG:
             extra_link_args.extend([

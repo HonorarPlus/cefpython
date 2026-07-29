@@ -64,6 +64,7 @@ import copy
 import sys
 import os
 import glob
+import plistlib
 import shutil
 import subprocess
 import re
@@ -303,7 +304,7 @@ def setup_environ():
         print("[build.py] PYTHON_INCLUDE: {python_include}"
               .format(python_include=os.environ["PYTHON_INCLUDE"]))
 
-        os.environ["CEF_CCFLAGS"] = "-std=gnu++11 -DNDEBUG -Wall -Werror -Wno-deprecated-declarations"
+        os.environ["CEF_CCFLAGS"] = "-std=gnu++20 -DNDEBUG -Wall -Werror -Wno-deprecated-declarations"
         if FAST_FLAG:
             os.environ["CEF_CCFLAGS"] += " -O0"
         else:
@@ -326,9 +327,12 @@ def setup_environ():
 
         if ARCH32:
             raise Exception("Python 32-bit is not supported on Mac")
-        os.environ["ARCHFLAGS"] = "-arch x86_64"
-        os.environ["CEF_CCFLAGS"] += " -arch x86_64"
-        os.environ["CEF_LINK_FLAGS"] += " -mmacosx-version-min=10.9"
+        os.environ["ARCHFLAGS"] = "-arch " + MACHINE_ARCH
+        os.environ["CEF_CCFLAGS"] += " -arch " + MACHINE_ARCH
+        minimum_macos_version = "12.0" if MACHINE_ARCH == "arm64" else "10.9"
+        os.environ["MACOSX_DEPLOYMENT_TARGET"] = minimum_macos_version
+        os.environ["CEF_CCFLAGS"] += " -mmacosx-version-min=" + minimum_macos_version
+        os.environ["CEF_LINK_FLAGS"] += " -mmacosx-version-min=" + minimum_macos_version
 
         # -Wno-return-type-c-linkage to ignore:
         # > warning: 'somefunc' has C-linkage specified, but returns
@@ -572,6 +576,58 @@ def compile_cpp_projects_unix():
     if os.path.exists(subprocess_from):
         # shutil.copy() will also copy Permission bits
         shutil.copy(subprocess_from, subprocess_to)
+        if MAC:
+            helper_names = [
+                "cefpython3 Helper",
+                "cefpython3 Helper (GPU)",
+                "cefpython3 Helper (Renderer)",
+                "cefpython3 Helper (Plugin)",
+                "cefpython3 Helper (Alerts)",
+            ]
+            helper_identifiers = {
+                "cefpython3 Helper": "org.cefpython.cefpython3.helper",
+                "cefpython3 Helper (GPU)":
+                    "org.cefpython.cefpython3.helper.gpu",
+                "cefpython3 Helper (Renderer)":
+                    "org.cefpython.cefpython3.helper.renderer",
+                "cefpython3 Helper (Plugin)":
+                    "org.cefpython.cefpython3.helper.plugin",
+                "cefpython3 Helper (Alerts)":
+                    "org.cefpython.cefpython3.helper.alerts",
+            }
+            helper_plist_path = os.path.join(SUBPROCESS_DIR,
+                                             "helper-Info.plist")
+            with open(helper_plist_path, "rb") as plist_file:
+                helper_plist = plistlib.load(plist_file)
+
+            for helper_name in helper_names:
+                helper_bundle = os.path.join(
+                        CEFPYTHON_BINARY, helper_name + ".app")
+                if os.path.exists(helper_bundle):
+                    shutil.rmtree(helper_bundle)
+                helper_contents = os.path.join(helper_bundle, "Contents")
+                helper_macos = os.path.join(helper_contents, "MacOS")
+                os.makedirs(helper_macos)
+                helper_executable = os.path.join(helper_macos, helper_name)
+                shutil.copy(subprocess_from, helper_executable)
+                os.chmod(helper_executable, 0o755)
+
+                variant_plist = helper_plist.copy()
+                variant_plist["CFBundleDisplayName"] = helper_name
+                variant_plist["CFBundleExecutable"] = helper_name
+                variant_plist["CFBundleIdentifier"] = \
+                        helper_identifiers[helper_name]
+                variant_plist["CFBundleName"] = helper_name
+                with open(os.path.join(helper_contents, "Info.plist"),
+                          "wb") as plist_file:
+                    plistlib.dump(variant_plist, plist_file)
+                # Bind the generated Info.plist to the executable. This
+                # ad-hoc signature is sufficient for local development and
+                # can be replaced by a Developer ID signature when an app is
+                # packaged for distribution.
+                subprocess.check_call([
+                    "codesign", "--force", "--sign", "-", helper_bundle,
+                ])
 
     # -- CPP_UTILS
     print("[build.py] ~~ Build CPP_UTILS project")

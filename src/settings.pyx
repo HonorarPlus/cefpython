@@ -44,7 +44,8 @@ cdef void SetApplicationSettings(
                 or key == "context_menu" \
                 or key == "auto_zooming"\
                 or key == "app_user_model_id"\
-                or key == "chrome_runtime":
+                or key == "chrome_runtime"\
+                or key == "macos_use_system_keychain":
             # CEF Python only options. These are not to be found in CEF.
             continue
         elif key == "accept_language_list":
@@ -87,6 +88,8 @@ cdef void SetApplicationSettings(
             cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
         elif key == "multi_threaded_message_loop":
             cefAppSettings.multi_threaded_message_loop = int(appSettings[key])
+        elif key == "no_sandbox":
+            cefAppSettings.no_sandbox = int(appSettings[key])
         elif key == "release_dcheck_enabled":
             # Keep for BC, just log info - no error
             Debug("DEPRECATED: 'release_dcheck_enabled' setting")

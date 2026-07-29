@@ -1,4 +1,4 @@
-"""Download, verify, extract, and synchronize the pinned CEF distribution."""
+"""Download, verify, extract, and synchronize pinned CEF distributions."""
 
 import argparse
 import hashlib
@@ -13,12 +13,35 @@ from urllib.request import urlopen
 TOOLS_DIR = Path(__file__).resolve().parent
 ROOT_DIR = TOOLS_DIR.parent
 MANIFEST_PATH = TOOLS_DIR / "cef_version.json"
+REQUIRED_PLATFORM_KEYS = frozenset({"archive", "url", "sha256"})
+VERSION_POSTFIXES = {
+    "windows": "win",
+    "macos": "mac",
+    "linux": "linux",
+}
 
 
 def load_manifest() -> dict:
     """Return the pinned CEF version manifest."""
     with MANIFEST_PATH.open(encoding="utf-8") as manifest_file:
         return json.load(manifest_file)
+
+
+def get_pinned_platform_names(manifest: dict) -> tuple[str, ...]:
+    """Return platforms whose archives are fully pinned in the manifest."""
+    return tuple(
+        platform_name
+        for platform_name, platform_manifest in manifest["platforms"].items()
+        if REQUIRED_PLATFORM_KEYS.issubset(platform_manifest)
+    )
+
+
+def get_version_postfix(platform_name: str) -> str:
+    """Return the CEFPython version-header postfix for a manifest platform."""
+    for platform_prefix, version_postfix in VERSION_POSTFIXES.items():
+        if platform_name.startswith(platform_prefix):
+            return version_postfix
+    raise RuntimeError(f"Unknown CEF platform family: {platform_name}")
 
 
 def calculate_sha256(path: Path) -> str:
@@ -99,28 +122,109 @@ def write_api_metadata(manifest: dict) -> None:
     metadata_path.write_text(contents, encoding="utf-8", newline="\n")
 
 
-def synchronize_headers(distribution_path: Path, manifest: dict) -> None:
-    """Replace vendored headers and generated version metadata deterministically."""
-    source_include = distribution_path / "include"
+def copy_text_file(source_path: Path | str, destination_path: Path | str) -> str:
+    """Copy a vendored text file with repository-standard LF line endings."""
+    source_path = Path(source_path)
+    destination_path = Path(destination_path)
+    contents = source_path.read_bytes().replace(b"\r\n", b"\n")
+    destination_path.write_bytes(contents)
+    shutil.copymode(source_path, destination_path)
+    return str(destination_path)
+
+
+def copy_missing_headers(source_include: Path, destination_include: Path) -> int:
+    """Add headers that exist only in another platform distribution."""
+    copied_count = 0
+    for source_path in sorted(source_include.rglob("*")):
+        if not source_path.is_file():
+            continue
+        relative_path = source_path.relative_to(source_include)
+        destination_path = destination_include / relative_path
+        if destination_path.exists():
+            continue
+        destination_path.parent.mkdir(parents=True, exist_ok=True)
+        copy_text_file(source_path, destination_path)
+        copied_count += 1
+    return copied_count
+
+
+def synchronize_headers(
+    distribution_paths: dict[str, Path],
+    manifest: dict,
+) -> None:
+    """Assemble vendored headers from every pinned platform distribution."""
+    canonical_platform = manifest["header_source_platform"]
+    if canonical_platform not in distribution_paths:
+        raise RuntimeError(
+            f"Header source platform is not pinned: {canonical_platform}"
+        )
+
+    source_include = distribution_paths[canonical_platform] / "include"
     destination_include = ROOT_DIR / "src" / "include"
     if destination_include.exists():
         shutil.rmtree(destination_include)
-    shutil.copytree(source_include, destination_include)
+    shutil.copytree(
+        source_include,
+        destination_include,
+        copy_function=copy_text_file,
+    )
 
-    version_header = source_include / "cef_version.h"
+    copied_headers = {}
+    for platform_name, distribution_path in distribution_paths.items():
+        if platform_name == canonical_platform:
+            continue
+        copied_headers[platform_name] = copy_missing_headers(
+            distribution_path / "include",
+            destination_include,
+        )
+
     version_dir = ROOT_DIR / "src" / "version"
-    for platform_name in ("win", "mac", "linux"):
-        shutil.copyfile(version_header, version_dir / f"cef_version_{platform_name}.h")
+    written_version_postfixes = set()
+    for platform_name, distribution_path in distribution_paths.items():
+        version_postfix = get_version_postfix(platform_name)
+        version_header = distribution_path / "include" / "cef_version.h"
+        destination_version = version_dir / f"cef_version_{version_postfix}.h"
+        if version_postfix in written_version_postfixes:
+            existing_contents = destination_version.read_bytes()
+            version_contents = version_header.read_bytes().replace(b"\r\n", b"\n")
+            if existing_contents != version_contents:
+                raise RuntimeError(
+                    "CEF version headers differ within platform family "
+                    f"{version_postfix}: {platform_name}"
+                )
+            continue
+        copy_text_file(version_header, destination_version)
+        written_version_postfixes.add(version_postfix)
+
+    canonical_version = source_include / "cef_version.h"
+    for platform_name in manifest["platforms"]:
+        version_postfix = get_version_postfix(platform_name)
+        if version_postfix in written_version_postfixes:
+            continue
+        copy_text_file(
+            canonical_version,
+            version_dir / f"cef_version_{version_postfix}.h",
+        )
+        written_version_postfixes.add(version_postfix)
+
     write_api_metadata(manifest)
-    print(f"[prepare_cef.py] Synchronized headers from {distribution_path.name}")
+    platform_summary = ", ".join(
+        f"{platform_name} (+{copied_headers.get(platform_name, 0)} unique)"
+        for platform_name in distribution_paths
+    )
+    print(
+        "[prepare_cef.py] Synchronized headers from "
+        f"{platform_summary}; common={canonical_platform}"
+    )
 
 
-def prepare_cef(platform_name: str = "windows64", synchronize: bool = True) -> Path:
-    """Prepare the pinned CEF distribution for a supported platform."""
-    manifest = load_manifest()
+def prepare_distribution(
+    platform_name: str,
+    manifest: dict,
+) -> Path:
+    """Download, verify, and extract one pinned CEF distribution."""
     platform_manifest = manifest["platforms"][platform_name]
-    required_keys = {"archive", "url", "sha256"}
-    if not required_keys.issubset(platform_manifest):
+    if not REQUIRED_PLATFORM_KEYS.issubset(platform_manifest):
         raise RuntimeError(f"CEF binaries for {platform_name} are not pinned yet")
 
     build_dir = ROOT_DIR / "build"
@@ -129,9 +233,23 @@ def prepare_cef(platform_name: str = "windows64", synchronize: bool = True) -> P
     if not archive_path.exists():
         download_archive(platform_manifest["url"], archive_path)
     verify_archive(archive_path, platform_manifest["sha256"])
-    distribution_path = extract_archive(archive_path, build_dir)
+    return extract_archive(archive_path, build_dir)
+
+
+def prepare_cef(platform_name: str = "windows64", synchronize: bool = True) -> Path:
+    """Prepare one CEF distribution and optionally assemble all pinned headers."""
+    manifest = load_manifest()
+    distribution_path = prepare_distribution(platform_name, manifest)
     if synchronize:
-        synchronize_headers(distribution_path, manifest)
+        distribution_paths = {
+            pinned_platform: (
+                distribution_path
+                if pinned_platform == platform_name
+                else prepare_distribution(pinned_platform, manifest)
+            )
+            for pinned_platform in get_pinned_platform_names(manifest)
+        }
+        synchronize_headers(distribution_paths, manifest)
     return distribution_path
 
 

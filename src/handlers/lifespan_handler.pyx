@@ -151,7 +151,10 @@ cdef public void LifespanHandler_OnBeforeClose(
         if g_MessageLoop_called and not len(g_pyBrowsers):
             # Automatically quit message loop when last browser was closed.
             # This is required for hello_world.py example to work.
-            PostTask(TID_UI, QuitMessageLoop)
+            # OnBeforeClose already runs on CEF's UI thread. Calling directly
+            # also accepts Cython 3 function objects, which PostTask's legacy
+            # function-type check rejects on Python 3.14.
+            QuitMessageLoop()
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

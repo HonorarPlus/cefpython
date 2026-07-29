@@ -6,6 +6,9 @@
 #if defined(OS_WIN)
 #include "dpi_aware.h"
 #endif
+#if defined(OS_MAC)
+#include "util_mac.h"
+#endif
 #include "include/base/cef_logging.h"
 
 
@@ -52,7 +55,20 @@ void LifespanHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 bool LifespanHandler::DoClose(CefRefPtr<CefBrowser> browser)
 {
     REQUIRE_UI_THREAD();
-    return LifespanHandler_DoClose(browser);
+    const bool close_handled = LifespanHandler_DoClose(browser);
+    #if defined(OS_MAC)
+    // CEF-owned top-level windows and JavaScript popups do not consistently
+    // release their retained host view after the standard performClose:
+    // notification. Complete their Cocoa hierarchy tear-down here instead.
+    // Never do this for an embedded browser because its NSWindow belongs to
+    // the host application.
+    if (!close_handled &&
+            (owns_top_level_window_ || browser->IsPopup()) &&
+            MacCloseBrowserWindow(browser)) {
+        return true;
+    }
+    #endif
+    return close_handled;
 }
 
 

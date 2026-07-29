@@ -85,7 +85,41 @@ void MacShutdown() {
 }
 
 void MacSetWindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
-    NSView* view = browser->GetHost()->GetWindowHandle();
+    NSView* view = static_cast<NSView*>(browser->GetHost()->GetWindowHandle());
     NSString* nstitle = [NSString stringWithFormat:@"%s" , title];
     view.window.title = nstitle;
+}
+
+bool MacCloseBrowserWindow(CefRefPtr<CefBrowser> browser) {
+    CefRefPtr<CefBrowserHost> host = browser->GetHost();
+    if (host->IsWindowRenderingDisabled()) {
+        return false;
+    }
+
+    NSView* browser_view = static_cast<NSView*>(host->GetWindowHandle());
+    if (!browser_view) {
+        return false;
+    }
+
+    // CEF sends performClose: after DoClose returns false, but a Python host
+    // has no Cocoa window delegate to release the retained browser view.
+    // Detaching the view completes the native hierarchy tear-down required
+    // for CEF to call OnBeforeClose. Close the top-level window as the
+    // standard CEF notification would do.
+    NSWindow* window = [browser_view window];
+    if (window) {
+        // AppKit expects an NSView content object. Replacing the complete
+        // content hierarchy (instead of assigning nil or only detaching CEF's
+        // child view) releases CEF's retained native browser view.
+        NSView* empty_view = [[NSView alloc] initWithFrame:NSZeroRect];
+        [window setDelegate:nil];
+        [window setContentView:empty_view];
+        [empty_view release];
+        [window setReleasedWhenClosed:YES];
+        [window orderOut:nil];
+        [window close];
+    } else {
+        [browser_view removeFromSuperview];
+    }
+    return true;
 }

@@ -24,6 +24,7 @@
   * [javascript_flags](ApplicationSettings.md#javascript_flags)
   * [locale](ApplicationSettings.md#locale)
   * [locales_dir_path](ApplicationSettings.md#locales_dir_path)
+  * [macos_use_system_keychain](ApplicationSettings.md#macos_use_system_keychain)
   * [debug](ApplicationSettings.md#debug)
   * [log_file](ApplicationSettings.md#log_file)
   * [log_severity](ApplicationSettings.md#log_severity)

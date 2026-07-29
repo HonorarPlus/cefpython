@@ -75,8 +75,13 @@ void RenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
                                        const CefAcceleratedPaintInfo& paint_info)
 {
     REQUIRE_UI_THREAD();
+#if defined(OS_MAC)
+    void* shared_handle = paint_info.shared_texture_io_surface;
+#else
+    void* shared_handle = paint_info.shared_texture_handle;
+#endif
     RenderHandler_OnAcceleratedPaint(browser, type, const_cast<RectList&>(dirtyRects),
-                                     paint_info.shared_texture_handle);
+                                     shared_handle);
 }
 
 

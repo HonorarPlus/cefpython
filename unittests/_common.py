@@ -119,7 +119,7 @@ class DisplayHandler(object):
 
 
 def close_popup(global_handler, browser):
-    browser.CloseBrowser()
+    browser.CloseBrowser(True)
     global_handler.PopupClosed_True = True
 
     # Test developer tools popup

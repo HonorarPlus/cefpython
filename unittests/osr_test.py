@@ -81,6 +81,8 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             "log_file": "",
             "windowless_rendering_enabled": True
         }
+        if MAC:
+            settings["external_message_pump"] = True
         if not LINUX:
             # On Linux you get a lot of "X error received" messages
             # from Chromium's "x11_util.cc", so do not show them.
@@ -110,6 +112,9 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         # Initialize
         cef.Initialize(settings=settings, switches=switches)
         subtest_message("cef.Initialize() ok")
+        if MAC:
+            self.assertFalse(cef.GetAppSetting(
+                    "macos_use_system_keychain"))
 
         # Accessibility handler
         accessibility_handler = AccessibilityHandler(self)

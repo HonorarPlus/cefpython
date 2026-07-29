@@ -1,8 +1,9 @@
 {
-    "cef_version": "150.0.9+g81b0088+chromium-150.0.7871.46",
-    "chromium_version": "150.0.7871.46",
+    "cef_version": "150.0.10+g8042e43+chromium-150.0.7871.101",
+    "chromium_version": "150.0.7871.101",
     "api_version": 15000,
     "package_version": "150.0",
+    "header_source_platform": "macosarm64",
     "api_hashes": {
         "windows": "71146b4350a01d3805e7ea990eb034e6ef4d53db",
         "macos": "e85c868aa8a947e1e7c9904c0745c60ae490fa05",
@@ -11,9 +12,9 @@
     "platforms": {
         "windows64": {
             "architecture": "x86_64",
-            "archive": "cef_binary_150.0.9+g81b0088+chromium-150.0.7871.46_windows64_minimal.tar.bz2",
-            "url": "https://cef-builds.spotifycdn.com/cef_binary_150.0.9%2Bg81b0088%2Bchromium-150.0.7871.46_windows64_minimal.tar.bz2",
-            "sha256": "e42e0aa5d783512f396f5a0c0930b00ccfbae78159ad34ee520445d4a335168b"
+            "archive": "cef_binary_150.0.10+g8042e43+chromium-150.0.7871.101_windows64_minimal.tar.bz2",
+            "url": "https://cef-builds.spotifycdn.com/cef_binary_150.0.10%2Bg8042e43%2Bchromium-150.0.7871.101_windows64_minimal.tar.bz2",
+            "sha256": "ff10d09944e976e281b2eaed17a20eaecb60ae5142ee2bd06fe2f7b38a23bf73"
         },
         "macosx64": {
             "architecture": "x86_64",
@@ -21,7 +22,10 @@
         },
         "macosarm64": {
             "architecture": "arm64",
-            "distribution": "minimal"
+            "distribution": "minimal",
+            "archive": "cef_binary_150.0.10+g8042e43+chromium-150.0.7871.101_macosarm64_minimal.tar.bz2",
+            "url": "https://cef-builds.spotifycdn.com/cef_binary_150.0.10%2Bg8042e43%2Bchromium-150.0.7871.101_macosarm64_minimal.tar.bz2",
+            "sha256": "ef5fe464184e2e00381a2cc73e911bb4b8cc219f0e6f9fd610af0bc89d0ea58d"
         },
         "linux64": {
             "architecture": "x86_64",
@@ -34,7 +38,7 @@
     },
     "toolchain_baselines": {
         "windows": "Windows 10+, C++20, Visual Studio Build Tools 2026",
-        "macos": "macOS 12.0+, C++20, Xcode 16+",
+        "macos": "macOS 12.0+, C++20, Xcode 13.5-16.4",
         "linux": "C++20, GCC 10+, GTK3"
     }
 }

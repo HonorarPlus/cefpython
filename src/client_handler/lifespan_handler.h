@@ -9,7 +9,8 @@
 class LifespanHandler : public CefLifeSpanHandler
 {
 public:
-    LifespanHandler(){}
+    explicit LifespanHandler(bool owns_top_level_window = false)
+        : owns_top_level_window_(owns_top_level_window) {}
     virtual ~LifespanHandler(){}
 
     typedef cef_window_open_disposition_t WindowOpenDisposition;
@@ -32,5 +33,6 @@ public:
     void OnBeforeClose(CefRefPtr<CefBrowser> browser) override;
 
 private:
+    const bool owns_top_level_window_;
     IMPLEMENT_REFCOUNTING(LifespanHandler);
 };

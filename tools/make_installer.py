@@ -18,6 +18,7 @@ from common import *
 
 import glob
 import os
+import plistlib
 import re
 import shutil
 import subprocess
@@ -91,6 +92,9 @@ def main():
         if os.path.basename(module_path) != expected_module:
             os.remove(module_path)
 
+    if MAC:
+        prepare_macos_app_bundle(PKG_DIR)
+
     # Linux only operations
     if LINUX:
         os.makedirs(os.path.join(SETUP_DIR, "examples", "kivy-select-boxes"))
@@ -125,6 +129,61 @@ def main():
         assert len(files) == 1
         print("[make_installer.py] Done. Wheel package created: {0}"
               .format(files[0]))
+
+
+def prepare_macos_app_bundle(pkg_dir):
+    """Place CEF in Chromium's required sandbox-compatible app layout."""
+    bundle_name = "cefpython3.app"
+    bundle_dir = os.path.join(pkg_dir, bundle_name)
+    contents_dir = os.path.join(bundle_dir, "Contents")
+    frameworks_dir = os.path.join(contents_dir, "Frameworks")
+    macos_dir = os.path.join(contents_dir, "MacOS")
+    os.makedirs(frameworks_dir)
+    os.makedirs(macos_dir)
+
+    nested_bundles = [
+        "Chromium Embedded Framework.framework",
+        "cefpython3 Helper.app",
+        "cefpython3 Helper (GPU).app",
+        "cefpython3 Helper (Renderer).app",
+        "cefpython3 Helper (Plugin).app",
+        "cefpython3 Helper (Alerts).app",
+    ]
+    for nested_bundle in nested_bundles:
+        source = os.path.join(pkg_dir, nested_bundle)
+        if not os.path.exists(source):
+            raise Exception("Missing macOS bundle: {0}".format(source))
+        shutil.move(source, frameworks_dir)
+
+    # A valid main bundle is required even when Python itself was launched
+    # from a terminal or another host application. This executable is only a
+    # bundle anchor; CEF launches the dedicated helpers above.
+    main_executable = os.path.join(macos_dir, "cefpython3")
+    shutil.copy(os.path.join(pkg_dir, "subprocess"), main_executable)
+    os.chmod(main_executable, 0o755)
+
+    info_plist = {
+        "CFBundleDevelopmentRegion": "en",
+        "CFBundleDisplayName": "CEF Python 3",
+        "CFBundleExecutable": "cefpython3",
+        "CFBundleIdentifier": "org.cefpython.cefpython3",
+        "CFBundleInfoDictionaryVersion": "6.0",
+        "CFBundleName": "cefpython3",
+        "CFBundlePackageType": "APPL",
+        "CFBundleShortVersionString": VERSION,
+        "CFBundleVersion": VERSION,
+        "LSMinimumSystemVersion": "12.0",
+        "LSUIElement": True,
+        "NSHighResolutionCapable": True,
+    }
+    with open(os.path.join(contents_dir, "Info.plist"), "wb") as plist_file:
+        plistlib.dump(info_plist, plist_file)
+
+    # Local development uses an ad-hoc recursive signature. Distributors can
+    # replace it with a Developer ID signature during their manual release.
+    subprocess.check_call([
+        "codesign", "--force", "--deep", "--sign", "-", bundle_dir,
+    ])
 
 
 def command_line_args():
@@ -164,6 +223,10 @@ def copy_tools_installer_files(setup_dir, pkg_dir):
         os.path.join(INSTALLER_DIR, "cefpython3.__init__.py"),
         os.path.join(pkg_dir, "__init__.py"),
         variables)
+
+    shutil.copy(
+        os.path.join(INSTALLER_DIR, "cefpython3.cx_freeze.py"),
+        os.path.join(pkg_dir, "cx_freeze.py"))
 
 
 def copy_template_file(src, dst, variables):

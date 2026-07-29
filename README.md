@@ -335,6 +335,7 @@ supporting this project actively on a daily basis.
 ### Docs
 
 - [Build instructions](docs/Build-instructions.md)
+- [Frozen applications](docs/Frozen-applications.md)
 - [Knowledge Base](docs/Knowledge-Base.md)
 - [Migration guide](docs/Migration-guide.md)
 - [Tutorial](docs/Tutorial.md)
@@ -422,6 +423,7 @@ supporting this project actively on a daily basis.
   * [javascript_flags](api/ApplicationSettings.md#javascript_flags)
   * [locale](api/ApplicationSettings.md#locale)
   * [locales_dir_path](api/ApplicationSettings.md#locales_dir_path)
+  * [macos_use_system_keychain](api/ApplicationSettings.md#macos_use_system_keychain)
   * [debug](api/ApplicationSettings.md#debug)
   * [log_file](api/ApplicationSettings.md#log_file)
   * [log_severity](api/ApplicationSettings.md#log_severity)
