@@ -233,8 +233,8 @@ VS_PLATFORM_ARG = "x86" if ARCH32 else "amd64"
 VS2026_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio"
                  r"\18\BuildTools\VC\Auxiliary\Build\vcvarsall.bat")
 
-VS2022_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio"
-                 r"\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat")
+VS2022_VCVARS = (r"C:\Program Files\Microsoft Visual Studio"
+                 r"\2022\Community\VC\Auxiliary\Build\vcvarsall.bat")
 
 VISUAL_STUDIO_TOOLCHAINS = (
     ("2026", VS2026_VCVARS),

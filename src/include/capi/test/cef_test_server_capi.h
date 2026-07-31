@@ -33,7 +33,7 @@
 // by hand. See the translator.README.txt file in the tools directory for
 // more information.
 //
-// $hash=e8529b32fc68c4882aac30846f4af359e9f3a21e$
+// $hash=bfa31676eb640a90a0057826481bb7eaa5e5cd3d$
 //
 
 #ifndef CEF_INCLUDE_CAPI_TEST_CEF_TEST_SERVER_CAPI_H_
@@ -198,7 +198,7 @@ typedef struct _cef_test_server_connection_t {
       size_t data_size,
       cef_string_multimap_t extra_headers);
 
-#if CEF_API_ADDED(CEF_EXPERIMENTAL)
+#if CEF_API_ADDED(15100)
   ///
   /// Send a custom HTTP response using raw header data. |header_data| is the
   /// complete raw HTTP response header block, including the status line (e.g.

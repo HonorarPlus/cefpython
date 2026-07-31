@@ -446,6 +446,8 @@
   E_CPONLY(CEF_ColorLiveCaptionBubbleForegroundSecondary) \
   E_CPONLY(CEF_ColorLiveCaptionBubbleCheckbox) \
   E_CPONLY(CEF_ColorLiveCaptionBubbleLink) \
+  E_CPONLY(CEF_ColorLiveCaptionDialogBackground) \
+  E_CPONLY(CEF_ColorLiveCaptionDialogForeground) \
   E_CPONLY(CEF_ColorLoadingGradientBorder) \
   E_CPONLY(CEF_ColorLoadingGradientEnd) \
   E_CPONLY(CEF_ColorLoadingGradientMiddle) \
@@ -814,6 +816,8 @@
   E_CPONLY(CEF_ColorAvatarButtonNormalRipple) \
   E_CPONLY(CEF_ColorAvatarStroke) \
   E_CPONLY(CEF_ColorAvatarFillForContrast) \
+  E_CPONLY(CEF_ColorAiSubscriptionRingGradientStart) \
+  E_CPONLY(CEF_ColorAiSubscriptionRingGradientEnd) \
   /* Bookmark Manager page colors. */ \
   E_CPONLY(CEF_ColorBookmarkManagerItemBackgroundSelected) \
   E_CPONLY(CEF_ColorBookmarkManagerItemOutline) \
@@ -880,7 +884,6 @@
   E_CPONLY(CEF_ColorContextualTasksBannerPromoBackground) \
   E_CPONLY(CEF_ColorContextualTasksBannerPromoText) \
   E_CPONLY(CEF_ColorContextualTasksBannerPromoIconBackground) \
-  E_CPONLY(CEF_ColorContextualTasksBannerPromoIconForeground) \
   /* Desktop media picker view. */ \
   E_CPONLY(CEF_ColorDesktopMediaPickerDescriptionLabel) \
   /* Desktop media tab list colors. */ \
@@ -933,6 +936,12 @@
   E_CPONLY(CEF_ColorFeaturePromoBubbleDefaultButtonBackground) \
   E_CPONLY(CEF_ColorFeaturePromoBubbleDefaultButtonForeground) \
   E_CPONLY(CEF_ColorFeaturePromoBubbleForeground) \
+  /* Feature Showcase colors. */ \
+  E_CPONLY(CEF_ColorFeatureShowcaseStepperCheck) \
+  E_CPONLY(CEF_ColorFeatureShowcaseStepperDot) \
+  E_CPONLY(CEF_ColorFeatureShowcaseThemePickerWrapperBackground) \
+  E_CPONLY(CEF_ColorFeatureShowcaseThemePickerBackground) \
+  E_CPONLY(CEF_ColorFeatureShowcaseThemeColorBorder) \
   E_CPONLY(CEF_ColorFeatureLensPromoBubbleBackground) \
   E_CPONLY(CEF_ColorFeatureLensPromoBubbleForeground) \
   /* Find bar colors. */ \

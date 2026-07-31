@@ -1,20 +1,20 @@
 {
-    "cef_version": "150.0.10+g8042e43+chromium-150.0.7871.101",
-    "chromium_version": "150.0.7871.101",
-    "api_version": 15000,
-    "package_version": "150.0",
-    "header_source_platform": "macosarm64",
+    "cef_version": "151.3.14+g5d67476+chromium-151.0.7922.72",
+    "chromium_version": "151.0.7922.72",
+    "api_version": 15101,
+    "package_version": "151.3",
+    "header_source_platform": "windows64",
     "api_hashes": {
-        "windows": "71146b4350a01d3805e7ea990eb034e6ef4d53db",
-        "macos": "e85c868aa8a947e1e7c9904c0745c60ae490fa05",
-        "linux": "210767725a6feb2e4becd3956b648cab6a006712"
+        "windows": "5933e18e1d2879e23205c70c637bf817c3f32454",
+        "macos": "2e13595a0971262679bcdc01c5d1391b12b5cf0d",
+        "linux": "5a32041cf2d7c50c5faad893cadda6c0cb7aecfc"
     },
     "platforms": {
         "windows64": {
             "architecture": "x86_64",
-            "archive": "cef_binary_150.0.10+g8042e43+chromium-150.0.7871.101_windows64_minimal.tar.bz2",
-            "url": "https://cef-builds.spotifycdn.com/cef_binary_150.0.10%2Bg8042e43%2Bchromium-150.0.7871.101_windows64_minimal.tar.bz2",
-            "sha256": "ff10d09944e976e281b2eaed17a20eaecb60ae5142ee2bd06fe2f7b38a23bf73"
+            "archive": "cef_binary_151.3.14+g5d67476+chromium-151.0.7922.72_windows64.tar.bz2",
+            "url": "https://cef-builds.spotifycdn.com/cef_binary_151.3.14+g5d67476+chromium-151.0.7922.72_windows64.tar.bz2",
+            "sha256": "8c539ff82408733e1b6c667d8df7cbc0913f8d30f8ae5cabf5ccf35980b6d7be"
         },
         "macosx64": {
             "architecture": "x86_64",
@@ -22,10 +22,7 @@
         },
         "macosarm64": {
             "architecture": "arm64",
-            "distribution": "minimal",
-            "archive": "cef_binary_150.0.10+g8042e43+chromium-150.0.7871.101_macosarm64_minimal.tar.bz2",
-            "url": "https://cef-builds.spotifycdn.com/cef_binary_150.0.10%2Bg8042e43%2Bchromium-150.0.7871.101_macosarm64_minimal.tar.bz2",
-            "sha256": "ef5fe464184e2e00381a2cc73e911bb4b8cc219f0e6f9fd610af0bc89d0ea58d"
+            "distribution": "minimal"
         },
         "linux64": {
             "architecture": "x86_64",
