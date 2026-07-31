@@ -14,6 +14,7 @@ TOOLS_DIR = Path(__file__).resolve().parent
 ROOT_DIR = TOOLS_DIR.parent
 MANIFEST_PATH = TOOLS_DIR / "cef_version.json"
 REQUIRED_PLATFORM_KEYS = frozenset({"archive", "url", "sha256"})
+EXTRACTION_TEMP_DIRNAME = ".cef-x"
 VERSION_POSTFIXES = {
     "windows": "win",
     "macos": "mac",
@@ -79,7 +80,7 @@ def extract_archive(archive_path: Path, build_dir: Path) -> Path:
     if distribution_path.is_dir():
         return distribution_path
 
-    temporary_path = build_dir / f"{distribution_name}.extracting"
+    temporary_path = build_dir / EXTRACTION_TEMP_DIRNAME
     if temporary_path.exists():
         shutil.rmtree(temporary_path)
     temporary_path.mkdir(parents=True)

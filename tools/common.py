@@ -142,7 +142,7 @@ DOCS_DIR = os.path.join(ROOT_DIR, "docs")
 
 # Build directories
 BUILD_DIR = os.path.join(ROOT_DIR, "build")
-BUILD_CEFPYTHON = os.path.join(BUILD_DIR, "build_cefpython")
+BUILD_CEFPYTHON = os.path.join(BUILD_DIR, "o")
 
 # May be auto-overwritten through detect_cef_binaries_libraries_dir()
 CEF_BINARIES_LIBRARIES = os.path.join(BUILD_DIR, "cef_"+OS_POSTFIX2)
@@ -155,16 +155,16 @@ DISTRIB_DIR = os.path.join(BUILD_DIR, "DISTRIB_NOTSET")
 
 # Build C++ projects directories
 BUILD_CEFPYTHON_APP = os.path.join(BUILD_CEFPYTHON,
-                                   "cefpython_app_py{pyver}_{os}"
+                                   "app{pyver}{os}"
                                    .format(pyver=PYVERSION, os=OS_POSTFIX2))
 BUILD_CLIENT_HANDLER = os.path.join(BUILD_CEFPYTHON,
-                                    "client_handler_py{pyver}_{os}"
+                                    "client{pyver}{os}"
                                     .format(pyver=PYVERSION, os=OS_POSTFIX2))
 BUILD_CPP_UTILS = os.path.join(BUILD_CEFPYTHON,
-                               "cpp_utils_py{pyver}_{os}"
+                               "utils{pyver}{os}"
                                .format(pyver=PYVERSION, os=OS_POSTFIX2))
 BUILD_SUBPROCESS = os.path.join(BUILD_CEFPYTHON,
-                                "subprocess_py{pyver}_{os}"
+                                "subprocess{pyver}{os}"
                                 .format(pyver=PYVERSION, os=OS_POSTFIX2))
 # -- end build directories
 
@@ -500,6 +500,20 @@ def get_cefpython_version():
     header_file = os.path.join(SRC_DIR, "version",
                                "cef_version_"+OS_POSTFIX+".h")
     return get_version_from_file(header_file)
+
+
+def get_wrapper_build_basename(runtime_library, msvs):
+    """Return a compact wrapper cache name scoped to the CEF revision."""
+    if runtime_library not in ("MT", "MD"):
+        raise ValueError("Unknown MSVC runtime library: " + runtime_library)
+    commit_hash = get_cefpython_version()["CEF_COMMIT_HASH"][:7]
+    runtime_code = runtime_library[-1].lower()
+    visual_studio_code = msvs[-2:]
+    return "w{commit}{runtime}{msvs}".format(
+        commit=commit_hash,
+        runtime=runtime_code,
+        msvs=visual_studio_code,
+    )
 
 
 def get_cefpython_api_hash():

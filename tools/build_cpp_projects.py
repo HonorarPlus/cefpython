@@ -4,8 +4,7 @@
 
 """Called by build.py internally. Builds C++ projects using
 distutils/setuptools compilers. This tool is executed by build.py
-on Windows only currently. Output directories are in
-build/build_cefpython/.
+on Windows only currently. Output directories are in build/o/.
 
 Usage:
     build_cpp_projects.py [--force]
