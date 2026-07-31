@@ -35,7 +35,7 @@ class PrepareCefTest(unittest.TestCase):
 
             manifest = {
                 "header_source_platform": "macosarm64",
-                "api_version": 15000,
+                "api_version": 15101,
                 "api_hashes": {
                     "windows": "windows hash",
                     "macos": "mac hash",

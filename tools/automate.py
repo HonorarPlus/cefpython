@@ -478,7 +478,7 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
         os.path.join(ACTIVE_MSVC_CMAKE_DIR, "cmake.exe"),
         "-G", "Ninja",
         "-DCMAKE_BUILD_TYPE=" + Options.build_type,
-        "-Dapi_version=15000",
+        "-Dapi_version=15101",
         "-DCEF_RUNTIME_LIBRARY_FLAG=" + runtime_flag,
         "-DCMAKE_C_COMPILER=" + compiler_paths[0],
         "-DCMAKE_CXX_COMPILER=" + compiler_paths[0],
@@ -488,7 +488,7 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
     # Build directory and library path
     build_wrapper_dir = os.path.join(
             Options.build_dir,
-            "w150_{runtime_library}_VS{msvs}"
+            "w151_{runtime_library}_VS{msvs}"
             .format(runtime_library=runtime_library, msvs=msvs))
     wrapper_lib = os.path.join(build_wrapper_dir, "libcef_dll_wrapper",
                                "libcef_dll_wrapper{ext}".format(ext=LIB_EXT))
@@ -821,13 +821,13 @@ def create_prebuilt_binaries():
             os.makedirs(vs_subdir)
             # MT library
             libsrc = os.path.join(
-                    Options.build_dir, "w150_MT_VS{msvs}".format(msvs=msvs),
+                    Options.build_dir, "w151_MT_VS{msvs}".format(msvs=msvs),
                     "libcef_dll_wrapper", "libcef_dll_wrapper.lib")
             libdst = os.path.join(vs_subdir, "libcef_dll_wrapper_MT.lib")
             shutil.copy(libsrc, libdst)
             # MD library
             libsrc = os.path.join(
-                    Options.build_dir, "w150_MD_VS{msvs}".format(msvs=msvs),
+                    Options.build_dir, "w151_MD_VS{msvs}".format(msvs=msvs),
                     "libcef_dll_wrapper", "libcef_dll_wrapper.lib")
             libdst = os.path.join(vs_subdir, "libcef_dll_wrapper_MD.lib")
             shutil.copy(libsrc, libdst)

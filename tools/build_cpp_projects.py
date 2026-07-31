@@ -30,7 +30,7 @@ MACROS = [
     ("NTDDI_VERSION", "0x0A000000"),
     ("WINVER", "0x0A00"),
     ("_WIN32_WINNT", "0x0A00"),
-    ("CEF_API_VERSION", "15000"),
+    ("CEF_API_VERSION", "15101"),
     "NDEBUG", "_NDEBUG",
     "_CRT_SECURE_NO_WARNINGS",
     "NOMINMAX",

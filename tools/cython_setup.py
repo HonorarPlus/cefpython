@@ -204,7 +204,7 @@ def set_compiler_options(options):
         # The above warning LNK4217 is caused by the warning below which occurs
         # when building the client_handler.lib static library:
         extra_compile_args.extend([
-            "/EHsc", "/std:c++20", "/DCEF_API_VERSION=15000", "/DNOMINMAX", "/wd4305"
+            "/EHsc", "/std:c++20", "/DCEF_API_VERSION=15101", "/DNOMINMAX", "/wd4305"
         ])
         extra_link_args.extend(["/ignore:4217"])
 
@@ -218,7 +218,7 @@ def set_compiler_options(options):
         extra_compile_args.extend([
                 "-DNDEBUG",
                 "-std=gnu++20",
-                "-DCEF_API_VERSION=15000",
+                "-DCEF_API_VERSION=15101",
         ])
 
     if LINUX:
