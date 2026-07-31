@@ -488,8 +488,7 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
     # Build directory and library path
     build_wrapper_dir = os.path.join(
             Options.build_dir,
-            "w151_{runtime_library}_VS{msvs}"
-            .format(runtime_library=runtime_library, msvs=msvs))
+            get_wrapper_build_basename(runtime_library, msvs))
     wrapper_lib = os.path.join(build_wrapper_dir, "libcef_dll_wrapper",
                                "libcef_dll_wrapper{ext}".format(ext=LIB_EXT))
 
@@ -821,13 +820,13 @@ def create_prebuilt_binaries():
             os.makedirs(vs_subdir)
             # MT library
             libsrc = os.path.join(
-                    Options.build_dir, "w151_MT_VS{msvs}".format(msvs=msvs),
+                    Options.build_dir, get_wrapper_build_basename(RUNTIME_MT, msvs),
                     "libcef_dll_wrapper", "libcef_dll_wrapper.lib")
             libdst = os.path.join(vs_subdir, "libcef_dll_wrapper_MT.lib")
             shutil.copy(libsrc, libdst)
             # MD library
             libsrc = os.path.join(
-                    Options.build_dir, "w151_MD_VS{msvs}".format(msvs=msvs),
+                    Options.build_dir, get_wrapper_build_basename(RUNTIME_MD, msvs),
                     "libcef_dll_wrapper", "libcef_dll_wrapper.lib")
             libdst = os.path.join(vs_subdir, "libcef_dll_wrapper_MD.lib")
             shutil.copy(libsrc, libdst)

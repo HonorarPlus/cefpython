@@ -376,8 +376,7 @@ def fix_cefpython_api_header_file():
     # On Mac this warning must be disabled using -Wno-return-type-c-linkage
     # flag in makefiles.
 
-    print("[build.py] Fix cefpython API header file in the build_cefpython/"
-          " directory")
+    print("[build.py] Fix cefpython API header file in the object directory")
     if not os.path.exists(CEFPYTHON_API_HFILE):
         assert not os.path.exists(CEFPYTHON_API_HFILE_FIXED)
         print("[build.py] cefpython API header file was not yet generated")
@@ -648,7 +647,7 @@ def clear_cache():
     delete_files_by_pattern("./"+MODULE_NAME_TEMPLATE
                             .format(pyversion=PYVERSION, ext=MODULE_EXT))
 
-    # Cache in build_cefpython/ directory
+    # Cache in the native object directory
     os.chdir(BUILD_CEFPYTHON)
 
     delete_files_by_pattern("./"+MODULE_NAME_TEMPLATE
@@ -704,13 +703,13 @@ def copy_and_fix_pyx_files():
 
     # Remove old pyx files
     oldpyxfiles = glob.glob("./*.pyx")
-    print("[build.py] Clean pyx files in build_cefpython/")
+    print("[build.py] Clean pyx files in the object directory")
     for pyxfile in oldpyxfiles:
         if os.path.exists(pyxfile):
             os.remove(pyxfile)
 
     # Copying pyxfiles and reading its contents.
-    print("[build.py] Copy pyx files to build_cefpython/")
+    print("[build.py] Copy pyx files to the object directory")
 
     # Copy cefpython.pyx and fix includes in cefpython.pyx, eg.:
     # include "handlers/focus_handler.pyx" becomes include "focus_handler.pyx"
@@ -853,7 +852,7 @@ def build_cefpython_module():
     # Remove .pyx files
     oldpyxfiles = glob.glob("./*.pyx")
     print("")
-    print("[build.py] Cleanup: remove pyx files in build_cefpython/")
+    print("[build.py] Cleanup: remove pyx files in the object directory")
     for pyxfile in oldpyxfiles:
         if os.path.exists(pyxfile):
             os.remove(pyxfile)
