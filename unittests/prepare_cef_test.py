@@ -65,6 +65,34 @@ class PrepareCefTest(unittest.TestCase):
 
         self.assertLessEqual(projected_length, 260 - required_headroom)
 
+    def test_extract_archive_does_not_require_directory_replace(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            build_dir = Path(temp_dir) / "build"
+            build_dir.mkdir()
+            distribution_name = "cef_binary_linux64_minimal"
+            archive_path = build_dir / f"{distribution_name}.tar.bz2"
+            member_name = f"{distribution_name}/Release/libcef.so"
+            contents = b"cef"
+            with tarfile.open(archive_path, "w:bz2") as archive:
+                member = tarfile.TarInfo(member_name)
+                member.size = len(contents)
+                archive.addfile(member, BytesIO(contents))
+
+            with patch.object(
+                Path,
+                "replace",
+                side_effect=AssertionError("Path.replace() must not be used"),
+            ):
+                distribution_path = prepare_cef.extract_archive(
+                    archive_path,
+                    build_dir,
+                )
+
+            self.assertEqual(
+                contents,
+                (distribution_path / "Release" / "libcef.so").read_bytes(),
+            )
+
     def test_synchronize_headers_combines_pinned_platforms(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -82,6 +110,10 @@ class PrepareCefTest(unittest.TestCase):
                 "mac canonical\n", encoding="utf-8")
             (windows_include / "common.h").write_text(
                 "windows variant\n", encoding="utf-8")
+            (mac_include / "cef_config.h").write_text(
+                "#define CEF_INCLUDE_CEF_CONFIG_H_\n", encoding="utf-8")
+            (windows_include / "cef_config.h").write_text(
+                "#define CEF_INCLUDE_CEF_CONFIG_H_\n", encoding="utf-8")
             (mac_include / "internal" / "cef_mac.h").write_text(
                 "mac\n", encoding="utf-8")
             (windows_include / "internal" / "cef_win.h").write_bytes(
@@ -137,6 +169,32 @@ class PrepareCefTest(unittest.TestCase):
                 "mac version\n",
                 (root_path / "src" / "version"
                  / "cef_version_linux.h").read_text(encoding="utf-8"))
+
+    def test_add_linux_config_preserves_x11_for_combined_headers(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            destination_include = temp_path / "destination"
+            linux_include = temp_path / "linux"
+            destination_include.mkdir()
+            linux_include.mkdir()
+            (destination_include / "cef_config.h").write_text(
+                "#define CEF_INCLUDE_CEF_CONFIG_H_\n"
+                "#define CEF_V8_ENABLE_SANDBOX 1\n",
+                encoding="utf-8",
+            )
+            (linux_include / "cef_config.h").write_text(
+                "#define CEF_INCLUDE_CEF_CONFIG_H_\n"
+                "#define CEF_X11 1\n",
+                encoding="utf-8",
+            )
+
+            prepare_cef.add_linux_config(destination_include, linux_include)
+
+            combined_config = (
+                destination_include / "cef_config.h"
+            ).read_text(encoding="utf-8")
+            self.assertIn("#if defined(__linux__)", combined_config)
+            self.assertIn("#define CEF_X11 1", combined_config)
 
     def test_get_pinned_platform_names_skips_metadata_only_platforms(self):
         manifest = {

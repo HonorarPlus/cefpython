@@ -308,6 +308,7 @@ from cef_request_context cimport *
 from cef_request_context_handler cimport *
 from request_context_handler cimport *
 from cef_jsdialog_handler cimport *
+from cef_permission_handler cimport *
 from cef_path_util cimport *
 from cef_drag_data cimport *
 from cef_image cimport *
@@ -399,6 +400,7 @@ include "handlers/display_handler.pyx"
 include "handlers/download_handler.pyx"
 include "handlers/focus_handler.pyx"
 include "handlers/javascript_dialog_handler.pyx"
+include "handlers/permission_handler.pyx"
 include "handlers/keyboard_handler.pyx"
 include "handlers/lifespan_handler.pyx"
 include "handlers/load_handler.pyx"
@@ -456,6 +458,11 @@ cdef public int CommandLineSwitches_GetInt(const char* key) except * with gil:
         return int(g_commandLineSwitches[pyKey])
     return 0
 
+
+def GetCommandLineSwitch(key):
+    """Return a configured Chromium command-line switch, or None."""
+    return g_commandLineSwitches.get(key)
+
 # -----------------------------------------------------------------------------
 
 # If you've built custom binaries with tcmalloc hook enabled on
@@ -487,6 +494,13 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         for key in command_line_switches:
             g_commandLineSwitches[key] = copy.deepcopy(
                     command_line_switches[key])
+    # Chromium 138+ no longer enables automatic SwiftShader fallback by
+    # default. Allow it without forcing software rendering, so Chromium still
+    # prefers an available hardware GPU. Respect the established Chromium
+    # switch for applications that explicitly disable software rasterization.
+    if "disable-software-rasterizer" not in g_commandLineSwitches and \
+            "enable-unsafe-swiftshader" not in g_commandLineSwitches:
+        g_commandLineSwitches["enable-unsafe-swiftshader"] = ""
     # Use g_commandLineSwitches if you need to modify or access
     # command line switches inside this function.
     del command_line_switches

@@ -145,6 +145,8 @@ class MainTest_IsolatedTest(unittest.TestCase):
         switches = {"disable-popup-blocking": ""}
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
+        self.assertEqual(
+                "", cef.GetCommandLineSwitch("enable-unsafe-swiftshader"))
         if MAC:
             self.assertFalse(cef.GetAppSetting(
                     "macos_use_system_keychain"))

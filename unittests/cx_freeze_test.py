@@ -1,7 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 from cefpython3 import cx_freeze
 
@@ -92,10 +92,11 @@ class CxFreezeTest(unittest.TestCase):
                 (locale_path / "locale.pak").write_bytes(
                         locale_name.encode())
 
-            runtime_path = cx_freeze.copy_runtime(
-                    build_path,
-                    package_dir=package_path,
-                    included_locales=("en",))
+            with patch("cefpython3.cx_freeze.sys.platform", "darwin"):
+                runtime_path = cx_freeze.copy_runtime(
+                        build_path,
+                        package_dir=package_path,
+                        included_locales=("en",))
 
             copied_locales = runtime_path / "locales"
             self.assertEqual(
@@ -121,6 +122,112 @@ class CxFreezeTest(unittest.TestCase):
                         build_path,
                         package_dir=package_path,
                         included_locales=())
+
+    def test_copy_runtime_splits_linux_symbols_outside_build(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            package_path = temp_path / "package"
+            build_path = temp_path / "build" / "game"
+            package_path.mkdir()
+            build_path.mkdir(parents=True)
+            (package_path / "libcef.so").write_bytes(b"unstripped")
+
+            with (
+                patch("cefpython3.cx_freeze.sys.platform", "linux"),
+                patch(
+                    "cefpython3.cx_freeze._extract_and_strip_linux_symbols"
+                ) as split_symbols,
+            ):
+                runtime_path = cx_freeze.copy_runtime(
+                    build_path,
+                    package_dir=package_path,
+                )
+
+            split_symbols.assert_called_once_with(
+                runtime_path / "libcef.so",
+                (build_path.parent / "game.debug" / "libcef.so.debug").resolve(),
+            )
+
+    def test_extract_and_strip_linux_symbols_uses_external_debuglink(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            libcef_path = temp_path / "runtime" / "libcef.so"
+            debug_path = temp_path / "symbols" / "libcef.so.debug"
+            libcef_path.parent.mkdir()
+            libcef_path.write_bytes(b"unstripped")
+
+            def create_debug_file(command, check):
+                self.assertTrue(check)
+                if "--only-keep-debug" in command:
+                    Path(command[-1]).write_bytes(b"debug")
+
+            with (
+                patch(
+                    "cefpython3.cx_freeze.shutil.which",
+                    side_effect=lambda tool: "/usr/bin/" + tool,
+                ),
+                patch(
+                    "cefpython3.cx_freeze.subprocess.run",
+                    side_effect=create_debug_file,
+                ) as run,
+            ):
+                cx_freeze._extract_and_strip_linux_symbols(
+                    libcef_path,
+                    debug_path,
+                )
+
+            self.assertEqual(b"debug", debug_path.read_bytes())
+            self.assertEqual(
+                [
+                    call(
+                        [
+                            "/usr/bin/objcopy",
+                            "--only-keep-debug",
+                            str(libcef_path.resolve()),
+                            str(debug_path.resolve()) + ".tmp",
+                        ],
+                        check=True,
+                    ),
+                    call(
+                        [
+                            "/usr/bin/strip",
+                            "--strip-unneeded",
+                            str(libcef_path.resolve()),
+                        ],
+                        check=True,
+                    ),
+                    call(
+                        [
+                            "/usr/bin/objcopy",
+                            "--add-gnu-debuglink=" + str(debug_path.resolve()),
+                            str(libcef_path.resolve()),
+                        ],
+                        check=True,
+                    ),
+                ],
+                run.call_args_list,
+            )
+
+    def test_copy_runtime_rejects_linux_symbols_inside_build(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            package_path = temp_path / "package"
+            build_path = temp_path / "build"
+            package_path.mkdir()
+            build_path.mkdir()
+            (package_path / "libcef.so").write_bytes(b"unstripped")
+
+            with (
+                patch("cefpython3.cx_freeze.sys.platform", "linux"),
+                self.assertRaisesRegex(ValueError, "outside the frozen build"),
+            ):
+                cx_freeze.copy_runtime(
+                    build_path,
+                    package_dir=package_path,
+                    linux_debug_symbols_path=(
+                        build_path / "lib" / "cefpython3" / "libcef.so.debug"
+                    ),
+                )
 
     def test_get_module_excludes_includes_macos_bundles(self):
         with tempfile.TemporaryDirectory() as temp_dir:

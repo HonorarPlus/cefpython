@@ -282,6 +282,8 @@ cdef class PyBrowser:
                     "OnBeforeUnloadJavascriptDialog",
                     "OnResetJavascriptDialogState",
                     "OnJavascriptDialogClosed"]
+            # PermissionHandler
+            self.allowedClientCallbacks += ["OnShowPermissionPrompt"]
             # FocusHandler
             self.allowedClientCallbacks += ["OnTakeFocus", "OnSetFocus",
                                             "OnGotFocus"]

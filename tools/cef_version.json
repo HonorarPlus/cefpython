@@ -1,6 +1,6 @@
 {
-    "cef_version": "151.3.14+g5d67476+chromium-151.0.7922.72",
-    "chromium_version": "151.0.7922.72",
+    "cef_version": "151.3.17+gf059e67+chromium-151.0.7922.138",
+    "chromium_version": "151.0.7922.138",
     "api_version": 15101,
     "package_version": "151.3",
     "header_source_platform": "windows64",
@@ -12,28 +12,37 @@
     "platforms": {
         "windows64": {
             "architecture": "x86_64",
-            "archive": "cef_binary_151.3.14+g5d67476+chromium-151.0.7922.72_windows64_minimal.tar.bz2",
-            "url": "https://cef-builds.spotifycdn.com/cef_binary_151.3.14%2Bg5d67476%2Bchromium-151.0.7922.72_windows64_minimal.tar.bz2",
-            "sha256": "c63a18909fea077b5c3b5f9a3194f05781cd909efa8a6d7a543cad99c4183a55"
+            "archive": "cef_binary_151.3.17+gf059e67+chromium-151.0.7922.138_windows64_minimal.tar.bz2",
+            "url": "https://cef-builds.spotifycdn.com/cef_binary_151.3.17%2Bgf059e67%2Bchromium-151.0.7922.138_windows64_minimal.tar.bz2",
+            "sha256": "07765e763c12d1f95ee0bd89695e28cfd114dc41bcf3d7e0192ad0c261f94f87"
         },
         "macosx64": {
             "architecture": "x86_64",
-            "distribution": "minimal"
+            "distribution": "minimal",
+            "archive": "cef_binary_151.3.17+gf059e67+chromium-151.0.7922.138_macosx64_minimal.tar.bz2",
+            "url": "https://cef-builds.spotifycdn.com/cef_binary_151.3.17%2Bgf059e67%2Bchromium-151.0.7922.138_macosx64_minimal.tar.bz2",
+            "sha256": "44d2e64f47522ea93b7ef7f695d162e2522236d8ae9bb77a8f59e88ceb4c136b"
         },
         "macosarm64": {
             "architecture": "arm64",
             "distribution": "minimal",
-            "archive": "cef_binary_151.3.14+g5d67476+chromium-151.0.7922.72_macosarm64_minimal.tar.bz2",
-            "url": "https://cef-builds.spotifycdn.com/cef_binary_151.3.14%2Bg5d67476%2Bchromium-151.0.7922.72_macosarm64_minimal.tar.bz2",
-            "sha256": "e3d268c88c612548f679aa454457e415d41c796bc5996f592b8263749c9681fd"
+            "archive": "cef_binary_151.3.17+gf059e67+chromium-151.0.7922.138_macosarm64_minimal.tar.bz2",
+            "url": "https://cef-builds.spotifycdn.com/cef_binary_151.3.17%2Bgf059e67%2Bchromium-151.0.7922.138_macosarm64_minimal.tar.bz2",
+            "sha256": "1320e1abe7bcd3535eb3649fe9b008f3848738c3a6f138f105139c325216f4e1"
         },
         "linux64": {
             "architecture": "x86_64",
-            "distribution": "minimal"
+            "distribution": "minimal",
+            "archive": "cef_binary_151.3.17+gf059e67+chromium-151.0.7922.138_linux64_minimal.tar.bz2",
+            "url": "https://cef-builds.spotifycdn.com/cef_binary_151.3.17%2Bgf059e67%2Bchromium-151.0.7922.138_linux64_minimal.tar.bz2",
+            "sha256": "83693646ff173ddf6fb81ef183b4f6e7a078ab86ab6c86f38cdafe19cde745b6"
         },
         "linuxarm64": {
             "architecture": "arm64",
-            "distribution": "minimal"
+            "distribution": "minimal",
+            "archive": "cef_binary_151.3.17+gf059e67+chromium-151.0.7922.138_linuxarm64_minimal.tar.bz2",
+            "url": "https://cef-builds.spotifycdn.com/cef_binary_151.3.17%2Bgf059e67%2Bchromium-151.0.7922.138_linuxarm64_minimal.tar.bz2",
+            "sha256": "c22bda48d0a0a406ceb2f7a3860a94e211ec2114cd168af257f54bc4232c3a4d"
         }
     },
     "toolchain_baselines": {

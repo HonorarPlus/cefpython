@@ -79,7 +79,7 @@ cdef void SetCefWindowInfo(
     if windowInfo.windowType == "offscreen":
         cefWindowInfo.SetAsWindowless(
                 <CefWindowHandle>windowInfo.parentWindowHandle)
-    IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
+    IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin" or UNAME_SYSNAME == "Linux":
         if windowInfo.runtimeStyle == "chrome":
             cefWindowInfo.runtime_style = cef_types.CEF_RUNTIME_STYLE_CHROME
         elif windowInfo.runtimeStyle == "default":

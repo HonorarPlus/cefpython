@@ -95,7 +95,10 @@ def extract_archive(archive_path: Path, build_dir: Path) -> Path:
     extracted_path = temporary_path / distribution_name
     if not extracted_path.is_dir():
         raise RuntimeError(f"CEF archive did not contain {distribution_name}")
-    extracted_path.replace(distribution_path)
+    # Path.replace() can fail with WinError 5 when a Linux or macOS archive is
+    # extracted on Windows. shutil.move() falls back to copy-and-remove when
+    # the native directory rename is unavailable.
+    shutil.move(str(extracted_path), str(distribution_path))
     temporary_path.rmdir()
     return distribution_path
 
@@ -149,6 +152,31 @@ def copy_missing_headers(source_include: Path, destination_include: Path) -> int
     return copied_count
 
 
+def add_linux_config(destination_include: Path, linux_include: Path) -> None:
+    """Preserve Linux-only CEF configuration in the combined header tree."""
+    linux_config = (linux_include / "cef_config.h").read_text(encoding="utf-8")
+    if "#define CEF_X11 1" not in linux_config:
+        return
+
+    destination_config_path = destination_include / "cef_config.h"
+    destination_config = destination_config_path.read_text(encoding="utf-8")
+    if "#define CEF_X11 1" in destination_config:
+        return
+
+    header_guard = "#define CEF_INCLUDE_CEF_CONFIG_H_\n"
+    linux_config_block = (
+        "\n#if defined(__linux__)\n"
+        "#define CEF_X11 1\n"
+        "#endif\n"
+    )
+    destination_config = destination_config.replace(
+        header_guard,
+        header_guard + linux_config_block,
+        1,
+    )
+    destination_config_path.write_text(destination_config, encoding="utf-8")
+
+
 def synchronize_headers(
     distribution_paths: dict[str, Path],
     manifest: dict,
@@ -177,6 +205,20 @@ def synchronize_headers(
         copied_headers[platform_name] = copy_missing_headers(
             distribution_path / "include",
             destination_include,
+        )
+
+    linux_platform = next(
+        (
+            platform_name
+            for platform_name in distribution_paths
+            if platform_name.startswith("linux")
+        ),
+        None,
+    )
+    if linux_platform:
+        add_linux_config(
+            destination_include,
+            distribution_paths[linux_platform] / "include",
         )
 
     version_dir = ROOT_DIR / "src" / "version"

@@ -11,6 +11,7 @@ INC = -I./../ -I./../common/ -I$(PYTHON_INCLUDE) \
 	-I/usr/include/glib-2.0 \
 	-I/usr/include/cairo \
 	-I/usr/include/pango-1.0 \
+	-I/usr/include/harfbuzz \
 	-I/usr/include/gdk-pixbuf-2.0 \
 	-I/usr/include/atk-1.0 \
 	-I/usr/lib/x86_64-linux-gnu/gtk-2.0/include \
@@ -27,11 +28,13 @@ INC = -I./../ -I./../common/ -I$(PYTHON_INCLUDE) \
 	-I/usr/lib/glib-2.0/include
 
 ifeq ($(UNAME_S), Linux)
-	LIB_DIRS = -L$(CEF_BIN) \
-							-L$(CEF_LIB)
+	LIB_DIRS = -L"$(CEF_BIN)" \
+							-L"$(CEF_LIB)"
+	RPATH = -Wl,-rpath,'$$ORIGIN'
 else ifeq ($(UNAME_S), Darwin)
-	LIB_DIRS = -F$(CEF_BIN) \
-							-L$(CEF_LIB)
+	LIB_DIRS = -F"$(CEF_BIN)" \
+							-L"$(CEF_LIB)"
+	RPATH = -Wl,-rpath,@loader_path/
 endif
 
 ifeq ($(UNAME_S), Linux)
@@ -55,4 +58,4 @@ subprocess:
 		$(CPP_FILES) \
 		$(CEF_LINK_FLAGS) \
 		$(LIBS) -lcef_dll_wrapper \
-		-o subprocess -Wl,-rpath,@loader_path/
+		-o subprocess $(RPATH)

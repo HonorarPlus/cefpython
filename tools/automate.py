@@ -447,6 +447,8 @@ def build_cef_projects():
         build_all_wrapper_libraries_windows()
     elif MAC:
         build_wrapper_library_mac()
+    elif LINUX and Options.prebuilt_cef:
+        build_wrapper_library_linux()
 
 
 def build_all_wrapper_libraries_windows():
@@ -671,6 +673,45 @@ def build_wrapper_library_mac():
         assert os.path.exists(wrapper_lib)
 
 
+def build_wrapper_library_linux():
+    """Build the Linux wrapper without compiling optional CEF sample apps."""
+    cmake_wrapper = prepare_build_command(build_lib=True)
+    cmake_wrapper.extend([
+        "cmake",
+        "-G",
+        "Ninja",
+        "-DCMAKE_BUILD_TYPE=" + Options.build_type,
+        "..",
+    ])
+    build_wrapper_dir = os.path.join(Options.cef_binary, "build_wrapper")
+    wrapper_lib = os.path.join(
+        build_wrapper_dir,
+        "libcef_dll_wrapper",
+        "libcef_dll_wrapper.a",
+    )
+
+    if os.path.exists(wrapper_lib):
+        print("[automate.py] Already built: libcef_dll_wrapper")
+        return
+    if os.path.exists(build_wrapper_dir):
+        shutil.rmtree(build_wrapper_dir)
+    os.makedirs(build_wrapper_dir)
+
+    print("[automate.py] Build libcef_dll_wrapper")
+    run_command(cmake_wrapper, build_wrapper_dir)
+    print("[automate.py] cmake OK")
+    ninja_wrapper = prepare_build_command(build_lib=True)
+    ninja_wrapper.extend([
+        "ninja",
+        "-j",
+        Options.ninja_jobs,
+        "libcef_dll_wrapper",
+    ])
+    run_command(ninja_wrapper, build_wrapper_dir)
+    print("[automate.py] ninja OK")
+    assert os.path.exists(wrapper_lib)
+
+
 def prepare_build_command(build_lib=False, vcvars=None):
     """On Windows VS env variables must be set up by calling vcvarsall.bat"""
     command = list()
@@ -759,13 +800,13 @@ def create_prebuilt_binaries():
             "build_cefclient", "tests", "cefclient",
             Options.build_type,
             "cefclient" + APP_EXT)
-    if LINUX:
+    cefclient_files = os.path.join(
+            src,
+            "build_cefclient", "tests", "cefclient",
+            Options.build_type,
+            "cefclient_files")
+    if LINUX and os.path.isdir(cefclient_files):
         # On Windows resources/*.html files are embedded inside exe
-        cefclient_files = os.path.join(
-                src,
-                "build_cefclient", "tests", "cefclient",
-                Options.build_type,
-                "cefclient_files")
         cpdir(cefclient_files, os.path.join(bindir, "cefclient_files"))
 
     # cefsimple
@@ -781,13 +822,13 @@ def create_prebuilt_binaries():
             "build_cefclient", "tests", "ceftests",
             Options.build_type,
             "ceftests" + APP_EXT)
-    if LINUX:
+    ceftests_files = os.path.join(
+            src,
+            "build_cefclient", "tests", "ceftests",
+            Options.build_type,
+            "ceftests_files")
+    if LINUX and os.path.isdir(ceftests_files):
         # On Windows resources/*.html files are embedded inside exe
-        ceftests_files = os.path.join(
-                src,
-                "build_cefclient", "tests", "ceftests",
-                Options.build_type,
-                "ceftests_files")
         cpdir(ceftests_files, os.path.join(bindir, "ceftests_files"))
 
     def copy_app(app):
@@ -835,12 +876,7 @@ def create_prebuilt_binaries():
                                  "libcef_dll_wrapper.a"),
                     libdir)
     else:
-        # cefclient builds libcef_dll_wrapper by default and this version
-        # is good for cefpython on Linux. On Windows and Mac
-        # libcef_dll_wrapper is built seprately.
-        shutil.copy(os.path.join(src, "build_cefclient", "libcef_dll_wrapper",
-                                 "libcef_dll_wrapper.a"),
-                    libdir)
+        shutil.copy(get_linux_wrapper_library_path(src), libdir)
 
     # Remove .lib files from bin/ only after libraries were copied (Windows)
     libs = glob.glob(os.path.join(bindir, "*.lib"))
@@ -863,6 +899,19 @@ def create_prebuilt_binaries():
                 cef_version_file)
 
     print("[automate.py] OK prebuilt binaries created in '%s/'" % dst)
+
+
+def get_linux_wrapper_library_path(source_dir):
+    """Return the wrapper built with or without the optional sample apps."""
+    build_directory = (
+        "build_wrapper" if Options.prebuilt_cef else "build_cefclient"
+    )
+    return os.path.join(
+        source_dir,
+        build_directory,
+        "libcef_dll_wrapper",
+        "libcef_dll_wrapper.a",
+    )
 
 
 def get_available_python_compilers():

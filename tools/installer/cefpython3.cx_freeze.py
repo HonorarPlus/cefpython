@@ -2,6 +2,7 @@
 
 import filecmp
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -40,6 +41,7 @@ def copy_runtime(
         destination=None,
         excluded_files=(),
         included_locales=None,
+        linux_debug_symbols_path=None,
 ):
     """Copy the platform CEF runtime into a completed cx_Freeze build.
 
@@ -48,6 +50,9 @@ def copy_runtime(
     original extension module and copies platform runtime bundles intact.
     By default all locales are retained. Pass language or locale prefixes,
     such as ``("en",)`` or ``("en-US",)``, to retain only matching locales.
+    On Linux, libcef's debug data is written outside the frozen application
+    and the runtime copy is stripped. Pass ``linux_debug_symbols_path`` to
+    choose the external symbol file location.
     """
     build_path = Path(build_root).resolve()
     package_path = _get_package_dir(package_dir)
@@ -70,9 +75,75 @@ def copy_runtime(
         runtime_path,
         included_locales,
     )
+    if sys.platform.startswith("linux"):
+        _split_linux_runtime_symbols(
+            build_path,
+            runtime_path,
+            linux_debug_symbols_path,
+        )
     if sys.platform == "darwin":
         _remove_flattened_macos_framework(build_path)
     return runtime_path
+
+
+def _split_linux_runtime_symbols(
+        build_path,
+        runtime_path,
+        debug_symbols_path=None,
+):
+    """Move Linux CEF debugging data outside the frozen application."""
+    libcef_path = runtime_path / "libcef.so"
+    if not libcef_path.is_file():
+        raise FileNotFoundError(
+            "Linux CEF runtime library does not exist: " + str(libcef_path)
+        )
+    if debug_symbols_path is None:
+        debug_symbols_path = (
+            build_path.parent
+            / (build_path.name + ".debug")
+            / "libcef.so.debug"
+        )
+    debug_path = Path(debug_symbols_path).resolve()
+    if debug_path == runtime_path or runtime_path in debug_path.parents:
+        raise ValueError("Linux debug symbols must be stored outside the frozen build")
+    print("[cefpython3.cx_freeze] Extracting Linux CEF symbols to " + str(debug_path))
+    _extract_and_strip_linux_symbols(libcef_path, debug_path)
+    print("[cefpython3.cx_freeze] Stripped frozen Linux CEF runtime " + str(libcef_path))
+
+
+def _extract_and_strip_linux_symbols(libcef_path, debug_symbols_path):
+    """Extract GNU debug data, strip the runtime, and link both artifacts."""
+    objcopy = shutil.which("objcopy")
+    strip = shutil.which("strip")
+    if objcopy is None or strip is None:
+        raise RuntimeError(
+            "Freezing CEF on Linux requires the binutils objcopy and strip tools"
+        )
+
+    libcef_path = Path(libcef_path).resolve()
+    debug_path = Path(debug_symbols_path).resolve()
+    debug_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_debug_path = debug_path.with_name(debug_path.name + ".tmp")
+    if temporary_debug_path.exists():
+        temporary_debug_path.unlink()
+
+    try:
+        subprocess.run(
+            [objcopy, "--only-keep-debug", str(libcef_path), str(temporary_debug_path)],
+            check=True,
+        )
+        temporary_debug_path.replace(debug_path)
+        subprocess.run(
+            [strip, "--strip-unneeded", str(libcef_path)],
+            check=True,
+        )
+        subprocess.run(
+            [objcopy, "--add-gnu-debuglink=" + str(debug_path), str(libcef_path)],
+            check=True,
+        )
+    finally:
+        if temporary_debug_path.exists():
+            temporary_debug_path.unlink()
 
 
 def _get_package_dir(package_dir):

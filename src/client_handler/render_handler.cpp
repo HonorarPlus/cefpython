@@ -77,8 +77,12 @@ void RenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
     REQUIRE_UI_THREAD();
 #if defined(OS_MAC)
     void* shared_handle = paint_info.shared_texture_io_surface;
-#else
+#elif defined(OS_WIN)
     void* shared_handle = paint_info.shared_texture_handle;
+#else
+    // CEF exposes Linux accelerated paint as native pixmap planes instead of
+    // the single platform handle expected by CEF Python's existing API.
+    void* shared_handle = nullptr;
 #endif
     RenderHandler_OnAcceleratedPaint(browser, type, const_cast<RectList&>(dirtyRects),
                                      shared_handle);

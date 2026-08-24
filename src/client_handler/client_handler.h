@@ -19,6 +19,7 @@
 #include "keyboard_handler.h"
 #include "lifespan_handler.h"
 #include "load_handler.h"
+#include "permission_handler.h"
 #include "render_handler.h"
 #include "request_handler.h"
 
@@ -33,6 +34,7 @@ class ClientHandler : public CefClient,
                       public KeyboardHandler,
                       public LifespanHandler,
                       public LoadHandler,
+                      public PermissionHandler,
                       public RenderHandler,
                       public RequestHandler
 {
@@ -76,6 +78,10 @@ public:
     }
 
     CefRefPtr<CefLoadHandler> GetLoadHandler() override {
+        return this;
+    }
+
+    CefRefPtr<CefPermissionHandler> GetPermissionHandler() override {
         return this;
     }
 

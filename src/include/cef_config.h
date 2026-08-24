@@ -35,6 +35,10 @@
 #ifndef CEF_INCLUDE_CEF_CONFIG_H_
 #define CEF_INCLUDE_CEF_CONFIG_H_
 
+#if defined(__linux__)
+#define CEF_X11 1
+#endif
+
 #define CEF_V8_ENABLE_SANDBOX 1
 
 #endif  // CEF_INCLUDE_CEF_CONFIG_H_

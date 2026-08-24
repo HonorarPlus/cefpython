@@ -7,6 +7,7 @@
 Table of contents:
 * [Preface](#preface)
 * [Example switches](#example-switches)
+  * [enable-unsafe-swiftshader](#enable-unsafe-swiftshader)
   * [enable-media-stream](#enable-media-stream)
   * [proxy-server](#proxy-server)
   * [no-proxy-server](#no-proxy-server)
@@ -42,6 +43,18 @@ cef3\windows\binaries\debug.log" --log-severity=info --enable-release-dcheck
 
 
 ## Example switches
+
+
+### enable-unsafe-swiftshader
+
+CEF Python enables this Chromium switch by default with CEF 150. It permits
+Chromium to fall back to the CPU-backed SwiftShader renderer when hardware GPU
+initialization fails, but it does not force software rendering when a working
+GPU is available. Applications can opt out by passing the
+"disable-software-rasterizer" switch to `Initialize()`.
+
+SwiftShader executes JIT-compiled graphics code in Chromium's GPU process and
+should only render content trusted by the embedding application.
 
 
 ### enable-media-stream

@@ -140,6 +140,16 @@ cdef extern from "include/internal/cef_types.h":
         TID_IO,
         TID_RENDERER
 
+    ctypedef enum cef_permission_request_types_t:
+        CEF_PERMISSION_TYPE_NONE
+        CEF_PERMISSION_TYPE_CLIPBOARD
+
+    ctypedef enum cef_permission_request_result_t:
+        CEF_PERMISSION_RESULT_ACCEPT
+        CEF_PERMISSION_RESULT_DENY
+        CEF_PERMISSION_RESULT_DISMISS
+        CEF_PERMISSION_RESULT_IGNORE
+
     ctypedef enum cef_v8_propertyattribute_t:
         V8_PROPERTY_ATTRIBUTE_NONE = 0,       # Writeable, Enumerable,
         #  Configurable
