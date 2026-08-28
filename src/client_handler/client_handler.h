@@ -19,6 +19,7 @@
 #include "keyboard_handler.h"
 #include "lifespan_handler.h"
 #include "load_handler.h"
+#include "permission_handler.h"
 #include "render_handler.h"
 #include "request_handler.h"
 
@@ -33,11 +34,13 @@ class ClientHandler : public CefClient,
                       public KeyboardHandler,
                       public LifespanHandler,
                       public LoadHandler,
+                      public PermissionHandler,
                       public RenderHandler,
                       public RequestHandler
 {
 public:
-    ClientHandler(){}
+    explicit ClientHandler(bool owns_top_level_window = false)
+        : LifespanHandler(owns_top_level_window) {}
     virtual ~ClientHandler(){}
 
     CefRefPtr<CefContextMenuHandler> GetContextMenuHandler() override {
@@ -78,6 +81,10 @@ public:
         return this;
     }
 
+    CefRefPtr<CefPermissionHandler> GetPermissionHandler() override {
+        return this;
+    }
+
     CefRefPtr<CefRenderHandler> GetRenderHandler() override {
         return this;
     }
@@ -87,6 +94,7 @@ public:
     }
 
     bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+                                  CefRefPtr<CefFrame> frame,
                                   CefProcessId source_process,
                                   CefRefPtr<CefProcessMessage> message
                                   ) override;

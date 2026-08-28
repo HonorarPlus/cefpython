@@ -12,7 +12,6 @@ Table of contents:
 * [API docs](#api-docs)
 * [Unit tests](#unit-tests)
 * [Platforms](#platforms)
-* [GIL](#gil)
 * [Authors](#authors)
 * [Updating CEF version](#updating-cef-version)
 
@@ -22,7 +21,7 @@ Table of contents:
 - Pull requests should be sent for the master branch
 - Pull request should implement only one feature at a time, so that
   reviewing them is easy. If you have implemented several features
-  then send them as sepearate pull requests. If not sure then ask
+  then send them as separate pull requests. If not sure then ask
   on the [Forum](https://groups.google.com/group/cefpython).
 
 
@@ -87,7 +86,7 @@ test methods named "test_1_initialize", "test_2_some", "test_3_shutdown",
 after doing so some strange things happen (maybe unittest is
 running these methods in separate threads). So with these
 restrictions the way it works currently is that there is a
-single method named test_main() in which muliple sub-tests are
+single method named test_main() in which multiple sub-tests are
 run. A function named subtest_message() was defined to be able
 to output results of the multiple subtests that are running inside
 the test_main() method.
@@ -107,7 +106,7 @@ _test_runner.py. This script implements a way to run all unit
 tests (by default with no arguments passed) and also implements
 some special features like Isolated Tests along with some other
 minor features for CEF special case. An isolated test is run
-using a separate Python intepreter (a separate process). To mark
+using a separate Python interpreter (a separate process). To mark
 a Test class an isolated test just append "_IsolatedTest" in
 its name. Isolated tests are required for running CEF tests
 properly. The _test_runner.py script allows to run multiple CEF
@@ -132,7 +131,7 @@ use the "with nogil" statement.
 
 From [Cython's documentation](http://docs.cython.org/src/userguide/external_C_code.html#acquiring-and-releasing-the-gil):
 
-> Note that acquiring the GIL is a blocking thread-synchronising operation,
+> Note that acquiring the GIL is a blocking thread-synchronizing operation,
 > and therefore potentially costly. It might not be worth releasing the GIL
 > for minor calculations. Usually, I/O operations and substantial computations
 > in parallel code will benefit from it.

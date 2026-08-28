@@ -60,11 +60,11 @@ HTML_code = """
 def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
-    # To change user agent use either "product_version"
+    # To change user agent use either "user_agent_product"
     # or "user_agent" options. Explained in Tutorial in
     # "Change user agent string" section.
     settings = {
-        # "product_version": "MyProduct/10.00",
+        # "user_agent_product": "MyProduct/10.00",
         # "user_agent": "MyAgent/20.00 MyProduct/10.00",
     }
     cef.Initialize(settings=settings)
@@ -85,7 +85,7 @@ def check_versions():
     print("[tutorial.py] Python {ver} {arch}".format(
            ver=platform.python_version(),
            arch=platform.architecture()[0]))
-    assert cef.__version__ >= "57.0", "CEF Python v57.0+ required to run this"
+    assert float(cef.__version__) >= 57.0, "CEF Python v57.0+ required to run this"
 
 
 def html_to_data_uri(html, js_callback=None):

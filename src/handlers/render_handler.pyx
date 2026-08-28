@@ -51,29 +51,28 @@ cdef public cpp_bool RenderHandler_GetRootScreenRect(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public cpp_bool RenderHandler_GetViewRect(
+cdef public void RenderHandler_GetViewRect(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRect& cefRect
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef list pyRect = []
-    cdef py_bool ret
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "GetViewRect")
         callback = pyBrowser.GetClientCallback("GetViewRect")
         if callback:
-            ret = callback(browser=pyBrowser, rect_out=pyRect)
-            if ret:
-                assert (pyRect and len(pyRect) == 4), "rectangle not provided"
-                cefRect.x = pyRect[0]
-                cefRect.y = pyRect[1]
-                cefRect.width = pyRect[2]
-                cefRect.height = pyRect[3]
-                return True
-            else:
-                return False
+            callback(browser=pyBrowser, rect_out=pyRect)
+            assert (pyRect and len(pyRect) == 4), "rectangle not provided"
+            cefRect.x = pyRect[0]
+            cefRect.y = pyRect[1]
+            cefRect.width = pyRect[2]
+            cefRect.height = pyRect[3]
         else:
-            return False
+            cefRect.x = 0
+            cefRect.y = 0
+            cefRect.width = 800
+            cefRect.height = 600
+
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -219,16 +218,41 @@ cdef public void RenderHandler_OnPaint(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public void RenderHandler_OnCursorChange(
+cdef public void RenderHandler_OnAcceleratedPaint(
         CefRefPtr[CefBrowser] cefBrowser,
-        CefCursorHandle cursor
+        cef_types.cef_paint_element_type_t paintElementType,
+        cpp_vector[CefRect]& cefDirtyRects,
+        void* shared_handle
         ) except * with gil:
     cdef PyBrowser pyBrowser
+    cdef list pyDirtyRects = []
+    cdef list pyRect
+    # TODO: cefDirtyRects should be const, but const_iterator is
+    #       not yet implemented in libcpp.vector.
+    cdef cpp_vector[CefRect].iterator iterator
+    cdef CefRect cefRect
     try:
-        pyBrowser = GetPyBrowser(cefBrowser, "OnCursorChange")
-        callback = pyBrowser.GetClientCallback("OnCursorChange")
+        pyBrowser = GetPyBrowser(cefBrowser, "OnAcceleratedPaint")
+        iterator = cefDirtyRects.begin()
+        while iterator != cefDirtyRects.end():
+            cefRect = deref(iterator)
+            pyRect = [cefRect.x, cefRect.y, cefRect.width, cefRect.height]
+            pyDirtyRects.append(pyRect)
+            preinc(iterator)
+
+        # In CEF 1 width and height were fetched using GetSize(),
+        # but in CEF 3 they are passed as arguments to OnPaint().
+        # OFF: | (width, height) = pyBrowser.GetSize(paintElementType)
+
+        callback = pyBrowser.GetClientCallback("OnAcceleratedPaint")
         if callback:
-            callback(browser=pyBrowser, cursor=<uintptr_t>cursor)
+            callback(
+                    browser=pyBrowser,
+                    element_type=paintElementType,
+                    dirty_rects=pyDirtyRects,
+                    shared_handle=<object>shared_handle)
+        else:
+            return
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -249,7 +273,7 @@ cdef public void RenderHandler_OnScrollOffsetChanged(
 cdef public cpp_bool RenderHandler_StartDragging(
         CefRefPtr[CefBrowser] cef_browser,
         CefRefPtr[CefDragData] cef_drag_data,
-        uint32 allowed_ops,
+        uint32_t allowed_ops,
         int x, int y
         ) except * with gil:
     cdef PyBrowser browser
@@ -278,7 +302,7 @@ cdef public cpp_bool RenderHandler_StartDragging(
 
 cdef public void RenderHandler_UpdateDragCursor(
         CefRefPtr[CefBrowser] cef_browser,
-        uint32 operation,
+        uint32_t operation,
         ) except * with gil:
     cdef PyBrowser browser
     try:

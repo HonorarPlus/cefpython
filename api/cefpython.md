@@ -59,13 +59,6 @@ All parameters are optional.
 
 This function can only be called on the UI thread.
 
-If the url is a local path it needs to start with the `file://` prefix.
-If the url contains special characters it may need proper handling.
-Starting with v66.1+ it is required for the app code to encode the url
-properly. You can use the `pathlib.PurePath.as_uri` in Python 3
-or `urllib.pathname2url` in Python 2 (`urllib.request.pathname2url`
-in Python 3) depending on your case.
-
 The "window_title" parameter will be used only when parent
 window provided in window_info was set to 0. This is for use
 with hello_world.py and tutorial.py examples which don't use
@@ -247,7 +240,7 @@ Description from upstream CEF:
 | __Return__ | void |
 
 Run the CEF message loop. Use this function instead of an application-
-provided message loop to get the best balance between performance and
+provided message loop to get the best balance between performance and 
 CPU usage. This function should only be called on the main application
 thread (UI thread) and only if cefpython.Initialize() is called with a
 [ApplicationSettings](ApplicationSettings.md).multi_threaded_message_loop
@@ -299,10 +292,11 @@ List of threads in the Browser process:
   - Loading data that might be shown in the UI after a future user
     interaction.
 * cef.TID_FILE_USER_BLOCKING: Used for blocking tasks (e.g. file system access) that affect UI immediately after a user interaction. All tasks posted after CefBrowserProcessHandler::OnContextInitialized() and before CefShutdown() are guaranteed to run. Example: Generating data shown in the UI immediately after a click.
+* cef.TID_PROCESS_LAUNCHER: Used to launch and terminate browser processes.
 * cef.TID_IO: Used to process IPC and network messages. Do not perform blocking tasks on this thread. All tasks posted after CefBrowserProcessHandler::OnContextInitialized() and before CefShutdown() are guaranteed to run.
 
 List of threads in the Renderer process:
-* cef.TID_RENDERER: Tasks may be posted to this thread after CefRenderProcessHandler::OnRenderThreadCreated but are not guaranteed to run before sub-process termination (sub-processes may be killed at any time without warning).
+* cef.TID_RENDERER.
 
 
 ### PostDelayedTask

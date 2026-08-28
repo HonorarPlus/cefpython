@@ -65,6 +65,4 @@ class DpiAware:
 
     @classmethod
     def EnableHighDpiSupport(cls):
-        # This CEF function sets process to be DPI aware. This
-        # CEF func is also called in subprocesses.
-        CefEnableHighDPISupport()
+        SetProcessDpiAware()

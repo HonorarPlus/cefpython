@@ -35,7 +35,7 @@ To be notified on new commits subscribe to this [RSS/Atom feed](../../../commits
 
 CEF Python depends on CEF and API breaks are inevitable when updating
 to latest CEF. The [Migration Guide](Migration-guide.md) document
-lists most notable breaking changes for each release. Full chanelogs
+lists most notable breaking changes for each release. Full changelogs
 can be found on [GitHub Releases](../../../releases) pages.
 
 Due to unavoidable changes in upstream API it is recommended for your setup
@@ -354,4 +354,3 @@ A quote by Marshall Greenblatt:
 
 Reference: [Question on browser security](http://magpcss.org/ceforum/viewtopic.php?f=10&t=10222)
 on the CEF Forum.
-

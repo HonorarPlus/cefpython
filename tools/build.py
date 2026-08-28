@@ -18,15 +18,12 @@ Option 2: Use the automate.py tool. With this tool you can build CEF
 from sources or use ready binaries from Spotify Automated Builds.
 
 Usage:
-    build.py VERSION [--rebuild-cpp] [--unittests] [--fast] [--clean] [--kivy]
-                     [--hello-world] [--enable-profiling]
-                     [--enable-line-tracing]
+    build.py VERSION [--rebuild-cpp] [--fast] [--clean] [--kivy]
+                     [--hello-world]
 
 Options:
     VERSION                Version number eg. 50.0
-    --unittests            Run only unit tests. Do not run examples while
-                           building cefpython modules. Examples require
-                           interaction such as closing window before proceeding.
+    --no-run-examples      Do not run examples after build, only unit tests
     --fast                 Fast mode
     --clean                Clean C++ projects build files on Linux/Mac
     --kivy                 Run only Kivy example
@@ -67,9 +64,11 @@ import copy
 import sys
 import os
 import glob
+import plistlib
 import shutil
 import subprocess
 import re
+from packaging.version import Version
 
 # raw_input() was renamed to input() in Python 3
 try:
@@ -82,7 +81,7 @@ except NameError:
 # Command line args variables
 SYS_ARGV_ORIGINAL = None
 VERSION = ""
-UNITTESTS = False
+NO_RUN_EXAMPLES = False
 DEBUG_FLAG = False
 FAST_FLAG = False
 CLEAN_FLAG = False
@@ -119,16 +118,23 @@ def main():
               .format(pyver=PYVERSION))
         global FIRST_RUN
         FIRST_RUN = True
+    print("[build.py]   ===== Clearing cache =====")
     clear_cache()
+
+    print("[build.py]   ===== Copy&Fix PYX =====")
     copy_and_fix_pyx_files()
-    build_cefpython_module()
+
+    print("[build.py]   ===== Build FIX HEADER module =====")
     fix_cefpython_api_header_file()
+
+    print("[build.py]   ===== Build CEFPYTHON module =====")
+    build_cefpython_module()
     install_and_run()
 
 
 def command_line_args():
     global DEBUG_FLAG, FAST_FLAG, CLEAN_FLAG, KIVY_FLAG, HELLO_WORLD_FLAG, \
-           REBUILD_CPP, VERSION, UNITTESTS
+           REBUILD_CPP, VERSION, NO_RUN_EXAMPLES
 
     VERSION = get_version_from_command_line_args(__file__)
     # Other scripts called by this script expect that version number
@@ -143,10 +149,10 @@ def command_line_args():
     global SYS_ARGV_ORIGINAL
     SYS_ARGV_ORIGINAL = copy.copy(sys.argv)
 
-    if "--unittests" in sys.argv:
-        UNITTESTS = True
-        print("[build.py] Running examples disabled (--unittests)")
-        sys.argv.remove("--unittests")
+    if "--no-run-examples" in sys.argv:
+        NO_RUN_EXAMPLES = True
+        print("[build.py] Running examples disabled (--no-run-examples)")
+        sys.argv.remove("--no-run-examples")
 
     if "--debug" in sys.argv:
         DEBUG_FLAG = True
@@ -208,20 +214,25 @@ def check_cython_version():
     print("[build.py] Check Cython version")
     with open(os.path.join(TOOLS_DIR, "requirements.txt"), "rb") as fileobj:
         contents = fileobj.read().decode("utf-8")
-        match = re.search(r"cython\s*==\s*([\d.]+)", contents,
+        match = re.search(r"cython\s*>=\s*([\w.]+)", contents,
                           flags=re.IGNORECASE)
         assert match, "cython package not found in requirements.txt"
         require_version = match.group(1)
+        print("Cython version required: {0}".format(require_version))
     try:
         import Cython
         version = Cython.__version__
+        print("Cython version: {0}".format(version))
     except ImportError:
         # noinspection PyUnusedLocal
         Cython = None
         print("[build.py] ERROR: Cython is not installed ({0} required)"
               .format(require_version))
         sys.exit(1)
-
+    if Version(version) < Version(require_version):
+        print("[build.py] ERROR: Cython version is too old: {0}. Required: {1}+"
+              .format(version, require_version))
+        sys.exit(1)
     print("[build.py] Cython version: {0}".format(version))
 
 
@@ -265,6 +276,9 @@ def setup_environ():
             "C:\\Windows\\System32\\Wbem",
             get_python_path(),
         ]
+        existing_paths = os.environ.get("PATH", "").split(os.pathsep)
+        path.extend(existing_path for existing_path in existing_paths
+                    if existing_path and existing_path not in path)
         os.environ["PATH"] = os.pathsep.join(path)
         print("[build.py] environ PATH: {path}"
               .format(path=os.environ["PATH"]))
@@ -290,7 +304,7 @@ def setup_environ():
         print("[build.py] PYTHON_INCLUDE: {python_include}"
               .format(python_include=os.environ["PYTHON_INCLUDE"]))
 
-        os.environ["CEF_CCFLAGS"] = "-std=gnu++11 -DNDEBUG -Wall -Werror -Wno-deprecated-declarations"
+        os.environ["CEF_CCFLAGS"] = "-std=gnu++20 -DNDEBUG -Wall -Werror -Wno-deprecated-declarations"
         if FAST_FLAG:
             os.environ["CEF_CCFLAGS"] += " -O0"
         else:
@@ -313,9 +327,12 @@ def setup_environ():
 
         if ARCH32:
             raise Exception("Python 32-bit is not supported on Mac")
-        os.environ["ARCHFLAGS"] = "-arch x86_64"
-        os.environ["CEF_CCFLAGS"] += " -arch x86_64"
-        os.environ["CEF_LINK_FLAGS"] += " -mmacosx-version-min=10.9"
+        os.environ["ARCHFLAGS"] = "-arch " + MACHINE_ARCH
+        os.environ["CEF_CCFLAGS"] += " -arch " + MACHINE_ARCH
+        minimum_macos_version = "12.0" if MACHINE_ARCH == "arm64" else "10.9"
+        os.environ["MACOSX_DEPLOYMENT_TARGET"] = minimum_macos_version
+        os.environ["CEF_CCFLAGS"] += " -mmacosx-version-min=" + minimum_macos_version
+        os.environ["CEF_LINK_FLAGS"] += " -mmacosx-version-min=" + minimum_macos_version
 
         # -Wno-return-type-c-linkage to ignore:
         # > warning: 'somefunc' has C-linkage specified, but returns
@@ -359,8 +376,7 @@ def fix_cefpython_api_header_file():
     # On Mac this warning must be disabled using -Wno-return-type-c-linkage
     # flag in makefiles.
 
-    print("[build.py] Fix cefpython API header file in the build_cefpython/"
-          " directory")
+    print("[build.py] Fix cefpython API header file in the object directory")
     if not os.path.exists(CEFPYTHON_API_HFILE):
         assert not os.path.exists(CEFPYTHON_API_HFILE_FIXED)
         print("[build.py] cefpython API header file was not yet generated")
@@ -369,18 +385,6 @@ def fix_cefpython_api_header_file():
     # Original contents
     with open(CEFPYTHON_API_HFILE, "rb") as fo:
         contents = fo.read().decode("utf-8")
-
-    # Pragma fix on Windows
-    if WINDOWS:
-        pragma = "#pragma warning(disable:4190)"
-        if pragma in contents:
-            print("[build.py] cefpython API header file is already fixed")
-        else:
-            contents = ("%s\n\n" % pragma) + contents
-            with open(CEFPYTHON_API_HFILE, "wb") as fo:
-                fo.write(contents.encode("utf-8"))
-            print("[build.py] Save {filename}"
-                  .format(filename=CEFPYTHON_API_HFILE))
 
     # Make a copy with a "_fixed" postfix
     if os.path.exists(CEFPYTHON_API_HFILE_FIXED):
@@ -400,7 +404,10 @@ def fix_cefpython_api_header_file():
 def compile_cpp_projects_with_setuptools():
     """Use setuptools to build static libraries / executable."""
     compile_cpp_projects = os.path.join(TOOLS_DIR, "build_cpp_projects.py")
-    retcode = subprocess.call([sys.executable, compile_cpp_projects])
+    command = [sys.executable, compile_cpp_projects]
+    if REBUILD_CPP:
+        command.append("--force")
+    retcode = subprocess.call(command)
     if retcode != 0:
         print("[build.py] ERROR: Failed to compile C++ projects")
         sys.exit(1)
@@ -568,6 +575,58 @@ def compile_cpp_projects_unix():
     if os.path.exists(subprocess_from):
         # shutil.copy() will also copy Permission bits
         shutil.copy(subprocess_from, subprocess_to)
+        if MAC:
+            helper_names = [
+                "cefpython3 Helper",
+                "cefpython3 Helper (GPU)",
+                "cefpython3 Helper (Renderer)",
+                "cefpython3 Helper (Plugin)",
+                "cefpython3 Helper (Alerts)",
+            ]
+            helper_identifiers = {
+                "cefpython3 Helper": "org.cefpython.cefpython3.helper",
+                "cefpython3 Helper (GPU)":
+                    "org.cefpython.cefpython3.helper.gpu",
+                "cefpython3 Helper (Renderer)":
+                    "org.cefpython.cefpython3.helper.renderer",
+                "cefpython3 Helper (Plugin)":
+                    "org.cefpython.cefpython3.helper.plugin",
+                "cefpython3 Helper (Alerts)":
+                    "org.cefpython.cefpython3.helper.alerts",
+            }
+            helper_plist_path = os.path.join(SUBPROCESS_DIR,
+                                             "helper-Info.plist")
+            with open(helper_plist_path, "rb") as plist_file:
+                helper_plist = plistlib.load(plist_file)
+
+            for helper_name in helper_names:
+                helper_bundle = os.path.join(
+                        CEFPYTHON_BINARY, helper_name + ".app")
+                if os.path.exists(helper_bundle):
+                    shutil.rmtree(helper_bundle)
+                helper_contents = os.path.join(helper_bundle, "Contents")
+                helper_macos = os.path.join(helper_contents, "MacOS")
+                os.makedirs(helper_macos)
+                helper_executable = os.path.join(helper_macos, helper_name)
+                shutil.copy(subprocess_from, helper_executable)
+                os.chmod(helper_executable, 0o755)
+
+                variant_plist = helper_plist.copy()
+                variant_plist["CFBundleDisplayName"] = helper_name
+                variant_plist["CFBundleExecutable"] = helper_name
+                variant_plist["CFBundleIdentifier"] = \
+                        helper_identifiers[helper_name]
+                variant_plist["CFBundleName"] = helper_name
+                with open(os.path.join(helper_contents, "Info.plist"),
+                          "wb") as plist_file:
+                    plistlib.dump(variant_plist, plist_file)
+                # Bind the generated Info.plist to the executable. This
+                # ad-hoc signature is sufficient for local development and
+                # can be replaced by a Developer ID signature when an app is
+                # packaged for distribution.
+                subprocess.check_call([
+                    "codesign", "--force", "--sign", "-", helper_bundle,
+                ])
 
     # -- CPP_UTILS
     print("[build.py] ~~ Build CPP_UTILS project")
@@ -588,7 +647,7 @@ def clear_cache():
     delete_files_by_pattern("./"+MODULE_NAME_TEMPLATE
                             .format(pyversion=PYVERSION, ext=MODULE_EXT))
 
-    # Cache in build_cefpython/ directory
+    # Cache in the native object directory
     os.chdir(BUILD_CEFPYTHON)
 
     delete_files_by_pattern("./"+MODULE_NAME_TEMPLATE
@@ -644,13 +703,13 @@ def copy_and_fix_pyx_files():
 
     # Remove old pyx files
     oldpyxfiles = glob.glob("./*.pyx")
-    print("[build.py] Clean pyx files in build_cefpython/")
+    print("[build.py] Clean pyx files in the object directory")
     for pyxfile in oldpyxfiles:
         if os.path.exists(pyxfile):
             os.remove(pyxfile)
 
     # Copying pyxfiles and reading its contents.
-    print("[build.py] Copy pyx files to build_cefpython/")
+    print("[build.py] Copy pyx files to the object directory")
 
     # Copy cefpython.pyx and fix includes in cefpython.pyx, eg.:
     # include "handlers/focus_handler.pyx" becomes include "focus_handler.pyx"
@@ -704,15 +763,18 @@ def generate_cefpython_module_variables():
     """Global variables that will be appended to cefpython.pyx sources."""
     ret = ('__version__ = "{0}"\n'.format(VERSION))
     version = get_cefpython_version()
+    hashes = get_cefpython_api_hash()
     chrome_version = "{0}.{1}.{2}.{3}".format(
             version["CHROME_VERSION_MAJOR"], version["CHROME_VERSION_MINOR"],
             version["CHROME_VERSION_BUILD"], version["CHROME_VERSION_PATCH"])
     ret += ('__chrome_version__ = "{0}"\n'.format(chrome_version))
     ret += ('__cef_version__ = "{0}"\n'.format(version["CEF_VERSION"]))
     ret += ('__cef_api_hash_platform__ = "{0}"\n'
-            .format(version["CEF_API_HASH_PLATFORM"]))
+            .format(hashes["CEF_API_HASH_PLATFORM"]))
     ret += ('__cef_api_hash_universal__ = "{0}"\n'
-            .format(version["CEF_API_HASH_UNIVERSAL"]))
+            .format(hashes["CEF_API_HASH_UNIVERSAL"]))
+    ret += ('__cef_api_version__ = {0}\n'
+            .format(hashes["CEF_API_VERSION"]))
     ret += ('__cef_commit_hash__ = "{0}"\n'
             .format(version["CEF_COMMIT_HASH"]))
     ret += ('__cef_commit_number__ = "{0}"\n'
@@ -726,23 +788,23 @@ def except_all_missing(content):
     patterns = list()
     patterns.append(
         r"\bcp?def\s+"
-        "((int|short|long|double|char|unsigned|float|double|cpp_bool"
-        "|cpp_string|cpp_wstring|uintptr_t|void"
-        "|int32|uint32|int64|uint64"
-        "|int32_t|uint32_t|int64_t|uint64_t"
-        "|CefString)\s+)+"
-        "\w+\([^)]*\)\s*(with\s+(gil|nogil))?\s*:")
+        r"((int|short|long|double|char|unsigned|float|double|cpp_bool"
+        r"|cpp_string|cpp_wstring|uintptr_t|void"
+        r"|int32|uint32|int64|uint64"
+        r"|int32_t|uint32_t|int64_t|uint64_t"
+        r"|CefString)\s+)+"
+        r"\w+\([^)]*\)\s*(with\s+(gil|nogil))?\s*:")
     patterns.append(
         r"\bcp?def\s+"
         # A template ends with bracket: CefRefPtr[CefBrowser]
         # or a pointer ends with asterisk: CefBrowser*
-        "[^\s]+[\]*]\s+"
-        "\w+\([^)]*\)\s*(with\s+(gil|nogil))?\s*:")
+        r"[^\s]+[\]*]\s+"
+        r"\w+\([^)]*\)\s*(with\s+(gil|nogil))?\s*:")
     patterns.append(
         r"\bcp?def\s+"
         # A reference, eg. CefString&
-        "[^\s]+&\s+"
-        "\w+\([^)]*\)\s*(with\s+(gil|nogil))?\s*:")
+        r"[^\s]+&\s+"
+        r"\w+\([^)]*\)\s*(with\s+(gil|nogil))?\s*:")
 
     match = None
     for pattern in patterns:
@@ -772,7 +834,7 @@ def build_cefpython_module():
     if ENABLE_LINE_TRACING:
         enable_line_tracing = "--enable-line-tracing"
 
-    command = ("\"{python}\" {tools_dir}/cython_setup.py build_ext"
+    command = ("\"{python}\" \"{tools_dir}/cython_setup.py\" build_ext"
                " {enable_profiling} {enable_line_tracing}"
                .format(python=sys.executable, tools_dir=TOOLS_DIR,
                        enable_profiling=enable_profiling,
@@ -790,7 +852,7 @@ def build_cefpython_module():
     # Remove .pyx files
     oldpyxfiles = glob.glob("./*.pyx")
     print("")
-    print("[build.py] Cleanup: remove pyx files in build_cefpython/")
+    print("[build.py] Cleanup: remove pyx files in the object directory")
     for pyxfile in oldpyxfiles:
         if os.path.exists(pyxfile):
             os.remove(pyxfile)
@@ -805,8 +867,9 @@ def build_cefpython_module():
                   " programmatically now.")
             args = list()
             args.append("\"{python}\"".format(python=sys.executable))
-            args.append(os.path.join(TOOLS_DIR, os.path.basename(__file__)))
-            assert __file__ in sys.argv[0]
+            args.append("\"{script}\"".format(
+                script=os.path.join(TOOLS_DIR, os.path.basename(__file__))))
+            assert os.path.basename(__file__) in sys.argv[0]
             args.extend(SYS_ARGV_ORIGINAL[1:])
             command = " ".join(args)
             print("[build.py] Running command: %s" % command)
@@ -877,11 +940,7 @@ def install_and_run():
     # Make setup installer
     print("[build.py] Make setup installer")
     make_tool = os.path.join(TOOLS_DIR, "make_installer.py")
-    command = ("\"{python}\" {make_tool} --version {version}"
-               .format(python=sys.executable,
-                       make_tool=make_tool,
-                       version=VERSION))
-    ret = os.system(command)
+    ret = subprocess.call([sys.executable, make_tool, "--version", VERSION])
     if ret != 0:
         print("[build.py] ERROR while making installer package")
         sys.exit(1)
@@ -889,10 +948,13 @@ def install_and_run():
     # Install
     print("[build.py] Install the cefpython package")
     os.chdir(setup_installer_dir)
-    command = ("\"{python}\" setup.py install"
-               .format(python=sys.executable))
-    command = sudo_command(command, python=sys.executable)
-    ret = os.system(command)
+    if WINDOWS:
+        ret = subprocess.call([sys.executable, "setup.py", "install"])
+    else:
+        command = ("\"{python}\" setup.py install"
+                   .format(python=sys.executable))
+        command = sudo_command(command, python=sys.executable)
+        ret = os.system(command)
     if ret != 0:
         print("[build.py] ERROR while installing package")
         sys.exit(1)
@@ -904,16 +966,13 @@ def install_and_run():
     # Run unittests
     print("[build.py] Run unittests")
     test_runner = os.path.join(UNITTESTS_DIR, "_test_runner.py")
-    command = ("\"{python}\" {test_runner}"
-               .format(python=sys.executable,
-                       test_runner=test_runner))
-    ret = os.system(command)
+    ret = subprocess.call([sys.executable, test_runner])
     if ret != 0:
         print("[build.py] ERROR while running unit tests")
         sys.exit(1)
 
     # Run examples
-    if not UNITTESTS:
+    if not NO_RUN_EXAMPLES:
         print("[build.py] Run examples")
         os.chdir(EXAMPLES_DIR)
         flags = ""
@@ -922,11 +981,10 @@ def install_and_run():
         if HELLO_WORLD_FLAG:
             flags += " --hello-world"
         run_examples = os.path.join(TOOLS_DIR, "run_examples.py")
-        command = ("\"{python}\" {run_examples} {flags}"
-                   .format(python=sys.executable,
-                           run_examples=run_examples,
-                           flags=flags))
-        ret = os.system(command)
+        command = [sys.executable, run_examples]
+        if flags:
+            command.append(flags.strip())
+        ret = subprocess.call(command)
         if ret != 0:
             print("[build.py] ERROR while running examples")
             sys.exit(1)

@@ -4,11 +4,9 @@
 
 """
 cefpython3 package setup.py file.
-
 Usage:
     setup.py install
     setup.py bdist_wheel [--universal]
-
 Options:
     install      Install package
     bdist_wheel  Generate wheel package. Use the --universal flag when
@@ -25,6 +23,10 @@ import os
 import platform
 import subprocess
 import sys
+
+if sys.platform == "win32":
+    import msilib
+
 import sysconfig
 
 # The setuptools package is not installed by default on a clean
@@ -75,11 +77,17 @@ cmdclass = {"install": custom_install}
 # Fix platform tag in wheel package
 if "bdist_wheel" in sys.argv:
     print("[setup.py] Overload bdist_wheel command to fix platform tag")
-    from wheel.bdist_wheel import bdist_wheel
+    from setuptools.command.bdist_wheel import bdist_wheel
 
     class custom_bdist_wheel(bdist_wheel):
+        def finalize_options(self):
+            bdist_wheel.finalize_options(self)
+            self.root_is_pure = False
+
         def get_tag(self):
-            tag = bdist_wheel.get_tag(self)
+            interpreter_tag = "cp{major}{minor}".format(
+                major=sys.version_info.major, minor=sys.version_info.minor
+            )
             platform_tag = sysconfig.get_platform()
             platform_tag = platform_tag.replace("-", "_")
             if platform.system() == "Linux":
@@ -89,11 +97,13 @@ if "bdist_wheel" in sys.argv:
             elif platform.system() == "Darwin":
                 # For explanation of Mac platform tags, see:
                 # http://lepture.com/en/2014/python-on-a-hard-wheel
-                platform_tag = ("macosx_10_6_intel"
-                                ".macosx_10_9_intel.macosx_10_9_x86_64"
-                                ".macosx_10_10_intel.macosx_10_10_x86_64")
-            tag = (tag[0], tag[1], platform_tag)
-            return tag
+                if platform.machine().lower() in ("arm64", "aarch64"):
+                    platform_tag = "macosx_12_0_arm64"
+                else:
+                    platform_tag = ("macosx_10_6_intel"
+                                    ".macosx_10_9_intel.macosx_10_9_x86_64"
+                                    ".macosx_10_10_intel.macosx_10_10_x86_64")
+            return interpreter_tag, interpreter_tag, platform_tag
 
     # Overwrite bdist_wheel command
     cmdclass["bdist_wheel"] = custom_bdist_wheel
@@ -127,7 +137,7 @@ def main():
                          " kind of internet bots.\n\n"
                          "Project website:\n"
                          "https://github.com/cztomczak/cefpython",
-        license="BSD 3-clause",
+        license="BSD-3-Clause",
         author="Czarek Tomczak",
         author_email="czarek.tomczak@gmail.com",
         url="https://github.com/cztomczak/cefpython",
@@ -138,7 +148,6 @@ def main():
         classifiers=[
             "Development Status :: 6 - Mature",
             "Intended Audience :: Developers",
-            "License :: OSI Approved :: BSD License",
             "Natural Language :: English",
             "Operating System :: MacOS :: MacOS X",
             "Operating System :: Microsoft :: Windows",
@@ -150,6 +159,11 @@ def main():
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
+            "Programming Language :: Python :: 3.14",
             "Topic :: Desktop Environment",
             "Topic :: Internet",
             "Topic :: Internet :: WWW/HTTP",
@@ -199,6 +213,23 @@ def get_executables():
     if platform.system() == "Windows":
         for key, executable in enumerate(data):
             data[key] += ".exe"
+    elif platform.system() == "Darwin":
+        frameworks_dir = os.path.join(
+            "cefpython3.app", "Contents", "Frameworks"
+        )
+        data.append(os.path.join(
+            "cefpython3.app", "Contents", "MacOS", "cefpython3"
+        ))
+        data.extend(
+            os.path.join(frameworks_dir, helper + ".app", "Contents", "MacOS", helper)
+            for helper in [
+                "cefpython3 Helper",
+                "cefpython3 Helper (GPU)",
+                "cefpython3 Helper (Renderer)",
+                "cefpython3 Helper (Plugin)",
+                "cefpython3 Helper (Alerts)",
+            ]
+        )
     return data
 
 
@@ -239,9 +270,9 @@ def post_install_hook():
         executable = os.path.join(installed_package_dir, executable)
         if not os.path.exists(executable):
             continue
-        command = "chmod +x {executable}".format(executable=executable)
-        print("[setup.py] {command}".format(command=command))
-        subprocess.call(command, shell=True)
+        print("[setup.py] chmod +x {executable}".format(
+                executable=executable))
+        os.chmod(executable, os.stat(executable).st_mode | 0o111)
 
     # Set write permissions on log files
     print("[setup.py] Set write permissions on log files")
@@ -250,9 +281,8 @@ def post_install_hook():
         if not pkgfile.endswith(".log"):
             continue
         logfile = os.path.join(installed_package_dir, pkgfile)
-        command = "chmod 666 {logfile}".format(logfile=logfile)
-        print("[setup.py] {command}".format(command=command))
-        subprocess.call(command, shell=True)
+        print("[setup.py] chmod 666 {logfile}".format(logfile=logfile))
+        os.chmod(logfile, 0o666)
 
 
 if __name__ == "__main__":

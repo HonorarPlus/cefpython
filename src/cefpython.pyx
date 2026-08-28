@@ -137,12 +137,25 @@ import struct
 # noinspection PyUnresolvedReferences
 import base64
 
-
-# noinspection PyUnresolvedReferences
-from urllib import parse as urlparse
-from urllib.parse import quote as urlparse_quote
-# noinspection PyUnresolvedReferences
-from urllib.parse import urlencode as urllib_urlencode
+# Must use compile-time condition instead of checking sys.version_info.major
+# otherwise results in "ImportError: cannot import name urlencode" strange
+# error in Python 3.6.
+IF PY_MAJOR_VERSION == 2:
+    # noinspection PyUnresolvedReferences
+    import urlparse
+    # noinspection PyUnresolvedReferences
+    from urllib import pathname2url as urllib_pathname2url
+    # noinspection PyUnresolvedReferences
+    from urllib import urlencode as urllib_urlencode
+    from urllib import quote as urlparse_quote
+ELSE:
+    # noinspection PyUnresolvedReferences
+    from urllib import parse as urlparse
+    from urllib.parse import quote as urlparse_quote
+    # noinspection PyUnresolvedReferences
+    from urllib.request import pathname2url as urllib_pathname2url
+    # noinspection PyUnresolvedReferences
+    from urllib.parse import urlencode as urllib_urlencode
 
 # noinspection PyUnresolvedReferences
 from cpython.version cimport PY_MAJOR_VERSION
@@ -181,6 +194,13 @@ from libcpp.pair cimport pair as cpp_pair
 from libcpp.vector cimport vector as cpp_vector
 # noinspection PyUnresolvedReferences
 from libcpp.string cimport string as cpp_string
+
+# noinspection PyUnresolvedReferences
+from libcpp.memory cimport unique_ptr as cpp_unique_ptr
+
+# noinspection PyUnresolvedReferences
+from libcpp cimport nullptr
+
 # noinspection PyUnresolvedReferences
 from wstring cimport wstring as cpp_wstring
 # noinspection PyUnresolvedReferences
@@ -206,9 +226,17 @@ from libc.stdlib cimport atoi
 # "from ... cimport *", this is important to know in pxd files.
 
 # noinspection PyUnresolvedReferences
-from libc.stdint cimport uint64_t
+from libc.stdint cimport int64_t, uint32_t, uint64_t
 # noinspection PyUnresolvedReferences
 from libc.stdint cimport uintptr_t
+
+cdef extern from *:
+    """
+    #include <cstdint>
+    using int64 = int64_t;
+    using uint32 = uint32_t;
+    using char16 = char16_t;
+    """
 
 # noinspection PyUnresolvedReferences
 ctypedef uintptr_t WindowHandle
@@ -248,9 +276,6 @@ from cef_types cimport (
 # noinspection PyUnresolvedReferences
 from cef_ptr cimport CefRefPtr
 
-# noinspection PyUnresolvedReferences
-from cef_scoped_ptr cimport scoped_ptr
-
 from cef_task cimport *
 from cef_platform cimport *
 from cef_app cimport *
@@ -264,7 +289,6 @@ from cef_time cimport *
 from cef_values cimport *
 from cefpython_app cimport *
 from cef_process_message cimport *
-from cef_web_plugin cimport *
 from cef_request_handler cimport *
 from cef_request cimport *
 from cef_cookie cimport *
@@ -277,7 +301,6 @@ from cef_callback cimport *
 from cef_response cimport *
 from cef_resource_handler cimport *
 from resource_handler cimport *
-from print_callback cimport *
 from cef_urlrequest cimport *
 from web_request_client cimport *
 from cef_command_line cimport *
@@ -285,6 +308,7 @@ from cef_request_context cimport *
 from cef_request_context_handler cimport *
 from request_context_handler cimport *
 from cef_jsdialog_handler cimport *
+from cef_permission_handler cimport *
 from cef_path_util cimport *
 from cef_drag_data cimport *
 from cef_image cimport *
@@ -293,6 +317,9 @@ from main_message_loop cimport *
 from cef_views cimport *
 from cef_log cimport *
 from cef_file_util cimport *
+from print_callback cimport *
+from cef_download_handler cimport *
+from cef_download_item cimport *
 
 # -----------------------------------------------------------------------------
 # GLOBAL VARIABLES
@@ -313,7 +340,7 @@ g_browser_settings = {}
 # noinspection PyUnresolvedReferences
 cdef CefRefPtr[CefRequestContext] g_shared_request_context
 
-cdef scoped_ptr[MainMessageLoopExternalPump] g_external_message_pump
+cdef unique_ptr[MainMessageLoopExternalPump] g_external_message_pump
 
 cdef py_bool g_MessageLoop_called = False
 cdef py_bool g_MessageLoopWork_called = False
@@ -350,13 +377,11 @@ include "window_info.pyx"
 include "process_message_utils.pyx"
 include "javascript_callback.pyx"
 include "python_callback.pyx"
-include "web_plugin_info.pyx"
 include "request.pyx"
 include "cookie.pyx"
 include "string_visitor.pyx"
 include "network_error.pyx"
 include "paint_buffer.pyx"
-include "pdf_print_handler.pyx"
 include "callback.pyx"
 include "response.pyx"
 include "web_request.pyx"
@@ -365,13 +390,17 @@ include "app.pyx"
 include "drag_data.pyx"
 include "helpers.pyx"
 include "image.pyx"
+include "pdf_print_handler.pyx"
+include "download_item.pyx"
 
 # Handlers
 include "handlers/accessibility_handler.pyx"
 include "handlers/browser_process_handler.pyx"
 include "handlers/display_handler.pyx"
+include "handlers/download_handler.pyx"
 include "handlers/focus_handler.pyx"
 include "handlers/javascript_dialog_handler.pyx"
+include "handlers/permission_handler.pyx"
 include "handlers/keyboard_handler.pyx"
 include "handlers/lifespan_handler.pyx"
 include "handlers/load_handler.pyx"
@@ -429,6 +458,11 @@ cdef public int CommandLineSwitches_GetInt(const char* key) except * with gil:
         return int(g_commandLineSwitches[pyKey])
     return 0
 
+
+def GetCommandLineSwitch(key):
+    """Return a configured Chromium command-line switch, or None."""
+    return g_commandLineSwitches.get(key)
+
 # -----------------------------------------------------------------------------
 
 # If you've built custom binaries with tcmalloc hook enabled on
@@ -460,6 +494,13 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         for key in command_line_switches:
             g_commandLineSwitches[key] = copy.deepcopy(
                     command_line_switches[key])
+    # Chromium 138+ no longer enables automatic SwiftShader fallback by
+    # default. Allow it without forcing software rendering, so Chromium still
+    # prefers an available hardware GPU. Respect the established Chromium
+    # switch for applications that explicitly disable software rasterization.
+    if "disable-software-rasterizer" not in g_commandLineSwitches and \
+            "enable-unsafe-swiftshader" not in g_commandLineSwitches:
+        g_commandLineSwitches["enable-unsafe-swiftshader"] = ""
     # Use g_commandLineSwitches if you need to modify or access
     # command line switches inside this function.
     del command_line_switches
@@ -470,14 +511,81 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         cdef str py_module_dir = GetModuleDirectory()
         cdef CefString cef_module_dir
         PyToCefString(py_module_dir, cef_module_dir)
-        CefOverridePath(PK_DIR_EXE, cef_module_dir)\
-                or Debug("ERROR: CefOverridePath failed")
-        CefOverridePath(PK_DIR_MODULE, cef_module_dir)\
-                or Debug("ERROR: CefOverridePath failed")
+
     # END IF UNAME_SYSNAME == "Linux":
 
     if not application_settings:
         application_settings = {}
+
+    cdef str module_dir = GetModuleDirectory()
+    cdef str mac_frameworks_dir = ""
+    cdef str mac_main_bundle_dir = ""
+    cdef str configured_frameworks_dir = ""
+    cdef str configured_contents_dir = ""
+    cdef str configured_bundle_dir = ""
+    cdef bint mac_sandbox_supported = False
+
+    # CEF 150 uses the bootstrap loader on macOS. Load its function table
+    # before creating CefString values or invoking any other CEF API.
+    IF UNAME_SYSNAME == "Darwin":
+        mac_main_bundle_dir = os.path.join(module_dir, "cefpython3.app")
+        mac_frameworks_dir = os.path.join(
+                mac_main_bundle_dir, "Contents", "Frameworks")
+
+        # Chromium's macOS sandbox requires the browser executable, CEF
+        # framework and helper apps to share one real top-level app bundle.
+        # An ordinary Python interpreter cannot gain that relationship by
+        # pointing at a synthetic bundle, so use the sandbox only for a
+        # correctly packaged/frozen application.
+        cdef str executable_macos_dir = os.path.dirname(
+                os.path.abspath(sys.executable))
+        cdef str executable_contents_dir = os.path.dirname(
+                executable_macos_dir)
+        cdef str executable_bundle_dir = os.path.dirname(
+                executable_contents_dir)
+        cdef str executable_frameworks_dir = os.path.join(
+                executable_contents_dir, "Frameworks")
+        if os.path.basename(executable_macos_dir) == "MacOS" and \
+           os.path.basename(executable_contents_dir) == "Contents" and \
+           executable_bundle_dir.endswith(".app") and \
+           os.path.isdir(os.path.join(
+                   executable_frameworks_dir,
+                   "Chromium Embedded Framework.framework")) and \
+           os.path.isdir(os.path.join(
+                   executable_frameworks_dir,
+                   "cefpython3 Helper.app")):
+            mac_main_bundle_dir = executable_bundle_dir
+            mac_frameworks_dir = executable_frameworks_dir
+            mac_sandbox_supported = True
+
+        cdef str cef_framework_dir = application_settings.get(
+                "framework_dir_path",
+                os.path.join(mac_frameworks_dir,
+                             "Chromium Embedded Framework.framework"))
+        if not mac_sandbox_supported:
+            # Frozen Python launchers can report their executable directory as
+            # the module directory even when cefpython3 is stored elsewhere.
+            # Derive the synthetic main bundle from an explicitly configured
+            # framework bundle instead of constructing a nonexistent sibling
+            # of the launcher.
+            configured_frameworks_dir = os.path.dirname(
+                    cef_framework_dir)
+            configured_contents_dir = os.path.dirname(
+                    configured_frameworks_dir)
+            configured_bundle_dir = os.path.dirname(
+                    configured_contents_dir)
+            if os.path.basename(configured_frameworks_dir) == "Frameworks" \
+                    and os.path.basename(configured_contents_dir) == \
+                    "Contents" \
+                    and configured_bundle_dir.endswith(".app") \
+                    and os.path.isdir(configured_bundle_dir):
+                mac_main_bundle_dir = configured_bundle_dir
+                mac_frameworks_dir = configured_frameworks_dir
+        cdef bytes cef_framework_binary = os.fsencode(os.path.join(
+                cef_framework_dir, "Chromium Embedded Framework"))
+        if not cef_load_library(cef_framework_binary):
+            raise RuntimeError("Failed to load the CEF framework: "
+                               + os.fsdecode(cef_framework_binary))
 
     # Debug settings need to be set before Debug() is called
     # and before the CefPythonApp class is instantiated.
@@ -486,7 +594,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         application_settings["debug"] = True
         application_settings["log_file"] = os.path.join(os.getcwd(),
                                                         "debug.log")
-        application_settings["log_severity"] = LOGSEVERITY_INFO
+        application_settings["log_severity"] = LOGSEVERITY_VERBOSE
         sys.argv.remove("--debug")
     if "debug" in application_settings:
         g_debug = bool(application_settings["debug"])
@@ -521,15 +629,34 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     if "app_user_model_id" in application_settings:
         g_commandLineSwitches["app-user-model-id"] =\
                 application_settings["app_user_model_id"]
+    if "chrome_runtime" in application_settings:
+        application_settings["chrome_runtime"] = bool(application_settings["chrome_runtime"])
+    IF UNAME_SYSNAME == "Darwin":
+        if "macos_use_system_keychain" not in application_settings:
+            application_settings["macos_use_system_keychain"] = False
+        else:
+            application_settings["macos_use_system_keychain"] = bool(
+                    application_settings["macos_use_system_keychain"])
+        if not application_settings["macos_use_system_keychain"]:
+            # Local applications should not trigger Chromium Safe Storage
+            # prompts unless they explicitly opt into Keychain-backed profile
+            # encryption. An explicitly supplied switch is preserved.
+            if "use-mock-keychain" not in g_commandLineSwitches:
+                g_commandLineSwitches["use-mock-keychain"] = ""
 
     # ------------------------------------------------------------------------
     # Paths
     # ------------------------------------------------------------------------
-    cdef str module_dir = GetModuleDirectory()
     if platform.system() == "Darwin":
         if  "framework_dir_path" not in application_settings:
             application_settings["framework_dir_path"] = os.path.join(
-                    module_dir, "Chromium Embedded Framework.framework")
+                    mac_frameworks_dir,
+                    "Chromium Embedded Framework.framework")
+        if "main_bundle_path" not in application_settings:
+            # Python is commonly launched outside of an application bundle.
+            # Give CEF a stable bundle identity so that the browser and its
+            # sandboxed helper processes use the same Mach rendezvous name.
+            application_settings["main_bundle_path"] = mac_main_bundle_dir
     if "locales_dir_path" not in application_settings:
         if platform.system() != "Darwin":
             application_settings["locales_dir_path"] = os.path.join(
@@ -542,8 +669,14 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
                     application_settings["framework_dir_path"],
                     "Resources")
     if "browser_subprocess_path" not in application_settings:
-        application_settings["browser_subprocess_path"] = os.path.join(
-                module_dir, "subprocess")
+        if platform.system() == "Darwin":
+            application_settings["browser_subprocess_path"] = os.path.join(
+                    mac_frameworks_dir, "cefpython3 Helper.app",
+                    "Contents", "MacOS",
+                    "cefpython3 Helper")
+        else:
+            application_settings["browser_subprocess_path"] = os.path.join(
+                    module_dir, "subprocess")
 
     # ------------------------------------------------------------------------
     # Mouse context menu
@@ -581,7 +714,12 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # ------------------------------------------------------------------------
     if not "cache_path" in application_settings:
         application_settings["cache_path"] = ""
-    if not application_settings["cache_path"]:
+    if not "root_cache_path" in application_settings:
+        application_settings["root_cache_path"] = ""
+    if application_settings["cache_path"] and not application_settings["root_cache_path"]:
+        application_settings["root_cache_path"] = application_settings["cache_path"]
+    if not application_settings["cache_path"] and \
+       not application_settings["root_cache_path"]:
         g_commandLineSwitches["disable-gpu-shader-disk-cache"] = ""
 
 
@@ -608,18 +746,20 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         g_applicationSettings[key] = copy.deepcopy(application_settings[key])
 
     cdef CefSettings cefApplicationSettings
-    # No sandboxing for the subprocesses
-    cefApplicationSettings.no_sandbox = 1
+    # macOS helper app bundles initialize CEF's subprocess sandbox. Preserve
+    # the historical default on other platforms until their bootstrap paths
+    # opt into sandbox support independently.
+    IF UNAME_SYSNAME == "Darwin":
+        cefApplicationSettings.no_sandbox = not mac_sandbox_supported
+    ELSE:
+        cefApplicationSettings.no_sandbox = 1
     SetApplicationSettings(application_settings, &cefApplicationSettings)
 
     # External message pump
     if GetAppSetting("external_message_pump")\
             and not g_external_message_pump.get():
         Debug("Create external message pump")
-        # Using .reset() here to assign new instance was causing
-        # MainMessageLoopExternalPump destructor to be called. Strange.
-        g_external_message_pump.Assign(
-                MainMessageLoopExternalPump.Create())
+        g_external_message_pump.reset(MainMessageLoopExternalPump.Create().release())
 
     Debug("CefInitialize()")
     cdef cpp_bool ret
@@ -726,16 +866,23 @@ def CreateBrowserSync(windowInfo=None,
     cdef CefWindowInfo cefWindowInfo
     SetCefWindowInfo(cefWindowInfo, windowInfo)
 
+    navigateUrl = GetNavigateUrl(navigateUrl)
+    Debug("navigateUrl: %s" % navigateUrl)
     cdef CefString cefNavigateUrl
     PyToCefString(navigateUrl, cefNavigateUrl)
 
     Debug("CefBrowser::CreateBrowserSync()")
+    cdef cpp_bool cefpythonOwnedTopLevelWindow = bool(
+            windowInfo.parentWindowHandle == 0
+            and windowInfo.windowType == "child")
     cdef CefRefPtr[ClientHandler] clientHandler =\
-            <CefRefPtr[ClientHandler]?>new ClientHandler()
+            <CefRefPtr[ClientHandler]?>new ClientHandler(
+                    cefpythonOwnedTopLevelWindow)
     cdef CefRefPtr[CefBrowser] cefBrowser
 
     # Request context - part 1/2.
     createSharedRequestContext = bool(not g_shared_request_context.get())
+    cdef CefRefPtr[CefDictionaryValue] extraInfo
     cdef CefRefPtr[CefRequestContext] cefRequestContext
     cdef CefRefPtr[RequestContextHandler] requestContextHandler =\
             <CefRefPtr[RequestContextHandler]?>new RequestContextHandler(
@@ -757,9 +904,9 @@ def CreateBrowserSync(windowInfo=None,
         cefBrowser = cef_browser_static.CreateBrowserSync(
                 cefWindowInfo, <CefRefPtr[CefClient]?>clientHandler,
                 cefNavigateUrl, cefBrowserSettings,
-                cefRequestContext)
+                extraInfo, cefRequestContext)
 
-    if <void*>cefBrowser == NULL or not cefBrowser.get():
+    if not cefBrowser.get():
         Debug("CefBrowser::CreateBrowserSync() failed")
         return None
     else:
@@ -952,9 +1099,12 @@ def Shutdown():
         MacShutdown()
 
 def SetOsModalLoop(py_bool modalLoop):
-    cdef cpp_bool cefModalLoop = bool(modalLoop)
-    with nogil:
-        CefSetOSModalLoop(cefModalLoop)
+    IF UNAME_SYSNAME == "Windows":
+        cdef cpp_bool cefModalLoop = bool(modalLoop)
+        with nogil:
+            CefSetOSModalLoop(cefModalLoop)
+    ELSE:
+        raise NotImplementedError("SetOsModalLoop is only supported on Windows")
 
 cpdef py_void SetGlobalClientCallback(py_string name, object callback):
     global g_globalClientCallbacks
@@ -962,7 +1112,7 @@ cpdef py_void SetGlobalClientCallback(py_string name, object callback):
     # Accept both with and without a prefix.
     if name.startswith("_"):
         name = name[1:]
-    if name in ["OnCertificateError", "OnBeforePluginLoad", "OnAfterCreated",
+    if name in ["OnCertificateError", "OnAfterCreated",
                 "OnAccessibilityTreeChange", "OnAccessibilityLocationChange"]:
         g_globalClientCallbacks[name] = callback
     else:
@@ -984,17 +1134,38 @@ cpdef py_void SetGlobalClientHandler(object clientHandler):
         if key and key[0:2] != '__':
             SetGlobalClientCallback(key, method)
 
-cpdef object GetGlobalClientCallback(py_string name):
-    global g_globalClientCallbacks
-    if name in g_globalClientCallbacks:
-        return g_globalClientCallbacks[name]
+cpdef object GetGlobalClientCallback(object cname):
+    cdef bytes name_bytes
+    cdef str name_str
+    if isinstance(cname, bytes):
+        name_bytes = cname
+        name_str = name_bytes.decode("utf-8", "replace")
     else:
-        return None
+        name_str = str(cname)
+        name_bytes = name_str.encode("utf-8", "replace")
 
-cpdef object GetAppSetting(py_string key):
+    global g_globalClientCallbacks
+    if name_str in g_globalClientCallbacks:
+        return g_globalClientCallbacks[name_str]
+    if name_bytes in g_globalClientCallbacks:
+        return g_globalClientCallbacks[name_bytes]
+    return None
+
+cpdef object GetAppSetting(object skey):
+    cdef bytes key_bytes
+    cdef str key_str
+    if isinstance(skey, bytes):
+        key_bytes = skey
+        key_str = key_bytes.decode("utf-8", "replace")
+    else:
+        key_str = str(skey)
+        key_bytes = key_str.encode("utf-8", "replace")
+
     global g_applicationSettings
-    if key in g_applicationSettings:
-        return g_applicationSettings[key]
+    if key_str in g_applicationSettings:
+        return g_applicationSettings[key_str]
+    if key_bytes in g_applicationSettings:
+        return g_applicationSettings[key_bytes]
     return None
 
 cpdef dict GetVersion():
@@ -1006,6 +1177,7 @@ cpdef dict GetVersion():
         cef_version=__cef_version__,
         cef_api_hash_platform=__cef_api_hash_platform__,
         cef_api_hash_universal=__cef_api_hash_universal__,
+        cef_api_version=__cef_api_version__,
         cef_commit_hash=__cef_commit_hash__,
         cef_commit_number=__cef_commit_number__,
     )

@@ -49,10 +49,10 @@ if MAC:
     g_generate_extern_c_macro_definition_old = (
             ModuleNode.generate_extern_c_macro_definition)
 
-    def generate_extern_c_macro_definition(self, code):
+    def generate_extern_c_macro_definition(self, code, is_cpp):
         # This code is written by Cython to both cefpython API header file
         # and cefpython module cpp file.
-        g_generate_extern_c_macro_definition_old(self, code)
+        g_generate_extern_c_macro_definition_old(self, code, is_cpp)
         code.putln("// Added by: cefpython/tools/cython_setup.py")
         code.putln("#undef PyMODINIT_FUNC")
 
@@ -151,7 +151,10 @@ def get_winsdk_lib():
             ]
         elif ARCH64:
             winsdk_libs = [
+                r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.20348.0\x64",
+                r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.17134.0\x64",
                 r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64",
+                r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib\\x64",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib\\x64",
                 # Visual Studio 2008 installation
@@ -200,7 +203,9 @@ def set_compiler_options(options):
         #
         # The above warning LNK4217 is caused by the warning below which occurs
         # when building the client_handler.lib static library:
-        extra_compile_args.extend(["/EHsc", "/wd4305"])
+        extra_compile_args.extend([
+            "/EHsc", "/std:c++20", "/DCEF_API_VERSION=15101", "/DNOMINMAX", "/wd4305"
+        ])
         extra_link_args.extend(["/ignore:4217"])
 
     if LINUX or MAC:
@@ -212,13 +217,14 @@ def set_compiler_options(options):
 
         extra_compile_args.extend([
                 "-DNDEBUG",
-                "-std=gnu++11",
+                "-std=gnu++20",
+                "-DCEF_API_VERSION=15101",
         ])
 
     if LINUX:
         os.environ["CC"] = "g++"
         os.environ["CXX"] = "g++"
-        extra_compile_args.extend(["-std=gnu++11"])
+        extra_compile_args.extend(["-std=gnu++20"])
 
         # Fix "ImportError ... undefined symbol ..." caused by CEF's
         # include/base/ headers by adding the -flto flag (Issue #230).
@@ -277,11 +283,9 @@ def set_compiler_options(options):
 
         # LINKER ARGS
         extra_link_args.extend([
-                "-mmacosx-version-min=10.9",
+                "-mmacosx-version-min=12.0",
                 "-Wl,-search_paths_first",
-                "-F"+os.path.join(CEF_BINARIES_LIBRARIES, "bin"),
-                "-framework", "Chromium Embedded Framework",
-                "-Wl,-rpath,@loader_path/",  # ending slash is crucial!
+                "-framework", "AppKit",
         ])
         if not FAST_FLAG:
             extra_link_args.extend([
@@ -431,10 +435,12 @@ def get_ext_modules(options):
         # > Unknown Extension options: 'cython_directives' warnings.warn(msg)
         cython_directives={
             # Any conversion to unicode must be explicit using .decode().
+            "language_level": 2,
             "c_string_type": "bytes",
             "c_string_encoding": "utf-8",
             "profile": ENABLE_PROFILING,
             "linetrace": ENABLE_LINE_TRACING,
+            "show_performance_hints": False,
         },
 
         language="c++",

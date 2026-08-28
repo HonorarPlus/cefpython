@@ -141,16 +141,15 @@ bool ClientDialogHandlerGtk::OnFileDialog(
     const CefString& title,
     const CefString& default_file_path,
     const std::vector<CefString>& accept_filters,
-    int selected_accept_filter,
+    const std::vector<CefString>& accept_extensions,
+    const std::vector<CefString>& accept_descriptions,
     CefRefPtr<CefFileDialogCallback> callback) {
   std::vector<CefString> files;
 
   GtkFileChooserAction action;
   const gchar* accept_button;
 
-  // Remove any modifier flags.
-  FileDialogMode mode_type =
-      static_cast<FileDialogMode>(mode & FILE_DIALOG_TYPE_MASK);
+  FileDialogMode mode_type = mode;
 
   if (mode_type == FILE_DIALOG_OPEN || mode_type == FILE_DIALOG_OPEN_MULTIPLE) {
     action = GTK_FILE_CHOOSER_ACTION_OPEN;
@@ -201,11 +200,8 @@ bool ClientDialogHandlerGtk::OnFileDialog(
 
   if (mode_type == FILE_DIALOG_SAVE) {
     gtk_file_chooser_set_do_overwrite_confirmation(
-        GTK_FILE_CHOOSER(dialog), !!(mode & FILE_DIALOG_OVERWRITEPROMPT_FLAG));
+        GTK_FILE_CHOOSER(dialog), TRUE);
   }
-
-  gtk_file_chooser_set_show_hidden(GTK_FILE_CHOOSER(dialog),
-                                   !(mode & FILE_DIALOG_HIDEREADONLY_FLAG));
 
   if (!default_file_path.empty() && mode_type == FILE_DIALOG_SAVE) {
     const std::string& file_path = default_file_path;
@@ -228,9 +224,8 @@ bool ClientDialogHandlerGtk::OnFileDialog(
 
   std::vector<GtkFileFilter*> filters;
   AddFilters(GTK_FILE_CHOOSER(dialog), accept_filters, true, &filters);
-  if (selected_accept_filter < static_cast<int>(filters.size())) {
-    gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dialog),
-                                filters[selected_accept_filter]);
+  if (!filters.empty()) {
+    gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dialog), filters.front());
   }
 
   bool success = false;
@@ -257,24 +252,10 @@ bool ClientDialogHandlerGtk::OnFileDialog(
     }
   }
 
-  int filter_index = selected_accept_filter;
-  if (success) {
-    GtkFileFilter* selected_filter =
-        gtk_file_chooser_get_filter(GTK_FILE_CHOOSER(dialog));
-    if (selected_filter != NULL) {
-      for (size_t x = 0; x < filters.size(); ++x) {
-        if (filters[x] == selected_filter) {
-          filter_index = x;
-          break;
-        }
-      }
-    }
-  }
-
   gtk_widget_destroy(dialog);
 
   if (success)
-    callback->Continue(filter_index, files);
+    callback->Continue(files);
   else
     callback->Cancel();
 
@@ -312,6 +293,8 @@ bool ClientDialogHandlerGtk::OnJSDialog(CefRefPtr<CefBrowser> browser,
       gtk_message_type = GTK_MESSAGE_QUESTION;
       title = "Prompt";
       break;
+    case JSDIALOGTYPE_NUM_VALUES:
+      return false;
   }
 
   js_dialog_callback_ = callback;
@@ -379,7 +362,7 @@ void ClientDialogHandlerGtk::OnResetDialogState(CefRefPtr<CefBrowser> browser) {
     return;
   gtk_widget_destroy(gtk_dialog_);
   gtk_dialog_ = NULL;
-  js_dialog_callback_ = NULL;
+  js_dialog_callback_ = nullptr;
 }
 
 // static
@@ -401,5 +384,5 @@ void ClientDialogHandlerGtk::OnDialogResponse(GtkDialog* dialog,
       NOTREACHED();
   }
 
-  handler->OnResetDialogState(NULL);
+  handler->OnResetDialogState(nullptr);
 }

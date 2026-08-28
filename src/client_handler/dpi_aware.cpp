@@ -10,6 +10,7 @@
 #include "dpi_aware.h"
 #include "include/wrapper/cef_closure_task.h"
 #include "include/base/cef_bind.h"
+#include "include/base/cef_callback.h"
 #include "include/base/cef_logging.h"
 
 const int DEFAULT_DPIX = 96;
@@ -63,67 +64,7 @@ PROCESS_DPI_AWARENESS GetProcessDpiAwareness() {
 }
 
 void SetProcessDpiAware() {
-    // Win8.1 supports monitor-specific DPI scaling, so it is
-    // recommended to use SetProcessDPIAwareness instead of the
-    // deprecated SetProcessDPIAware. SetProcessDpiAwareness is
-    // only available on Win8. So as a back-up plan SetProcessDPIAware
-    // is called.
-
-    // If DPI aware manifest was embedded in executable, or
-    // "Disable display scaling on high DPI settings" was checked
-    // on the executable properties (Compatibility tab), then
-    // DPI awareness is already set.
-    /*
-        What if GetProcessDpiAwareness returned
-        PROCESS_PER_MONITOR_DPI_AWARE? The code below sets awareness
-        to PROCESS_SYSTEM_DPI_AWARE, so it should be called either way.
-        --OFF:
-        if (IsProcessDpiAware()) {
-            return;
-        }
-    */
-
-    typedef BOOL(WINAPI *SetProcessDpiAwarenessPtr)(PROCESS_DPI_AWARENESS);
-    SetProcessDpiAwarenessPtr set_process_dpi_awareness_func =
-            reinterpret_cast<SetProcessDpiAwarenessPtr>(
-                GetProcAddress(GetModuleHandleA("user32.dll"),
-                    "SetProcessDpiAwarenessInternal"));
-    if (set_process_dpi_awareness_func) {
-        LOG(INFO) << "[Browser process] SetProcessDpiAware():"
-                     " calling user32.dll SetProcessDpiAwareness";
-        HRESULT hr = set_process_dpi_awareness_func(PROCESS_SYSTEM_DPI_AWARE);
-        if (SUCCEEDED(hr)) {
-            LOG(INFO) << "[Browser process]: SetBrowserDpiAware():"
-                         " SetProcessDpiAwareness succeeded";
-            return;
-        } else if (hr == E_ACCESSDENIED) {
-            LOG(ERROR) << "[Browser process] SetBrowserDpiAware():"
-                          " SetProcessDpiAwareness failed:"
-                          " The DPI awareness is already set, either by calling"
-                          " this API previously or through the application"
-                          " (.exe) manifest.";
-            // Do not return here, let's try to call SetProcessDPIAware.
-        } else {
-            LOG(ERROR) << "[Browser process] SetBrowserDpiAware():"
-                          " SetProcessDpiAwareness failed";
-            // Do not return here, let's try to call SetProcessDPIAware.
-        }
-    }
-
-    // SetProcessDpiAwareness not found in user32.dll or the call failed.
-    typedef BOOL(WINAPI *SetProcessDPIAwarePtr)(VOID);
-    SetProcessDPIAwarePtr set_process_dpi_aware_func =
-            reinterpret_cast<SetProcessDPIAwarePtr>(
-                GetProcAddress(GetModuleHandleA("user32.dll"),
-                    "SetProcessDPIAware"));
-    if (set_process_dpi_aware_func) {
-        // If cefpython.Initialize() wasn't yet called, then
-        // this log message won't be written, as g_debug is
-        // is set during CEF initialization.
-        LOG(INFO) << "[Browser process] SetProcessDpiAware():"
-                     " calling user32.dll SetProcessDPIAware";
-        set_process_dpi_aware_func();
-    }
+    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 }
 
 void GetSystemDpi(int* dpix, int* dpiy) {
@@ -218,10 +159,7 @@ void SetBrowserDpiSettings(CefRefPtr<CefBrowser> cefBrowser,
     // be set again.
     CefPostDelayedTask(
             TID_UI,
-            CefCreateClosureTask(
-                    base::Bind(&SetBrowserDpiSettings,
-                               cefBrowser, autoZooming)
-            ),
+            CefCreateClosureTask(base::BindOnce(&SetBrowserDpiSettings, cefBrowser, autoZooming)),
             50
     );
 }

@@ -4,8 +4,7 @@
 
 """Called by build.py internally. Builds C++ projects using
 distutils/setuptools compilers. This tool is executed by build.py
-on Windows only currently. Output directories are in
-build/build_cefpython/.
+on Windows only currently. Output directories are in build/o/.
 
 Usage:
     build_cpp_projects.py [--force]
@@ -26,12 +25,14 @@ from pprint import pprint
 # Macros
 MACROS = [
     "WIN32", "_WIN32", "_WINDOWS",
-    # Windows 7+ minimum supported
-    ("NTDDI_VERSION", "0x06010000"),
-    ("WINVER", "0x0601"),
-    ("_WIN32_WINNT", "0x0601"),
+    # CEF 150 requires Windows 10 or newer.
+    ("NTDDI_VERSION", "0x0A000000"),
+    ("WINVER", "0x0A00"),
+    ("_WIN32_WINNT", "0x0A00"),
+    ("CEF_API_VERSION", "15101"),
     "NDEBUG", "_NDEBUG",
     "_CRT_SECURE_NO_WARNINGS",
+    "NOMINMAX",
 ]
 cefpython_app_MACROS = MACROS + [
     "BROWSER_PROCESS",
@@ -47,8 +48,11 @@ subprocess_MACROS = MACROS + [
 # Compiler args
 COMPILER_ARGS = [
     "/EHsc",
+    "/std:c++20",
 ]
 subprocess_COMPILER_ARGS = [
+    "/EHsc",
+    "/std:c++20",
     "/MT",
 ]
 
@@ -115,8 +119,8 @@ def get_compiler(static=False):
     compiler.initialize()
     if static:
         compiler.compile_options.remove("/MD")
-        # Overwrite function that adds /MANIFESTFILE, as for subprocess
-        # manifest is disabled. Otherwise warning LNK4075 is generated.
+        # The subprocess supplies Chromium's Windows compatibility manifest
+        # directly to link.exe.
         if hasattr(compiler, "manifest_setup_ldargs"):
             compiler.manifest_setup_ldargs = lambda *_: None
     return compiler
@@ -169,9 +173,27 @@ def build_subprocess_executable():
                                        extra_args=subprocess_COMPILER_ARGS,
                                        sources=sources,
                                        output_dir=BUILD_SUBPROCESS)
+    resource_source = os.path.join(SUBPROCESS_DIR, "subprocess.rc")
+    resource_object = compiler.object_filenames(
+        [resource_source], output_dir=BUILD_SUBPROCESS
+    )[0]
+    manifest_path = os.path.join(SUBPROCESS_DIR, "compatibility.manifest")
+    resource_changed = not os.path.exists(resource_object) or any(
+        os.path.getmtime(path) > os.path.getmtime(resource_object)
+        for path in (resource_source, manifest_path)
+    )
+    if resource_changed:
+        resource_objects = compiler.compile(
+            [resource_source], output_dir=BUILD_SUBPROCESS
+        )
+        resource_object = resource_objects[0]
+    objects.append(resource_object)
     executable_path = os.path.join(BUILD_SUBPROCESS,
                                    "subprocess" + EXECUTABLE_EXT)
-    if changed or not os.path.exists(executable_path):
+    manifest_changed = os.path.exists(executable_path) and (
+        os.path.getmtime(manifest_path) > os.path.getmtime(executable_path)
+    )
+    if changed or manifest_changed or not os.path.exists(executable_path):
         lib_dir = os.path.join(CEF_BINARIES_LIBRARIES, "lib")
         lib_dir_vs = os.path.join(lib_dir,
                                   get_msvs_for_python(vs_prefix=True))
@@ -179,7 +201,8 @@ def build_subprocess_executable():
                                  output_progname="subprocess",
                                  output_dir=BUILD_SUBPROCESS,
                                  libraries=["libcef",
-                                            "libcef_dll_wrapper_MT"],
+                                            "libcef_dll_wrapper_MT",
+                                            "user32"],
                                  library_dirs=[lib_dir, lib_dir_vs],
                                  # TODO linker flags for Linux/Mac
                                  extra_preargs=None,

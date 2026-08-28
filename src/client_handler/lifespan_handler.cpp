@@ -6,11 +6,15 @@
 #if defined(OS_WIN)
 #include "dpi_aware.h"
 #endif
+#if defined(OS_MAC)
+#include "util_mac.h"
+#endif
 #include "include/base/cef_logging.h"
 
 
 bool LifespanHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
+                                    int popup_id,
                                     const CefString& target_url,
                                     const CefString& target_frame_name,
                                     WindowOpenDisposition target_disposition,
@@ -19,6 +23,7 @@ bool LifespanHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
                                     CefWindowInfo& windowInfo,
                                     CefRefPtr<CefClient>& client,
                                     CefBrowserSettings& settings,
+                                    CefRefPtr<CefDictionaryValue>& extra_info,
                                     bool* no_javascript_access)
 {
     REQUIRE_UI_THREAD();
@@ -27,7 +32,7 @@ bool LifespanHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
     return LifespanHandler_OnBeforePopup(browser, frame, target_url,
                         target_frame_name, target_disposition, user_gesture,
                         popupFeaturesNotImpl, windowInfo, client, settings,
-                        no_javascript_access);
+                        extra_info, no_javascript_access);
 }
 
 
@@ -50,7 +55,20 @@ void LifespanHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 bool LifespanHandler::DoClose(CefRefPtr<CefBrowser> browser)
 {
     REQUIRE_UI_THREAD();
-    return LifespanHandler_DoClose(browser);
+    const bool close_handled = LifespanHandler_DoClose(browser);
+    #if defined(OS_MAC)
+    // CEF-owned top-level windows and JavaScript popups do not consistently
+    // release their retained host view after the standard performClose:
+    // notification. Complete their Cocoa hierarchy tear-down here instead.
+    // Never do this for an embedded browser because its NSWindow belongs to
+    // the host application.
+    if (!close_handled &&
+            (owns_top_level_window_ || browser->IsPopup()) &&
+            MacCloseBrowserWindow(browser)) {
+        return true;
+    }
+    #endif
+    return close_handled;
 }
 
 

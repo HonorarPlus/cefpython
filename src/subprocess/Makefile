@@ -28,11 +28,13 @@ INC = -I./../ -I./../common/ -I$(PYTHON_INCLUDE) \
 	-I/usr/lib/glib-2.0/include
 
 ifeq ($(UNAME_S), Linux)
-	LIB_DIRS = -L$(CEF_BIN) \
-							-L$(CEF_LIB)
+	LIB_DIRS = -L"$(CEF_BIN)" \
+							-L"$(CEF_LIB)"
+	RPATH = -Wl,-rpath,'$$ORIGIN'
 else ifeq ($(UNAME_S), Darwin)
-	LIB_DIRS = -F$(CEF_BIN) \
-							-L$(CEF_LIB)
+	LIB_DIRS = -F"$(CEF_BIN)" \
+							-L"$(CEF_LIB)"
+	RPATH = -Wl,-rpath,@loader_path/
 endif
 
 ifeq ($(UNAME_S), Linux)
@@ -40,12 +42,14 @@ ifeq ($(UNAME_S), Linux)
 	LIBS = -lcef -lX11 -lgobject-2.0 -lglib-2.0 -lgtk-x11-2.0 -lgdk-x11-2.0
 else ifeq ($(UNAME_S), Darwin)
 	CPP_FILES =
-	# Include framework before libcef_dll_wrapper
-	LIBS = -framework "Chromium Embedded Framework"
+	# CEF 150's wrapper supplies bootstrap stubs. The helper loads the
+	# framework dynamically after process startup.
+	LIBS =
 endif
 
 CCFLAGS = -DRENDERER_PROCESS $(CEF_CCFLAGS)
 
+.PHONY: subprocess
 subprocess:
 	# -fPIC is required only for libraries included by Cython.
 	@echo [SUBPROCESS] Building the 'subprocess' executable
@@ -54,4 +58,4 @@ subprocess:
 		$(CPP_FILES) \
 		$(CEF_LINK_FLAGS) \
 		$(LIBS) -lcef_dll_wrapper \
-		-o subprocess -Wl,-rpath,@loader_path/
+		-o subprocess $(RPATH)

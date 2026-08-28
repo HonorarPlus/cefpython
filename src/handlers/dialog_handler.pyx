@@ -8,11 +8,11 @@ include "../browser.pyx"
 
 cdef class PyFileDialogCallback:
     cdef CefRefPtr[CefFileDialogCallback] cefCallback
-    cpdef py_void Continue(self,int selected_accept_filter,list file_paths):
+    cpdef py_void Continue(self, list file_paths):
         cdef cpp_vector[CefString] filePaths
         for f in file_paths:
             filePaths.push_back(PyToCefStringValue(f))
-        self.cefCallback.get().Continue(selected_accept_filter,filePaths)
+        self.cefCallback.get().Continue(filePaths)
 
     cpdef py_void Cancel(self):
         self.cefCallback.get().Cancel()
@@ -31,7 +31,6 @@ cdef public cpp_bool DialogHandler_OnFileDialog(
         const CefString& cefTitle,
         const CefString& cefDefaultFilePath,
         const cpp_vector[CefString]& cefAcceptFilters,
-        int selected_accept_filter,
         CefRefPtr[CefFileDialogCallback] cefFileDialogCallback
         ) except * with gil:
 
@@ -58,7 +57,6 @@ cdef public cpp_bool DialogHandler_OnFileDialog(
                      title=pyTitle,
                      default_file_path=pyDefaultFilePath,
                      accept_filters=pyAcceptFilters,
-                     selected_accept_filter=selected_accept_filter,
                      file_dialog_callback = CreatePyFileDialogCallback(cefFileDialogCallback))
             return bool(returnValue)
     except:

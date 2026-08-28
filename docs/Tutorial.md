@@ -188,9 +188,9 @@ Here are some settings worth noting:
   customize context menu
 - [locale](../api/ApplicationSettings.md#locale) - set language
   for localized resources
-- [product_version](../api/ApplicationSettings.md#product_version) -
+- [user_agent_product](../api/ApplicationSettings.md#user_agent_product) -
   set the product portion of the default User-Agent string.
-  If user_agent option (below) is used then product_version will
+  If user_agent option (below) is used then user_agent_product will
   be ignored.
 - [user_agent](../api/ApplicationSettings.md#user_agent) - set
   value that will be returned as the User-Agent HTTP header
@@ -247,13 +247,13 @@ for details.
 ## Change user agent string
 
 There are two options in [application settings](../api/ApplicationSettings.md#application-settings)
-for changing User-Agent string: [product_version](../api/ApplicationSettings.md#product_version)
+for changing User-Agent string: [user_agent_product](../api/ApplicationSettings.md#user_agent_product)
 and [user_agent](../api/ApplicationSettings.md#user_agent).
 
-The "product_version" sets the product portion of the default
+The "user_agent_product" sets the product portion of the default
 User-Agent string. If "user_agent" option is used then
-"product_version" will be ignored. For example if you set
-"product_version" to "MyProduct/10.00" then User-Agent will
+"user_agent_product" will be ignored. For example if you set
+"user_agent_product" to "MyProduct/10.00" then User-Agent will
 be:
 
 ```text
@@ -273,11 +273,11 @@ Uncomment appropriate lines in [tutorial.py](../examples/tutorial.py)
 example to see the effect:
 
 ```Python
-# To change user agent use either "product_version"
+# To change user agent use either "user_agent_product"
 # or "user_agent" options. Explained in Tutorial in
 # "Change user agent string" section.
 settings = {
-    # "product_version": "MyProduct/10.00",
+    # "user_agent_product": "MyProduct/10.00",
     # "user_agent": "MyAgent/20.00 MyProduct/10.00",
 }
 cef.Initialize(settings=settings)
@@ -441,7 +441,7 @@ callback and it fails, a Javascript exception will be thrown.
 To see Javascript exceptions open Developer Tools
 window using mouse context menu and switch to Console tab.
 
-There are multiple ways to intercept javascript exceptions programmaticaly
+There are multiple ways to intercept javascript exceptions programmatically
 in CEF:
 
 1. In Javascript you can register "window.onerror" event to
@@ -568,7 +568,7 @@ cef.Initialize(settings={"windowless_rendering_enabled": True})
 Do not enable this value if the application does not use off-screen
 rendering as it may reduce rendering performance on some systems.
 
-Another thing that distincts windowed rendering from off-screen
+Another thing that distinct windowed rendering from off-screen
 rendering is that when creating browser you have to call SetAsOffscreen
 method on the WindowInfo object. Code from the example:
 
@@ -600,7 +600,6 @@ callback information on viewport size will be provided to CEF:
 ```Python
 def GetViewRect(self, rect_out, **_):
     rect_out.extend([0, 0, VIEWPORT_SIZE[0], VIEWPORT_SIZE[1]])
-    return True
 ```
 
 In this callback viewport size is returned via |rect_out| which

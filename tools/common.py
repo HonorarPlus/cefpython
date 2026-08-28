@@ -1,3 +1,4 @@
+
 # Copyright (c) 2017 CEF Python, see the Authors file.
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
@@ -6,12 +7,14 @@
 
 import atexit
 import glob
+import json
 import os
 import platform
 import re
 import shutil
 import struct
 import sys
+import sysconfig
 import tempfile
 
 # These sample apps will be deleted when creating setup/wheel packages
@@ -27,6 +30,14 @@ if ARCH32:
 if ARCH64:
     assert platform.architecture()[0] == "64bit"
 ARCH_STR = platform.architecture()[0]
+
+machine = platform.machine().lower()
+if machine in ("arm64", "aarch64"):
+    MACHINE_ARCH = "arm64"
+elif machine in ("amd64", "x86_64"):
+    MACHINE_ARCH = "x86_64"
+else:
+    MACHINE_ARCH = machine
 
 # Operating system architecture
 SYSTEM64 = platform.machine().endswith('64')
@@ -51,11 +62,11 @@ if OS_POSTFIX == "win":
     OS_POSTFIX2 = "win32" if ARCH32 else "win64"
     CEF_POSTFIX2 = "windows32" if ARCH32 else "windows64"
 elif OS_POSTFIX == "mac":
-    OS_POSTFIX2 = "mac32" if ARCH32 else "mac64"
-    CEF_POSTFIX2 = "macosx32" if ARCH32 else "macosx64"
+    OS_POSTFIX2 = "mac32" if ARCH32 else "macarm64" if MACHINE_ARCH == "arm64" else "mac64"
+    CEF_POSTFIX2 = "macosx32" if ARCH32 else "macosarm64" if MACHINE_ARCH == "arm64" else "macosx64"
 elif OS_POSTFIX == "linux":
-    OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
-    CEF_POSTFIX2 = "linux32" if ARCH32 else "linux64"
+    OS_POSTFIX2 = "linux32" if ARCH32 else "linuxarm64" if MACHINE_ARCH == "arm64" else "linux64"
+    CEF_POSTFIX2 = "linux32" if ARCH32 else "linuxarm64" if MACHINE_ARCH == "arm64" else "linux64"
 
 # Platforms
 SYSTEM = platform.system().upper()
@@ -67,18 +78,23 @@ MAC = SYSTEM if SYSTEM == "MAC" else False
 
 OS_POSTFIX2_ARCH = dict(
     WINDOWS={"32bit": "win32", "64bit": "win64"},
-    LINUX={"32bit": "linux32", "64bit": "linux64"},
-    MAC={"32bit": "mac32", "64bit": "mac64"},
+    LINUX={"32bit": "linux32", "64bit": "linux64", "x86_64": "linux64", "arm64": "linuxarm64"},
+    MAC={"32bit": "mac32", "64bit": "mac64", "x86_64": "mac64", "arm64": "macarm64"},
 )
 CEF_POSTFIX2_ARCH = dict(
-    WINDOWS={"32bit": "windows32", "64bit": "windows64"},
-    LINUX={"32bit": "linux32", "64bit": "linux64"},
-    MAC={"64bit": "macosx64"},
+    WINDOWS={"32bit": "windows32", "64bit": "windows64", "x86_64": "windows64"},
+    LINUX={"32bit": "linux32", "64bit": "linux64", "x86_64": "linux64", "arm64": "linuxarm64"},
+    MAC={"64bit": "macosx64", "x86_64": "macosx64", "arm64": "macosarm64"},
 )
 PYPI_POSTFIX2_ARCH = dict(
     WINDOWS={"32bit": "win32", "64bit": "win_amd64"},
-    LINUX={"32bit": "manylinux1_i686", "64bit": "manylinux1_x86_64"},
-    MAC={"64bit": "x86_64"},
+    LINUX={
+        "32bit": "manylinux1_i686",
+        "64bit": "manylinux1_x86_64",
+        "x86_64": "manylinux1_x86_64",
+        "arm64": "manylinux_2_17_aarch64",
+    },
+    MAC={"64bit": "x86_64", "x86_64": "x86_64", "arm64": "arm64"},
 )
 
 # Python version eg. 27
@@ -131,7 +147,7 @@ DOCS_DIR = os.path.join(ROOT_DIR, "docs")
 
 # Build directories
 BUILD_DIR = os.path.join(ROOT_DIR, "build")
-BUILD_CEFPYTHON = os.path.join(BUILD_DIR, "build_cefpython")
+BUILD_CEFPYTHON = os.path.join(BUILD_DIR, "o")
 
 # May be auto-overwritten through detect_cef_binaries_libraries_dir()
 CEF_BINARIES_LIBRARIES = os.path.join(BUILD_DIR, "cef_"+OS_POSTFIX2)
@@ -144,16 +160,16 @@ DISTRIB_DIR = os.path.join(BUILD_DIR, "DISTRIB_NOTSET")
 
 # Build C++ projects directories
 BUILD_CEFPYTHON_APP = os.path.join(BUILD_CEFPYTHON,
-                                   "cefpython_app_py{pyver}_{os}"
+                                   "app{pyver}{os}"
                                    .format(pyver=PYVERSION, os=OS_POSTFIX2))
 BUILD_CLIENT_HANDLER = os.path.join(BUILD_CEFPYTHON,
-                                    "client_handler_py{pyver}_{os}"
+                                    "client{pyver}{os}"
                                     .format(pyver=PYVERSION, os=OS_POSTFIX2))
 BUILD_CPP_UTILS = os.path.join(BUILD_CEFPYTHON,
-                               "cpp_utils_py{pyver}_{os}"
+                               "utils{pyver}{os}"
                                .format(pyver=PYVERSION, os=OS_POSTFIX2))
 BUILD_SUBPROCESS = os.path.join(BUILD_CEFPYTHON,
-                                "subprocess_py{pyver}_{os}"
+                                "subprocess{pyver}{os}"
                                 .format(pyver=PYVERSION, os=OS_POSTFIX2))
 # -- end build directories
 
@@ -219,6 +235,40 @@ SUBPROCESS_EXE = os.path.join(BUILD_SUBPROCESS,
 
 VS_PLATFORM_ARG = "x86" if ARCH32 else "amd64"
 
+VS2026_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio"
+                 r"\18\BuildTools\VC\Auxiliary\Build\vcvarsall.bat")
+
+VS2022_VCVARS = (r"C:\Program Files\Microsoft Visual Studio"
+                 r"\2022\Community\VC\Auxiliary\Build\vcvarsall.bat")
+
+VISUAL_STUDIO_TOOLCHAINS = (
+    ("2026", VS2026_VCVARS),
+    ("2022", VS2022_VCVARS),
+)
+ACTIVE_MSVC_VERSION, ACTIVE_MSVC_VCVARS = next(
+    ((version, vcvars_path) for version, vcvars_path in VISUAL_STUDIO_TOOLCHAINS
+     if os.path.exists(vcvars_path)),
+    VISUAL_STUDIO_TOOLCHAINS[-1],
+)
+ACTIVE_VISUAL_STUDIO_ROOT = os.path.realpath(
+    os.path.join(os.path.dirname(ACTIVE_MSVC_VCVARS), "..", "..", ".."))
+VISUAL_STUDIO_BUILD_TOOL_ROOTS = tuple(
+    os.path.realpath(os.path.join(os.path.dirname(vcvars_path), "..", "..", ".."))
+    for _, vcvars_path in VISUAL_STUDIO_TOOLCHAINS
+)
+ACTIVE_MSVC_CMAKE_DIR = next(
+    (os.path.join(root, "Common7", "IDE", "CommonExtensions", "Microsoft", "CMake", "CMake", "bin")
+     for root in VISUAL_STUDIO_BUILD_TOOL_ROOTS
+     if os.path.isdir(os.path.join(root, "Common7", "IDE", "CommonExtensions", "Microsoft", "CMake", "CMake", "bin"))),
+    "",
+)
+ACTIVE_MSVC_NINJA_DIR = next(
+    (os.path.join(root, "Common7", "IDE", "CommonExtensions", "Microsoft", "CMake", "Ninja")
+     for root in VISUAL_STUDIO_BUILD_TOOL_ROOTS
+     if os.path.isdir(os.path.join(root, "Common7", "IDE", "CommonExtensions", "Microsoft", "CMake", "Ninja"))),
+    "",
+)
+
 VS2019_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio"
                  r"\2019\Community\VC\Auxiliary\Build\vcvarsall.bat")
 
@@ -272,6 +322,10 @@ def get_python_include_path():
     #    ~/.pyenv/versions/2.7.13/include/python2.7
     # 3) ~/.pyenv/versions/3.4.6/include/python2.7m
     # 4) /usr/include/python2.7
+    configured_include_dir = sysconfig.get_path("include")
+    if os.path.isfile(os.path.join(configured_include_dir, "Python.h")):
+        return configured_include_dir
+
     base_dir = os.path.dirname(sys.executable)
     try_dirs = ["{base_dir}/include",
                 "{base_dir}/../include/python{ver}",
@@ -453,8 +507,36 @@ def get_cefpython_version():
     return get_version_from_file(header_file)
 
 
+def get_wrapper_build_basename(runtime_library, msvs):
+    """Return a compact wrapper cache name scoped to the CEF revision."""
+    if runtime_library not in ("MT", "MD"):
+        raise ValueError("Unknown MSVC runtime library: " + runtime_library)
+    commit_hash = get_cefpython_version()["CEF_COMMIT_HASH"][:7]
+    runtime_code = runtime_library[-1].lower()
+    visual_studio_code = msvs[-2:]
+    return "w{commit}{runtime}{msvs}".format(
+        commit=commit_hash,
+        runtime=runtime_code,
+        msvs=visual_studio_code,
+    )
+
+
+def get_cefpython_api_hash():
+    """Get CEF API hash from the 'src/version/' directory."""
+    manifest_file = os.path.join(TOOLS_DIR, "cef_version.json")
+    with open(manifest_file, "r", encoding="utf-8") as file_object:
+        manifest = json.load(file_object)
+    platform_key = {"win": "windows", "mac": "macos", "linux": "linux"}[OS_POSTFIX]
+    platform_hash = manifest["api_hashes"][platform_key]
+    return {
+        "CEF_API_VERSION": str(manifest["api_version"]),
+        "CEF_API_HASH_PLATFORM": platform_hash,
+        "CEF_API_HASH_UNIVERSAL": platform_hash,
+    }
+
+
 def get_version_from_file(header_file):
-    with open(header_file, "rU") as fp:
+    with open(header_file, "r") as fp:
         contents = fp.read()  # no need to decode() as "rU" specified
     ret = dict()
     matches = re.findall(r'^#define (\w+) "?([^\s"]+)"?', contents,
@@ -478,6 +560,10 @@ def get_msvs_for_python(vs_prefix=False):
         return "VS2019" if vs_prefix else "2019"
     elif sys.version_info[:2] == (3, 9):
         return "VS2019" if vs_prefix else "2019"
+    elif sys.version_info[:2] == (3, 10):
+        return "VS2019" if vs_prefix else "2019"
+    elif (3, 11) <= sys.version_info[:2] <= (3, 14):
+        return "VS{version}".format(version=ACTIVE_MSVC_VERSION) if vs_prefix else ACTIVE_MSVC_VERSION
     else:
         print("ERROR: This version of Python is not supported")
         sys.exit(1)

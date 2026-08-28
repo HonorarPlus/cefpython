@@ -51,6 +51,35 @@ Before you can build CEF Python or CEF you must satisfy
 Complete steps for building CEF Python v50+ with Python 2.7 using
 prebuilt binaries and libraries from GitHub Releases.
 
+### CEF 108 with Python 3.13+
+
+The `cef108` branch supports a modern Windows build using Visual Studio Build
+Tools 2026 and Cython 3.2.8 or newer. Install the Visual Studio C++ workload,
+including a Windows SDK. CMake and Ninja may come from any installed Visual
+Studio Build Tools version or be available on `PATH`.
+
+Install the Python build dependencies from the repository root:
+
+```
+python -m pip install --upgrade -r tools/requirements.txt
+```
+
+Download the Spotify CEF binary archive matching `CEF_VERSION` in
+`src/version/cef_version_win.h`, then extract it into `build/`. Prepare the CEF
+wrapper libraries and compile cefpython:
+
+```
+python tools/automate.py --prebuilt-cef --ninja-jobs=8
+cd build
+python ../tools/build.py 108.4 --rebuild-cpp --no-run-examples
+```
+
+Prebuilt builds support repository and build paths containing spaces. The
+automation skips the optional upstream CEF sample applications and builds the
+`/MT` and `/MD` wrapper libraries required by cefpython.
+
+### Legacy releases
+
 When cloning repository you should checkout a stable branch which
 are named "cefpythonXX" where XX is Chromium version number.
 

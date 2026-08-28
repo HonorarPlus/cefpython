@@ -10,19 +10,20 @@ cimport cef_types
 
 TID_UI = cef_types.TID_UI
 TID_FILE_BACKGROUND = cef_types.TID_FILE_BACKGROUND
-TID_FILE = cef_types.TID_FILE
 TID_FILE_USER_VISIBLE = cef_types.TID_FILE_USER_VISIBLE
 TID_FILE_USER_BLOCKING = cef_types.TID_FILE_USER_BLOCKING
+TID_PROCESS_LAUNCHER = cef_types.TID_PROCESS_LAUNCHER
 TID_IO = cef_types.TID_IO
 TID_RENDERER = cef_types.TID_RENDERER
 
 g_browserProcessThreads = [
     TID_UI,
     TID_FILE_BACKGROUND,
-    TID_FILE,
     TID_FILE_USER_VISIBLE,
     TID_FILE_USER_BLOCKING,
+    TID_PROCESS_LAUNCHER,
     TID_IO,
+    TID_RENDERER
 ]
 
 cpdef py_bool IsString(object maybeString):
@@ -41,29 +42,33 @@ cpdef py_bool IsThread(int threadID):
 #       unicode strings and writing them to file (codecs.open).
 #       This change is required to work with Cython 0.20.
 
-cpdef object Debug(py_string msg):
-    """Print debug message. Will be shown only when settings.debug=True."""
-    # In Python 3 str or bytes may be passed
-    if type(msg) != str and type(msg) == bytes:
-        msg = msg.decode("utf-8", "replace")
-    # Convert to str in case other kind of object was passed
-    msg = str(msg)
-    msg = "[Browser process] " + msg
-    # CEF logging is initialized only after CEF was initialized.
-    # Otherwise the default is LOGSEVERITY_INFO and log_file is
-    # none.
-    if g_cef_initialized or g_debug:
-        cef_log_info(PyStringToChar(msg))
+cpdef bytes toBytes(object input):
+    """ Convert input to bytes string."""
+    if input is None:
+        return b""
+    elif isinstance(input, bytes):
+        return input
+    else:
+        return str(input).encode("utf-8", "replace")
 
-cdef void NonCriticalError(py_string msg) except *:
+cpdef object Debug(object message):
+    """Print debug message. Will be shown only when settings.debug=True."""
+    cdef bytes msg_bytes
+    msg_bytes = toBytes(message)
+    msg_bytes = b"[Browser process] " + msg_bytes
+    if g_cef_initialized or g_debug:
+        cef_log_info(msg_bytes)
+    return None
+
+cdef void NonCriticalError(object msg) except *:
     """Notify about error gently. Does not terminate application."""
-    # In Python 3 str or bytes may be passed
-    if type(msg) != str and type(msg) == bytes:
-        msg = msg.decode("utf-8", "replace")
-    # Convert to str in case other kind of object was passed
-    msg = str(msg)
-    msg = "[Browser process] " + msg
-    cef_log_error(PyStringToChar(msg))
+    cdef bytes msg_bytes
+    if isinstance(msg, bytes):
+        msg_bytes = msg
+    else:
+        msg_bytes = str(msg).encode("utf-8", "replace")
+    msg_bytes = b"[Browser process] " + msg_bytes
+    cef_log_error(msg_bytes)
 
 cpdef str GetSystemError():
     IF UNAME_SYSNAME == "Windows":
@@ -72,11 +77,56 @@ cpdef str GetSystemError():
     ELSE:
         return ""
 
+cpdef str GetNavigateUrl(py_string url):
+    # Encode local file paths so that CEF can load them correctly:
+    # | some.html, some/some.html, D:\, /var, file://
+    if re.search(r"^file:", url, re.I) or \
+            re.search(r"^[a-zA-Z]:", url) or \
+            not re.search(r"^[\w-]+:", url):
+
+        # Function pathname2url will complain if url starts with "file://".
+        # CEF may also change local urls to "file:///C:/" - three slashes.
+        is_file_protocol = False
+        file_prefix = ""
+        file_prefixes = ["file:///", "file://"]
+        for file_prefix in file_prefixes:
+            if url.startswith(file_prefix):
+                is_file_protocol = True
+                # Remove the file:// prefix
+                url = url[len(file_prefix):]
+                break
+
+        # Need to encode chinese characters in local file paths,
+        # otherwise CEF will try to encode them by itself. But it
+        # will fail in doing so. CEF will return the following string:
+        # >> %EF%BF%97%EF%BF%80%EF%BF%83%EF%BF%A6
+        # But it should be:
+        # >> %E6%A1%8C%E9%9D%A2
+        url = urllib_pathname2url(url)
+
+        if is_file_protocol:
+            url = "%s%s" % (file_prefix, url)
+
+        # If it is C:\ then colon was encoded. Decode it back.
+        url = re.sub(r"^([a-zA-Z])%3A", r"\1:", url)
+
+        # Allow hash when loading urls. The pathname2url function
+        # replaced hashes with "%23" (Issue #114).
+        url = url.replace("%23", "#")
+
+        # Allow more special characters when loading urls. The pathname2url
+        # function encoded them and need to decode them back here
+        # Characters: ? & = (Issue #273).
+        url = url.replace("%3F", "?")
+        url = url.replace("%26", "&")
+        url = url.replace("%3D", "=")
+
+    return str(url)
+
 cpdef py_bool IsFunctionOrMethod(object valueType):
     if (valueType == types.FunctionType
             or valueType == types.MethodType
             or valueType == types.BuiltinFunctionType
-            or valueType == types.BuiltinMethodType
-            or valueType.__name__ == "cython_function_or_method"):
+            or valueType == types.BuiltinMethodType):
         return True
     return False

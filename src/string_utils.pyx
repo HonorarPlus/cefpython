@@ -26,14 +26,13 @@ BYTES_DECODE_ERRORS = "replace"
 
 
 cdef py_string AnyToPyString(object value):
-    cdef object valueType = type(value)
-    if valueType == str or valueType == bytes:
+    if isinstance(value, str):
         return value
-    elif PY_MAJOR_VERSION < 3 and valueType == unicode:
-        # The unicode type is not defined in Python 3
-        return value
+    elif isinstance(value, bytes):
+        # Decode bytes to str using utf-8 with replacement for errors
+        return value.decode("utf-8", "replace")
     else:
-        return ""
+        return str("")
 
 cdef py_string CharToPyString(
         const char* charString):
@@ -77,22 +76,23 @@ cdef bytes PyStringToChar(py_string pyString):
 #     return cppString
 # ---
 
-cdef py_string CefToPyString(
-        ConstCefString& cefString):
+cdef py_string CefToPyString(ConstCefString& cefString):
     cdef cpp_string cppString
     if cefString.empty():
-        return ""
+        return str("")
     IF UNAME_SYSNAME == "Windows":
         cdef wchar_t* wcharstr = <wchar_t*> cefString.c_str()
         return WidecharToPyString(wcharstr)
     ELSE:
         cppString = cefString.ToString()
-        if PY_MAJOR_VERSION < 3:
-            return <bytes>cppString
+        value = <bytes>cppString
+        # Only decode if value is bytes (Python 3)
+        if isinstance(value, bytes):
+            return value.decode(
+                g_applicationSettings["string_encoding"],
+                errors=BYTES_DECODE_ERRORS)
         else:
-            return <unicode>((<bytes>cppString).decode(
-                    g_applicationSettings["string_encoding"],
-                    errors=BYTES_DECODE_ERRORS))
+            return value
 
 cdef bytes CefToPyBytes(
         ConstCefString& cefString):
@@ -103,17 +103,11 @@ cdef void PyToCefString(
         CefString& cefString
         ) except *:
     if PY_MAJOR_VERSION < 3:
-        # Handle objects that may be converted to string e.g. QString
-        if not isinstance(pyString, str) and not isinstance(pyString, unicode):
-            pyString = str(pyString)
         if type(pyString) == unicode:
             pyString = <bytes>(pyString.encode(
                     g_applicationSettings["string_encoding"],
                     errors=UNICODE_ENCODE_ERRORS))
     else:
-        # Handle objects that may be converted to string e.g. QString
-        if not isinstance(pyString, str) and not isinstance(pyString, bytes):
-            pyString = str(pyString)
         # The unicode type is not defined in Python 3.
         if type(pyString) == str:
             pyString = <bytes>(pyString.encode(
@@ -124,11 +118,14 @@ cdef void PyToCefString(
     # when a non-ascii character is encountered.
     cefString.FromString(cppString)
 
-cdef CefString PyToCefStringValue(
-        py_string pyString
-        ) except *:
+cdef CefString PyToCefStringValue(object astring) except *:
+    cdef bytes string
+    if isinstance(astring, bytes):
+        string = astring
+    else:
+        string = str(astring).encode("utf-8", "replace")
     cdef CefString cefString
-    PyToCefString(pyString, cefString)
+    PyToCefString(string, cefString)
     return cefString
 
 cdef void PyToCefStringPointer(

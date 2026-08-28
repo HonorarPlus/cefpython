@@ -5,7 +5,7 @@
 include "compile_time_constants.pxi"
 
 from libcpp cimport bool as cpp_bool
-from cef_types cimport CefRect
+from cef_types cimport CefRect, cef_runtime_style_t
 
 cdef extern from "include/internal/cef_linux.h":
 
@@ -13,6 +13,7 @@ cdef extern from "include/internal/cef_linux.h":
     ctypedef unsigned long CefCursorHandle
 
     cdef cppclass CefWindowInfo:
+        cef_runtime_style_t runtime_style
         void SetAsChild(CefWindowHandle parent,
                         const CefRect& windowRect)
         void SetAsWindowless(CefWindowHandle parent)

@@ -9,6 +9,7 @@
 #include <gdk/gdkx.h>
 
 #include "include/cef_browser.h"
+#include "include/internal/cef_types_linux.h"
 
 void InstallX11ErrorHandlers();
 void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,

@@ -13,24 +13,27 @@ Table of contents:
   * [background_color](#background_color)
   * [browser_subprocess_path](#browser_subprocess_path)
   * [cache_path](#cache_path)
+  * [chrome_runtime](#chrome_runtime)
+  * [cookieable_schemes_list](cookieable_schemes_list)
+  * [root_cache_path](#root_cache_path)
   * [command_line_args_disabled](#command_line_args_disabled)
   * [context_menu](#context_menu)
   * [downloads_enabled](#downloads_enabled)
   * [external_message_pump](#external_message_pump)
   * [framework_dir_path](#framework_dir_path)
-  * [ignore_certificate_errors](#ignore_certificate_errors)
+  * [main_bundle_path](#main_bundle_path)
   * [javascript_flags](#javascript_flags)
   * [locale](#locale)
   * [locales_dir_path](#locales_dir_path)
+  * [macos_use_system_keychain](#macos_use_system_keychain)
   * [debug](#debug)
   * [log_file](#log_file)
   * [log_severity](#log_severity)
   * [multi_threaded_message_loop](#multi_threaded_message_loop)
-  * [net_security_expiration_enabled](#net_security_expiration_enabled)
   * [pack_loading_disabled](#pack_loading_disabled)
   * [persist_session_cookies](#persist_session_cookies)
   * [persist_user_preferences](#persist_user_preferences)
-  * [product_version](#product_version)
+  * [user_agent_product](#user_agent_product)
   * [remote_debugging_port](#remote_debugging_port)
   * [resources_dir_path](#resources_dir_path)
   * [string_encoding](#string_encoding)
@@ -39,6 +42,8 @@ Table of contents:
   * [user_agent](#user_agent)
   * [user_data_path](#user_data_path)
   * [windowless_rendering_enabled](#windowless_rendering_enabled)
+  * [shared_texture_enabled](#shared_texture_enabled)
+  * [external_begin_frame_enabled](#external_begin_frame_enabled)
 
 
 ## Introduction
@@ -135,18 +140,53 @@ switch.
 ### cache_path
 
 (string)
-The location where cache data will be stored on disk. If empty then
-browsers will be created in "incognito mode" where in-memory caches are
-used for storage and no data is persisted to disk. HTML5 databases such as
-localStorage will only persist across sessions if a cache path is
-specified. Can be overridden for individual CefRequestContext instances via
-the CefRequestContextSettings.cache_path value.
+The location where data for the global browser cache will be stored on
+disk. If non-empty this must be either equal to or a child directory of
+CefSettings.root_cache_path. If empty then browsers will be created in
+"incognito mode" where in-memory caches are used for storage and no data is
+persisted to disk. HTML5 databases such as localStorage will only persist
+across sessions if a cache path is specified. Can be overridden for
+individual CefRequestContext instances via the
+CefRequestContextSettings.cache_path value.
 
 CEF flushes cookies or other cache data to disk every 30 seconds,
 or immediately when [cefpython](cefpython.md).Shutdown() is called.
 
 When this option is not set (empty string), a unique cache directory
 will be created in the user's temp directory for each run of the application.
+
+
+### chrome_runtime
+
+(int)
+Set to true (1) to enable use of the Chrome runtime in CEF. This feature is
+considered experimental and is not recommended for most users at this time.
+See issue #2969 for details.
+
+
+### cookieable_schemes_list
+
+(string)
+Comma delimited list of schemes supported by the associated
+CefCookieManager. If |cookieable_schemes_exclude_defaults| is false (0) the
+default schemes ("http", "https", "ws" and "wss") will also be supported.
+Specifying a |cookieable_schemes_list| value and setting
+|cookieable_schemes_exclude_defaults| to true (1) will disable all loading
+and saving of cookies for this manager. Can be overridden
+for individual CefRequestContext instances via the
+CefRequestContextSettings.cookieable_schemes_list and
+CefRequestContextSettings.cookieable_schemes_exclude_defaults values.
+
+
+### root_cache_path
+
+(string)
+The root directory that all CefSettings.cache_path and
+CefRequestContextSettings.cache_path values must have in common. If this
+value is empty and CefSettings.cache_path is non-empty then this value will
+default to the CefSettings.cache_path value. Failure to set this value
+correctly may result in the sandbox blocking read/write access to the
+cache_path directory.
 
 
 ### command_line_args_disabled
@@ -230,38 +270,11 @@ the "framework-dir-path" command-line switch.
 See also [Issue #304](../../../issues/304).
 
 
-### ignore_certificate_errors
+### main_bundle_path
 
-(bool)
-Set to true (1) to ignore errors related to invalid SSL certificates.  
-Enabling this setting can lead to potential security vulnerabilities like  
-"man in the middle" attacks. Applications that load content from the  
-internet should not enable this setting. Also configurable using the  
-"ignore-certificate-errors" [command-line switch](CommandLineSwitches.md).
-Can be overridden for individual CefRequestContext instances via the
-CefRequestContextSettings.ignore_certificate_errors value.
-
-__IMPORTANT__: This option not only ignores all certificate errors,
-but it also enables caching of content due to custom patch being
-applied (read more in "NOTE ON CACHING" further down). If you don't
-want this caching feature of insecure content then alternatively you
-can ignore certificate errors using the
-RequestHandler.[_OnCertificateError()](#_oncertificateerror)
-callback. Note that disk caching is enabled only when the "cache_path"
-option is set.
-
-__NOTE ON CACHING__: Chromium by default disallows caching of
-content when there is certificate error. There is a issue125.patch
-in the patches/ directory that can be enabled when doing a custom
-CEF build. This patch changes the caching behavior on sites with SSL
-certificate errors when used with this setting. This patch can be
-applied Chromium sources to allow for caching even when there is
-certificate error, but only when the "ignore_certificate_errors"
-option is set to True.
-When it's set to False then the Chromium's caching behavior does not
-change. Enabling caching with certificate errors is useful on local
-private networks that use self-signed SSL certificates. See the
-referenced CEF topic in [Issue #125](../../../issues/125) for more details.
+The path to the main bundle on macOS. If this value is empty then it
+defaults to the top-level app bundle. Also configurable using
+the "main-bundle-path" command-line switch.
 
 
 ### javascript_flags
@@ -294,6 +307,28 @@ bundle Resources directory. Also configurable using the "locales-dir-path"
 [command-line switch](CommandLineSwitches.md).
 
 
+### macos_use_system_keychain
+
+(bool)
+macOS only. Default: False
+
+Set to true to let Chromium use the macOS Keychain for profile encryption.
+By default, CEF Python supplies Chromium's `use-mock-keychain` switch to
+prevent blocking "Chromium Safe Storage" permission dialogs in local
+applications.
+
+The mock keychain is Chromium testing infrastructure and does not provide
+Keychain-backed protection for cookies, tokens, or other encrypted profile
+data. Applications that store sensitive data in a persistent
+[cache_path](#cache_path) should consider enabling the system Keychain.
+Choose one mode for each persistent profile: changing modes can make existing
+encrypted profile data unreadable.
+
+An explicit `use-mock-keychain` command-line switch takes precedence over this
+setting. This setting has no effect on Windows or Linux, which use different
+credential-storage mechanisms.
+
+
 ### debug
 
 (bool)
@@ -316,16 +351,18 @@ is the name of the main app executable. Also configurable using the
 ### log_severity
 
 (int)
-The log severity. Only messages of this severity level or higher will be  
-logged. Also configurable using the --log-severity switch with  
-a value of "verbose", "info", "warning", "error", "error-report" or  
-"disable".
+The log severity. Only messages of this severity level or higher will be
+logged. When set to DISABLE no messages will be written to the log file,
+but FATAL messages will still be output to stderr. Also configurable using
+the "log-severity" command-line switch with a value of "verbose", "info",
+"warning", "error", "fatal" or "disable".
 
 Accepted values - constants available in the cefpython module:
 * LOGSEVERITY_VERBOSE
 * LOGSEVERITY_INFO
 * LOGSEVERITY_WARNING
 * LOGSEVERITY_ERROR (default)
+* LOGSEVERITY_FATAL
 * LOGSEVERITY_DISABLE
 
 
@@ -345,18 +382,6 @@ handlers/callbacks execute on specific threads, so when this option is On then
 your app's code can start executing on different threads.
 
 This option is not and cannot be supported on OS-X for architectural reasons.
-
-
-### net_security_expiration_enabled
-
-(bool)
-Set to true (1) to enable date-based expiration of built in network
-security information (i.e. certificate transparency logs, HSTS preloading
-and pinning information). Enabling this option improves network security
-but may cause HTTPS load failures when using CEF binaries built more than
-10 weeks in the past. See https://www.certificate-transparency.org/ and
-https://www.chromium.org/hsts for details. Can be set globally using the
-CefSettings.enable_net_security_expiration value.
 
 
 
@@ -391,13 +416,13 @@ individual CefRequestContext instances via the
 CefRequestContextSettings.persist_user_preferences value.
 
 
-### product_version
+### user_agent_product
 
 (string)
 Value that will be inserted as the product portion of the default  
 User-Agent string. If empty the Chromium product version will be used. If  
 |userAgent| is specified this value will be ignored. Also configurable  
-using the --product-version switch.
+using the --user- agent-product switch.
 
 
 ### remote_debugging_port
@@ -421,7 +446,6 @@ The fully qualified path for the resources directory. If this value is
 empty the cef.pak and/or devtools_resources.pak files must be located in  
 the module directory on Windows/Linux or the app bundle Resources directory  
 on Mac OS X. Also configurable using the --resources-dir-path switch.
-
 
 
 ### string_encoding
@@ -464,8 +488,8 @@ set `unique_request_context_per_browser` to True.
 
 In upstream CEF each request context may have separate settings like
 cache_path, persist_session_cookies, persist_user_preferences,
-ignore_certificate_errors, enable_net_security_expiration,
-accept_language_list. Such functionality wasn't yet exposed in CEF Python.
+accept_language_list. Such functionality
+wasn't yet exposed in CEF Python.
 
 
 ### user_agent
@@ -493,3 +517,18 @@ profile directory on Windows).
 Set to true (1) to enable windowless (off-screen) rendering support. Do not
 enable this value if the application does not use windowless rendering as
 it may reduce rendering performance on some systems.
+
+
+### shared_texture_enabled
+
+(bool)
+Set to true (1) to enable shared textures for windowless rendering. Only
+valid if windowless_rendering_enabled above is also set to true. Currently
+only supported on Windows (D3D11).
+
+
+### external_begin_frame_enabled
+
+(bool)
+Set to true (1) to enable the ability to issue BeginFrame requests from the
+client application by calling CefBrowserHost::SendExternalBeginFrame.

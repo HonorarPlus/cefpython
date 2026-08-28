@@ -1,3 +1,4 @@
+
 // Copyright (c) 2012 CEF Python, see the Authors file.
 // All rights reserved. Licensed under BSD 3-clause license.
 // Project website: https://github.com/cztomczak/cefpython
@@ -16,6 +17,13 @@
 // Python.h must be included first otherwise error on Linux:
 // >> error: "_POSIX_C_SOURCE" redefined
 #include "Python.h"
+#include <cstdint>
+
+// CEF 133 removed these legacy Chromium integer aliases. Keep them at the
+// CEFPython public boundary until all downstream callbacks use stdint names.
+using int64 = int64_t;
+using uint32 = uint32_t;
+using char16 = char16_t;
 
 
 // Includes required by "cefpython_fixed.h".
@@ -35,21 +43,31 @@
 
 #if PY_MAJOR_VERSION == 2
 #if PY_MINOR_VERSION == 7
-#include "../../build/build_cefpython/cefpython_py27_fixed.h"
+#include "../../build/o/cefpython_py27_fixed.h"
 #endif // PY_MINOR_VERSION
 #elif PY_MAJOR_VERSION == 3
 #if PY_MINOR_VERSION == 4
-#include "../../build/build_cefpython/cefpython_py34_fixed.h"
+#include "../../build/o/cefpython_py34_fixed.h"
 #elif PY_MINOR_VERSION == 5
-#include "../../build/build_cefpython/cefpython_py35_fixed.h"
+#include "../../build/o/cefpython_py35_fixed.h"
 #elif PY_MINOR_VERSION == 6
-#include "../../build/build_cefpython/cefpython_py36_fixed.h"
+#include "../../build/o/cefpython_py36_fixed.h"
 #elif PY_MINOR_VERSION == 7
-#include "../../build/build_cefpython/cefpython_py37_fixed.h"
+#include "../../build/o/cefpython_py37_fixed.h"
 #elif PY_MINOR_VERSION == 8
-#include "../../build/build_cefpython/cefpython_py38_fixed.h"
+#include "../../build/o/cefpython_py38_fixed.h"
 #elif PY_MINOR_VERSION == 9
-#include "../../build/build_cefpython/cefpython_py39_fixed.h"
+#include "../../build/o/cefpython_py39_fixed.h"
+#elif PY_MINOR_VERSION == 10
+#include "../../build/o/cefpython_py310_fixed.h"
+#elif PY_MINOR_VERSION == 11
+#include "../../build/o/cefpython_py311_fixed.h"
+#elif PY_MINOR_VERSION == 12
+#include "../../build/o/cefpython_py312_fixed.h"
+#elif PY_MINOR_VERSION == 13
+#include "../../build/o/cefpython_py313_fixed.h"
+#elif PY_MINOR_VERSION == 14
+#include "../../build/o/cefpython_py314_fixed.h"
 #endif // PY_MINOR_VERSION
 #endif // PY_MAJOR_VERSION
 

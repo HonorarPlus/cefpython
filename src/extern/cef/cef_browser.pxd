@@ -18,8 +18,6 @@ from cef_drag_data cimport CefDragData
 from cef_types cimport CefMouseEvent
 from cef_request_context cimport CefRequestContext
 
-from cef_process_message cimport CefProcessMessage, CefProcessId
-
 IF UNAME_SYSNAME == "Windows":
     from cef_win cimport CefWindowHandle, CefWindowInfo
 ELIF UNAME_SYSNAME == "Linux":
@@ -28,6 +26,7 @@ ELIF UNAME_SYSNAME == "Darwin":
     from cef_mac cimport CefWindowHandle, CefWindowInfo
 
 cdef extern from "include/cef_browser.h":
+
 
     cdef cppclass CefPdfPrintCallback:
 
@@ -43,12 +42,11 @@ cdef extern from "include/cef_browser.h":
         double GetZoomLevel()
         void SetZoomLevel(double zoomLevel)
         void StartDownload(const CefString& url)
-        void SetMouseCursorChangeDisabled(cpp_bool disabled)
-        cpp_bool IsMouseCursorChangeDisabled()
         cpp_bool IsWindowRenderingDisabled()
         void WasResized()
         void WasHidden(cpp_bool hidden)
         void NotifyScreenInfoChanged()
+        void SendExternalBeginFrame()
         void NotifyMoveOrResizeStarted()
 
         void SendKeyEvent(cef_types.CefKeyEvent)
@@ -59,7 +57,6 @@ cdef extern from "include/cef_browser.h":
                 cpp_bool mouseLeave)
         void SendMouseWheelEvent(cef_types.CefMouseEvent, int deltaX,
                 int deltaY)
-        void SendFocusEvent(cpp_bool setFocus)
         void SendCaptureLostEvent()
 
         void ShowDevTools(const CefWindowInfo& windowInfo,
@@ -71,13 +68,14 @@ cdef extern from "include/cef_browser.h":
 
         CefRefPtr[CefRequestContext] GetRequestContext()
 
-        void Find(int identifier, const CefString& searchText, cpp_bool forward,
+        void Find(const CefString& searchText, cpp_bool forward,
                 cpp_bool matchCase, cpp_bool findNext)
         void StopFinding(cpp_bool clearSelection)
         void Print()
         void PrintToPDF(const CefString& path,
                         const CefPdfPrintSettings& settings,
                         CefRefPtr[CefPdfPrintCallback] callback)
+
         cpp_bool TryCloseBrowser()
 
         # Drag & drop OSR
@@ -105,11 +103,12 @@ cdef extern from "include/cef_browser.h":
     cdef cppclass CefBrowser:
 
         CefRefPtr[CefBrowserHost] GetHost()
+        cpp_bool IsValid()
         cpp_bool CanGoBack()
         cpp_bool CanGoForward()
         CefRefPtr[CefFrame] GetFocusedFrame()
-        CefRefPtr[CefFrame] GetFrame(CefString& name)
-        CefRefPtr[CefFrame] GetFrame(int64 identifier)
+        CefRefPtr[CefFrame] GetFrameByIdentifier(CefString& identifier)
+        CefRefPtr[CefFrame] GetFrameByName(CefString& name)
         void GetFrameNames(cpp_vector[CefString]& names)
         CefRefPtr[CefFrame] GetMainFrame()
         void GoBack()
@@ -121,5 +120,3 @@ cdef extern from "include/cef_browser.h":
         void StopLoad()
         cpp_bool IsLoading()
         int GetIdentifier()
-        cpp_bool SendProcessMessage(CefProcessId target_process,
-                                    CefRefPtr[CefProcessMessage] message)

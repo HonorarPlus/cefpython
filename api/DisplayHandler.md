@@ -12,6 +12,7 @@ Table of contents:
   * [OnAddressChange](#onaddresschange)
   * [OnAutoResize](#onautoresize)
   * [OnConsoleMessage](#onconsolemessage)
+  * [OnCursorChange](#oncursorchange)
   * [OnLoadingProgressChange](#onloadingprogresschange)
   * [OnStatusMessage](#onstatusmessage)
   * [OnTitleChange](#ontitlechange)
@@ -64,6 +65,20 @@ Called to display a console message. Return true to stop the message from
 being output to the console.
 
 |level| can be one of the same values as in ApplicationSettings.[log_severity](ApplicationSettings.md#log_severity).
+
+
+### OnCursorChange
+
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| cursor | CursorHandle |
+| __Return__ | void |
+
+Called when the browser's cursor has changed. If |type| is CT_CUSTOM then
+|custom_cursor_info| will be populated with the custom cursor information.
+
+`CursorHandle` is an int pointer.
 
 
 ### OnLoadingProgressChange

@@ -7,6 +7,8 @@
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 
+#include <memory>
+
 #include "include/cef_app.h"
 
 @class EventHandler;
@@ -17,22 +19,22 @@ class MainMessageLoopExternalPumpMac : public MainMessageLoopExternalPump {
   ~MainMessageLoopExternalPumpMac();
 
   // MainMessageLoopStd methods:
-  void Quit() OVERRIDE;
-  int Run() OVERRIDE;
+  void Quit() override;
+  int Run() override;
 
   // MainMessageLoopExternalPump methods:
-  void OnScheduleMessagePumpWork(int64 delay_ms) OVERRIDE;
+  void OnScheduleMessagePumpWork(int64_t delay_ms) override;
 
   // Internal methods used for processing the event callbacks. They are public
   // for simplicity but should not be used directly.
-  void HandleScheduleWork(int64 delay_ms);
+  void HandleScheduleWork(int64_t delay_ms);
   void HandleTimerTimeout();
 
  protected:
   // MainMessageLoopExternalPump methods:
-  void SetTimer(int64 delay_ms) OVERRIDE;
-  void KillTimer() OVERRIDE;
-  bool IsTimerPending() OVERRIDE { return timer_ != nil; }
+  void SetTimer(int64_t delay_ms) override;
+  void KillTimer() override;
+  bool IsTimerPending() override { return timer_ != nil; }
 
  private:
   // Owner thread that will run events.
@@ -114,7 +116,7 @@ int MainMessageLoopExternalPumpMac::Run() {
   return 0;
 }
 
-void MainMessageLoopExternalPumpMac::OnScheduleMessagePumpWork(int64 delay_ms) {
+void MainMessageLoopExternalPumpMac::OnScheduleMessagePumpWork(int64_t delay_ms) {
   // This method may be called on any thread.
   NSNumber* number = [NSNumber numberWithInt:static_cast<int>(delay_ms)];
   [event_handler_ performSelector:@selector(scheduleWork:)
@@ -123,7 +125,7 @@ void MainMessageLoopExternalPumpMac::OnScheduleMessagePumpWork(int64 delay_ms) {
                     waitUntilDone:NO];
 }
 
-void MainMessageLoopExternalPumpMac::HandleScheduleWork(int64 delay_ms) {
+void MainMessageLoopExternalPumpMac::HandleScheduleWork(int64_t delay_ms) {
   OnScheduleWork(delay_ms);
 }
 
@@ -131,7 +133,7 @@ void MainMessageLoopExternalPumpMac::HandleTimerTimeout() {
   OnTimerTimeout();
 }
 
-void MainMessageLoopExternalPumpMac::SetTimer(int64 delay_ms) {
+void MainMessageLoopExternalPumpMac::SetTimer(int64_t delay_ms) {
   DCHECK_GT(delay_ms, 0);
   DCHECK(!timer_);
 
@@ -157,8 +159,7 @@ void MainMessageLoopExternalPumpMac::KillTimer() {
 }
 
 // static
-scoped_ptr<MainMessageLoopExternalPump>
+std::unique_ptr<MainMessageLoopExternalPump>
 MainMessageLoopExternalPump::Create() {
-  return scoped_ptr<MainMessageLoopExternalPump>(
-      new MainMessageLoopExternalPumpMac());
+  return std::make_unique<MainMessageLoopExternalPumpMac>();
 }

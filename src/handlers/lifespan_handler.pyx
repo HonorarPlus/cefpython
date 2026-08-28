@@ -34,6 +34,7 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
         CefWindowInfo& windowInfo,
         CefRefPtr[CefClient]& client,
         CefBrowserSettings& settings,
+        CefRefPtr[CefDictionaryValue]& extraInfo,
         cpp_bool* noJavascriptAccess
         ) except * with gil:
     # Empty place-holders: popupFeatures, client.
@@ -67,6 +68,7 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
                     window_info_out=pyWindowInfo,
                     client=None,
                     browser_settings_out=pyBrowserSettings,
+                    extra_info=None,
                     no_javascript_access_out=pyNoJavascriptAccess))
             noJavascriptAccess[0] = <cpp_bool>bool(pyNoJavascriptAccess[0])
             if len(pyBrowserSettings):
@@ -133,13 +135,13 @@ cdef public void LifespanHandler_OnBeforeClose(
         # GetCookieManager to implement custom cookie managers then
         # flushing of cookies would need to be handled manually.
         cefBrowser.get().GetHost().get().GetRequestContext().get() \
-                .GetDefaultCookieManager(
-                        <CefRefPtr[CefCompletionCallback]?>NULL) \
-                .get().FlushStore(<CefRefPtr[CefCompletionCallback]?>NULL)
+                .GetCookieManager(
+                        <CefRefPtr[CefCompletionCallback]?>nullptr) \
+                .get().FlushStore(<CefRefPtr[CefCompletionCallback]?>nullptr)
 
         browserId = pyBrowser.GetIdentifier()
-        pyBrowser.cefBrowser.Assign(NULL)
-        cefBrowser.Assign(NULL)
+        pyBrowser.cefBrowser.reset()
+        cefBrowser.reset()
         del pyBrowser
 
         RemovePythonCallbacksForBrowser(browserId)
@@ -149,7 +151,10 @@ cdef public void LifespanHandler_OnBeforeClose(
         if g_MessageLoop_called and not len(g_pyBrowsers):
             # Automatically quit message loop when last browser was closed.
             # This is required for hello_world.py example to work.
-            PostTask(TID_UI, QuitMessageLoop)
+            # OnBeforeClose already runs on CEF's UI thread. Calling directly
+            # also accepts Cython 3 function objects, which PostTask's legacy
+            # function-type check rejects on Python 3.14.
+            QuitMessageLoop()
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

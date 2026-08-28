@@ -4,6 +4,8 @@
 
 include "cefpython.pyx"
 
+cimport cef_types
+
 cdef void SetCefWindowInfo(
         CefWindowInfo& cefWindowInfo,
         WindowInfo windowInfo
@@ -18,8 +20,10 @@ cdef void SetCefWindowInfo(
             # raise Exception("WindowInfo: parentWindowHandle is not set")
             pass
 
+    IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
+        cdef CefRect windowRect
     IF UNAME_SYSNAME == "Windows":
-        cdef RECT windowRect
+        cdef RECT rect2
         cdef CefString windowName
     ELIF UNAME_SYSNAME == "Linux":
         cdef CefRect windowRect
@@ -28,23 +32,32 @@ cdef void SetCefWindowInfo(
     if windowInfo.windowType == "child":
         IF UNAME_SYSNAME == "Windows":
             if windowInfo.windowRect:
-                windowRect.left = int(windowInfo.windowRect[0])
-                windowRect.top = int(windowInfo.windowRect[1])
-                windowRect.right = int(windowInfo.windowRect[2])
-                windowRect.bottom = int(windowInfo.windowRect[3])
-            else:
-                GetClientRect(<CefWindowHandle>windowInfo.parentWindowHandle,
-                              &windowRect)
-            cefWindowInfo.SetAsChild(
-                    <CefWindowHandle>windowInfo.parentWindowHandle,
-                    windowRect)
-        ELIF UNAME_SYSNAME == "Darwin":
-            cefWindowInfo.SetAsChild(
-                    <CefWindowHandle>windowInfo.parentWindowHandle,
+                windowRect = CefRect(
                     int(windowInfo.windowRect[0]),
                     int(windowInfo.windowRect[1]),
                     int(windowInfo.windowRect[2]),
                     int(windowInfo.windowRect[3]))
+            else:
+                GetClientRect(<CefWindowHandle>windowInfo.parentWindowHandle,
+                              &rect2)
+                windowRect = CefRect(
+                    int(rect2.left),
+                    int(rect2.top),
+                    int(rect2.right),
+                    int(rect2.bottom))
+                              
+            cefWindowInfo.SetAsChild(
+                    <CefWindowHandle>windowInfo.parentWindowHandle,
+                    windowRect)
+        ELIF UNAME_SYSNAME == "Darwin":
+            windowRect = CefRect(
+                    int(windowInfo.windowRect[0]),
+                    int(windowInfo.windowRect[1]),
+                    int(windowInfo.windowRect[2]),
+                    int(windowInfo.windowRect[3]))
+            cefWindowInfo.SetAsChild(
+                    <CefWindowHandle>windowInfo.parentWindowHandle,
+                    windowRect)
         ELIF UNAME_SYSNAME == "Linux":
             x = int(windowInfo.windowRect[0])
             y = int(windowInfo.windowRect[1])
@@ -66,15 +79,32 @@ cdef void SetCefWindowInfo(
     if windowInfo.windowType == "offscreen":
         cefWindowInfo.SetAsWindowless(
                 <CefWindowHandle>windowInfo.parentWindowHandle)
+    IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin" or UNAME_SYSNAME == "Linux":
+        if windowInfo.runtimeStyle == "chrome":
+            cefWindowInfo.runtime_style = cef_types.CEF_RUNTIME_STYLE_CHROME
+        elif windowInfo.runtimeStyle == "default":
+            cefWindowInfo.runtime_style = cef_types.CEF_RUNTIME_STYLE_DEFAULT
+        else:
+            # Preserve CEFPython's historical Alloy behavior for windowed apps.
+            cefWindowInfo.runtime_style = cef_types.CEF_RUNTIME_STYLE_ALLOY
+
+    IF UNAME_SYSNAME == "Windows":
+        if windowInfo.initiallyHidden:
+            # CefWindowInfo::SetAsPopup/SetAsChild add WS_VISIBLE by default.
+            cefWindowInfo.style &= ~<cef_types.uint32>0x10000000
 
 cdef class WindowInfo:
     cdef public str windowType
     cdef public WindowHandle parentWindowHandle
     cdef public list windowRect # [left, top, right, bottom]
     cdef public py_string windowName
+    cdef public str runtimeStyle
+    cdef public py_bool initiallyHidden
 
     def __init__(self, title=""):
-        self.windowName = ""
+        self.windowName = str("")
+        self.runtimeStyle = "chrome" if GetAppSetting("chrome_runtime") else "alloy"
+        self.initiallyHidden = False
         if title:
             self.windowName = title
 
@@ -86,7 +116,7 @@ cdef class WindowInfo:
             # On Windows when parent window handle is 0 then SetAsPopup()
             # must be called instead.
             if parentWindowHandle == 0:
-                self.SetAsPopup(parentWindowHandle, "")
+                self.SetAsPopup(parentWindowHandle, str(""))
                 return
         if parentWindowHandle != 0\
                 and not WindowUtils.IsWindowHandle(parentWindowHandle):
@@ -129,6 +159,23 @@ cdef class WindowInfo:
         self.parentWindowHandle = parentWindowHandle
         self.windowType = "offscreen"
 
+    cpdef py_void SetRuntimeStyle(self, str runtime_style):
+        """Set the per-browser runtime style."""
+        runtime_style = runtime_style.lower()
+        if runtime_style not in ("alloy", "chrome", "default"):
+            raise ValueError("runtime_style must be 'alloy', 'chrome', or 'default'")
+        if self.windowType == "offscreen" and runtime_style == "chrome":
+            raise ValueError("Windowless browsers require the Alloy runtime style")
+        self.runtimeStyle = runtime_style
+
+    cpdef py_void SetInitiallyHidden(self, py_bool initially_hidden):
+        """Create a Windows browser without showing its native window."""
+        IF UNAME_SYSNAME == "Windows":
+            self.initiallyHidden = bool(initially_hidden)
+        ELSE:
+            if initially_hidden:
+                raise NotImplementedError("Initially hidden windows are currently supported only on Windows")
+
     cpdef py_void SetTransparentPainting(self,
             py_bool transparentPainting):
         """Deprecated."""
@@ -138,4 +185,3 @@ cdef class WindowInfo:
         else:
             raise Exception("This method is deprecated since v66, see "
                             "Migration Guide document.")
-

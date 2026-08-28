@@ -17,18 +17,14 @@ Available in upstream CEF, but not yet exposed to CEF Python:
 Table of contents:
 * [Callbacks](#callbacks)
   * [CanGetCookies](#cangetcookies)
-  * [CanSetCookie](#cansetcookie)
   * [GetAuthCredentials](#getauthcredentials)
   * [GetCookieManager](#getcookiemanager)
   * [GetResourceHandler](#getresourcehandler)
   * [OnBeforeBrowse](#onbeforebrowse)
-  * [_OnBeforePluginLoad](#_onbeforepluginload)
   * [OnBeforeResourceLoad](#onbeforeresourceload)
   * [_OnCertificateError](#_oncertificateerror)
   * [OnQuotaRequest](#onquotarequest)
   * [OnResourceRedirect](#onresourceredirect)
-  * [OnResourceResponse](#onresourceresponse)
-  * [OnPluginCrashed](#onplugincrashed)
   * [OnProtocolExecution](#onprotocolexecution)
   * [OnRendererProcessTerminated](#onrendererprocessterminated)
 
@@ -52,29 +48,12 @@ Description from upstream CEF:
 > modified in this callback.
 
 
-### CanSetCookie
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| frame | [Frame](Frame.md) |
-| request | [Request](Request.md) |
-| cookie | [Cookie](Cookie.md) |
-| __Return__ | bool |
-
-Description from upstream CEF:
-> Called on the IO thread when receiving a network request with a
-> "Set-Cookie" response header value represented by |cookie|. Return true to
-> allow the cookie to be stored or false to block the cookie. The |request|
-> object should not be modified in this callback.
-
-
 ### GetAuthCredentials
 
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| frame | [Frame](Frame.md) |
+| origin_url | string |
 | is_proxy | bool |
 | host | string |
 | port | int |
@@ -190,48 +169,6 @@ Description from upstream CEF:
 > navigated automatically (e.g. via the DomContentLoaded event).
 
 
-### _OnBeforePluginLoad
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| mime_type | string |
-| plugin_url | string |
-| is_main_frame | bool |
-| top_origin_url | string |
-| plugin_info | [WebPluginInfo](WebPluginInfo.md) |
-| __Return__ | bool |
-
-Description from upstream CEF:
-> Called on multiple browser process threads before a plugin instance is
-> loaded. |mime_type| is the mime type of the plugin that will be loaded.
-> |plugin_url| is the content URL that the plugin will load and may be empty.
-> |is_main_frame| will be true if the plugin is being loaded in the main
-> (top-level) frame, |top_origin_url| is the URL for the top-level frame that
-> contains the plugin when loading a specific plugin instance or empty when
-> building the initial list of enabled plugins for 'navigator.plugins'
-> JavaScript state. |plugin_info| includes additional information about the
-> plugin that will be loaded. |plugin_policy| is the recommended policy.
-> Modify |plugin_policy| and return true to change the policy. Return false
-> to use the recommended policy. The default plugin policy can be set at
-> runtime using the `--plugin-policy=[allow|detect|block]` command-line flag.
-> Decisions to mark a plugin as disabled by setting |plugin_policy| to
-> PLUGIN_POLICY_DISABLED may be cached when |top_origin_url| is empty. To
-> purge the plugin list cache and potentially trigger new calls to this
-> method call CefRequestContext::PurgePluginListCache.
-
-Return True to block loading of the plugin.
-
-This callback will be executed during browser creation, thus you must
-call [cefpython](cefpython.md).SetGlobalClientCallback() to use it.
-The callback name was prefixed with "`_`" to distinguish this special
-behavior.
-
-Plugins are loaded on demand, only when website requires it.
-This callback is called every time the page tries to load a plugin
-(perhaps even multiple times per plugin).
-
-
 ### OnBeforeResourceLoad
 
 | Parameter | Type |
@@ -261,13 +198,11 @@ it. The callback name was prefixed with "`_`" to distinguish this
 special behavior.
 
 Called on the UI thread to handle requests for URLs with an invalid
-SSL certificate. Return true and call CefRequestCallback::Continue() either
+SSL certificate. Return true and call CefCallback::Continue() either
 in this method or at a later time to continue or cancel the request. Return
-false to cancel the request immediately. If
-CefSettings.ignore_certificate_errors is set all invalid certificates will
-be accepted without calling this method.
+false to cancel the request immediately.
 
-The `RequestCallback` object methods:
+The `CefCallback` object methods:
   * void Continue(bool allow)
   * void Cancel()
 
@@ -286,10 +221,10 @@ Called on the IO thread when javascript requests a specific storage quota
 size via the `webkitStorageInfo.requestQuota` function. |origin_url| is the
 origin of the page making the request. |new_size| is the requested quota
 size in bytes. Return true to continue the request and call
-CefRequestCallback::Continue() either in this method or at a later time to
+CefCallback::Continue() either in this method or at a later time to
 grant or deny the request. Return false to cancel the request immediately.
 
-The `RequestCallback` object methods:
+The `CefCallback` object methods:
 * void Continue(bool allow)
 * void Cancel()
 
@@ -315,41 +250,13 @@ Description from upstream CEF:
 > callback.
 
 
-### OnResourceResponse
-
-| | |
-| --- | --- |
-| __Return__ | void |
-
-Available in upstream CEF, but not yet exposed to CEF Python.
-See Issue #229.
-
-You can implement this functionality by using
-[ResourceHandler](ResourceHandler.md) and [WebRequest](WebRequest.md)
-/ [WebRequestClient](WebRequestClient.md). For an example see the
-_OnResourceResponse() method in the old v31 [wxpython-response.py]
-example.
-
-
-### OnPluginCrashed
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| plugin_path | string |
-| __Return__ | void |
-
-Called when a plugin has crashed. |plugin_path| is the path of the plugin
-that crashed.
-
-
 ### OnProtocolExecution
 
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| url | string |
-| allow_execution_out | list[bool] |
+| frame | [Frame](Frame.md) |
+| allow_execution_out | [Request](Request.md) |
 | __Return__ | void |
 
 Called on the UI thread to handle requests for URLs with an unknown
@@ -380,3 +287,4 @@ how the process terminated.
   * TS_ABNORMAL_TERMINATION - Non-zero exit status.
   * TS_PROCESS_WAS_KILLED - SIGKILL or task manager kill.
   * TS_PROCESS_CRASHED - Segmentation fault.
+  * TS_PROCESS_OOM - Out of memory. Some platforms may use TS_PROCESS_CRASHED instead.

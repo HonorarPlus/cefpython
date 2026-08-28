@@ -7,7 +7,7 @@ class PdfPrintCallback : public CefPdfPrintCallback
   public:
     PdfPrintCallback(CefRefPtr<CefBrowser> browser)
         : browser_(browser) {}
-    virtual void OnPdfPrintFinished(const CefString& path, bool ok) OVERRIDE;
+    virtual void OnPdfPrintFinished(const CefString& path, bool ok) override;
 
   protected:
     CefRefPtr<CefBrowser> browser_;

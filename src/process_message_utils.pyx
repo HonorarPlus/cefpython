@@ -22,7 +22,7 @@ cdef object CheckForCefPythonMessageHash(CefRefPtr[CefBrowser] cefBrowser,
     # TODO: this could be sent using CefBinaryNamedString in the future,
     #       see this topic "Sending custom data types using process messaging":
     #       http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10881
-    cdef py_string cefPythonMessageHash = "####cefpython####"
+    cdef py_string cefPythonMessageHash = str("####cefpython####")
     cdef JavascriptCallback jsCallback
     cdef py_string jsonData
     cdef object message
@@ -56,12 +56,12 @@ cdef object CefValueToPyValue(CefRefPtr[CefValue] cefValue):
         return CefToPyString(cefValue.get().GetString())
     elif valueType == cef_types.VTYPE_DICTIONARY:
         return CefDictionaryValueToPyDict(
-                <CefRefPtr[CefBrowser]>NULL,
+                <CefRefPtr[CefBrowser]>nullptr,
                 cefValue.get().GetDictionary(),
                 1)
     elif valueType == cef_types.VTYPE_LIST:
         return CefListValueToPyList(
-                <CefRefPtr[CefBrowser]>NULL,
+                <CefRefPtr[CefBrowser]>nullptr,
                 cefValue.get().GetList(),
                 1)
     elif valueType == cef_types.VTYPE_BINARY:
@@ -92,8 +92,8 @@ cdef list CefListValueToPyList(
     if nestingLevel > 8:
         raise Exception("CefListValueToPyList(): max nesting level (8)"
                 " exceeded")
-    cdef size_t index
-    cdef size_t size = cefListValue.get().GetSize()
+    cdef int index
+    cdef int size = int(cefListValue.get().GetSize())
     cdef cef_types.cef_value_type_t valueType
     cdef list ret = []
     cdef CefRefPtr[CefBinaryValue] binaryValue
@@ -230,7 +230,7 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
     cdef type valueType
     cdef CefRefPtr[CefListValue] ret = CefListValue_Create()
     cdef CefRefPtr[CefBinaryValue] binaryValue
-    cdef size_t index
+    cdef int index
     for index_size_t, value in enumerate(pyList):
         index = int(index_size_t)
         valueType = type(value)
@@ -289,7 +289,7 @@ cdef void PyListToExistingCefListValue(
                 " exceeded")
     cdef type valueType
     cdef CefRefPtr[CefListValue] newCefListValue
-    cdef size_t index
+    cdef int index
     for index_size_t, value in enumerate(pyList):
         index = int(index_size_t)
         valueType = type(value)

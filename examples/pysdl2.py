@@ -224,7 +224,6 @@ def main():
     browser.SetClientHandler(renderHandler)
     # Must call WasResized at least once to let know CEF that
     # viewport size is available and that OnPaint may be called.
-    browser.SendFocusEvent(True)
     browser.WasResized()
 
     # Begin the main rendering loop
@@ -500,7 +499,6 @@ class RenderHandler(object):
 
     def GetViewRect(self, rect_out, **_):
         rect_out.extend([0, 0, self.__width, self.__height])
-        return True
 
     def OnPaint(self, element_type, paint_buffer, **_):
         """

@@ -46,11 +46,10 @@ public:
                  const void* buffer,
                  int width, int height) override;
 
-    void OnCursorChange(CefRefPtr<CefBrowser> browser,
-                        CefCursorHandle cursor,
-                        CursorType type,
-                        const CefCursorInfo& custom_cursor_info
-                        ) override;
+    void OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
+                            PaintElementType type,
+                            const RectList& dirtyRects,
+                            const CefAcceleratedPaintInfo& paint_info) override;
 
     void OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser,
                                double x,

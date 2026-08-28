@@ -39,8 +39,12 @@ def main(file_arg=""):
     # type: (str) -> None
     """Main entry point."""
 
-    # Set working dir to script's current
-    os.chdir(dirname(realpath(__file__)))
+    # Set working dir to the script and make repository tools importable.
+    tests_dir = dirname(realpath(__file__))
+    repository_dir = dirname(tests_dir)
+    if repository_dir not in sys.path:
+        sys.path.insert(0, repository_dir)
+    os.chdir(tests_dir)
 
     # Script arguments
     testcase_arg = ""

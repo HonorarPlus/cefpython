@@ -18,46 +18,8 @@ bool RequestHandler::OnBeforeBrowse(CefRefPtr<CefBrowser> browser,
 }
 
 
-ReturnValue RequestHandler::OnBeforeResourceLoad(
-                                        CefRefPtr<CefBrowser> browser,
-                                        CefRefPtr<CefFrame> frame,
-                                        CefRefPtr<CefRequest> request,
-                                        CefRefPtr<CefRequestCallback> callback)
-{
-    REQUIRE_IO_THREAD();
-    bool retval = RequestHandler_OnBeforeResourceLoad(browser, frame, request);
-    if (retval) {
-        return RV_CANCEL;
-    } else {
-        return RV_CONTINUE;
-    }
-}
-
-
-CefRefPtr<CefResourceHandler> RequestHandler::GetResourceHandler(
-                                                CefRefPtr<CefBrowser> browser,
-                                                CefRefPtr<CefFrame> frame,
-                                                CefRefPtr<CefRequest> request)
-{
-    REQUIRE_IO_THREAD();
-    return RequestHandler_GetResourceHandler(browser, frame, request);
-}
-
-
-void RequestHandler::OnResourceRedirect(CefRefPtr<CefBrowser> browser,
-                                        CefRefPtr<CefFrame> frame,
-                                        CefRefPtr<CefRequest> request,
-                                        CefRefPtr<CefResponse> response,
-                                        CefString& new_url)
-{
-    REQUIRE_IO_THREAD();
-    RequestHandler_OnResourceRedirect(browser, frame, request->GetURL(),
-                                      new_url, request, response);
-}
-
-
 bool RequestHandler::GetAuthCredentials(CefRefPtr<CefBrowser> browser,
-                                        CefRefPtr<CefFrame> frame,
+                                        const CefString& origin_url,
                                         bool isProxy,
                                         const CefString& host,
                                         int port,
@@ -66,26 +28,8 @@ bool RequestHandler::GetAuthCredentials(CefRefPtr<CefBrowser> browser,
                                         CefRefPtr<CefAuthCallback> callback)
 {
     REQUIRE_IO_THREAD();
-    return RequestHandler_GetAuthCredentials(browser, frame, isProxy, host,
+    return RequestHandler_GetAuthCredentials(browser, origin_url, isProxy, host,
                                              port, realm, scheme, callback);
-}
-
-
-bool RequestHandler::OnQuotaRequest(CefRefPtr<CefBrowser> browser,
-                                    const CefString& origin_url,
-                                    int64 new_size,
-                                    CefRefPtr<CefRequestCallback> callback) {
-    REQUIRE_IO_THREAD();
-    return RequestHandler_OnQuotaRequest(browser, origin_url, new_size,
-                                         callback);
-}
-
-
-void RequestHandler::OnProtocolExecution(CefRefPtr<CefBrowser> browser,
-                                         const CefString& url,
-                                         bool& allow_os_execution) {
-    REQUIRE_UI_THREAD();
-    RequestHandler_OnProtocolExecution(browser, url, allow_os_execution);
 }
 
 
@@ -94,7 +38,7 @@ bool RequestHandler::OnCertificateError(
                                   cef_errorcode_t cert_error,
                                   const CefString& request_url,
                                   CefRefPtr<CefSSLInfo> ssl_info, // not used
-                                  CefRefPtr<CefRequestCallback> callback)
+                                  CefRefPtr<CefCallback> callback)
 {
     REQUIRE_UI_THREAD();
     return RequestHandler_OnCertificateError(cert_error, request_url,
@@ -103,7 +47,9 @@ bool RequestHandler::OnCertificateError(
 
 
 void RequestHandler::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
-                                               cef_termination_status_t status)
+                                               cef_termination_status_t status,
+                                               int error_code,
+                                               const CefString& error_string)
 {
     REQUIRE_UI_THREAD();
     LOG(ERROR) << "[Browser process] OnRenderProcessTerminated()";
@@ -111,24 +57,48 @@ void RequestHandler::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
 }
 
 
-void RequestHandler::OnPluginCrashed(CefRefPtr<CefBrowser> browser,
-                                     const CefString& plugin_path)
+ReturnValue ResourceRequestHandler::OnBeforeResourceLoad(
+                                        CefRefPtr<CefBrowser> browser,
+                                        CefRefPtr<CefFrame> frame,
+                                        CefRefPtr<CefRequest> request,
+                                        CefRefPtr<CefCallback> callback)
 {
+    REQUIRE_IO_THREAD();
+    bool retval = ResourceRequestHandler_OnBeforeResourceLoad(browser, frame, request);
+    if (retval) {
+        return RV_CANCEL;
+    } else {
+        return RV_CONTINUE;
+    }
+}
+
+
+CefRefPtr<CefResourceHandler> ResourceRequestHandler::GetResourceHandler(
+                                                CefRefPtr<CefBrowser> browser,
+                                                CefRefPtr<CefFrame> frame,
+                                                CefRefPtr<CefRequest> request)
+{
+    REQUIRE_IO_THREAD();
+    return ResourceRequestHandler_GetResourceHandler(browser, frame, request);
+}
+
+
+void ResourceRequestHandler::OnResourceRedirect(CefRefPtr<CefBrowser> browser,
+                                        CefRefPtr<CefFrame> frame,
+                                        CefRefPtr<CefRequest> request,
+                                        CefRefPtr<CefResponse> response,
+                                        CefString& new_url)
+{
+    REQUIRE_IO_THREAD();
+    ResourceRequestHandler_OnResourceRedirect(browser, frame, request->GetURL(),
+                                      new_url, request, response);
+}
+
+
+void ResourceRequestHandler::OnProtocolExecution(CefRefPtr<CefBrowser> browser,
+                                         CefRefPtr<CefFrame> frame,
+                                         CefRefPtr<CefRequest> request,
+                                         bool& allow_os_execution) {
     REQUIRE_UI_THREAD();
-    RequestHandler_OnPluginCrashed(browser, plugin_path);
-}
-
-bool RequestHandler::CanGetCookies(CefRefPtr<CefBrowser> browser,
-                                   CefRefPtr<CefFrame> frame,
-                                   CefRefPtr<CefRequest> request) {
-    REQUIRE_IO_THREAD();
-    return RequestHandler_CanGetCookies(browser, frame, request);
-}
-
-bool RequestHandler::CanSetCookie(CefRefPtr<CefBrowser> browser,
-                                  CefRefPtr<CefFrame> frame,
-                                  CefRefPtr<CefRequest> request,
-                                  const CefCookie& cookie) {
-    REQUIRE_IO_THREAD();
-    return RequestHandler_CanSetCookie(browser, frame, request, cookie);
+    ResourceRequestHandler_OnProtocolExecution(browser, frame, request, allow_os_execution);
 }

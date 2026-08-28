@@ -49,10 +49,11 @@ def ExceptHook(exc_type, exc_value, exc_trace):
 
 cpdef str GetModuleDirectory():
     """Get path to the cefpython module (so/pyd)."""
-    if platform.system() == "Linux" and os.getenv("CEFPYTHON3_PATH"):
-        # cefpython3 package __init__.py sets CEFPYTHON3_PATH.
-        # When cefpython3 is installed as debian package, this
-        # env variable is the only way of getting valid path.
+    if os.getenv("CEFPYTHON3_PATH"):
+        # The cefpython3 package sets CEFPYTHON3_PATH before importing this
+        # extension. In frozen applications __file__ may point at the
+        # executable instead of the package, so prefer the package-owned path
+        # on every platform.
         return os.getenv("CEFPYTHON3_PATH")
     if hasattr(sys, "frozen"):
         path = os.path.dirname(sys.executable)

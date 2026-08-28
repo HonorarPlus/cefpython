@@ -4,10 +4,8 @@
 
 """
 Create setup.py package installer.
-
 Usage:
     make_installer.py VERSION [--wheel] [--python-tag xx] [--universal]
-
 Options:
     VERSION  Version number eg. 50.0
     --wheel  Generate wheel package.
@@ -20,6 +18,7 @@ from common import *
 
 import glob
 import os
+import plistlib
 import re
 import shutil
 import subprocess
@@ -84,7 +83,17 @@ def main():
         (EXAMPLES_DIR, "*"), (SETUP_DIR, "examples/"),
     ]
     perform_copy_operations(copy_operations)
-    delete_cef_sample_apps(caller_script=__file__, bin_dir=PKG_DIR)
+    for sample_app_name in CEF_SAMPLE_APPS + ["bootstrap", "bootstrapc"]:
+        sample_app_path = os.path.join(PKG_DIR, sample_app_name + APP_EXT)
+        if os.path.exists(sample_app_path):
+            os.remove(sample_app_path)
+    expected_module = MODULE_NAME
+    for module_path in glob.glob(os.path.join(PKG_DIR, "cefpython_py*." + MODULE_EXT)):
+        if os.path.basename(module_path) != expected_module:
+            os.remove(module_path)
+
+    if MAC:
+        prepare_macos_app_bundle(PKG_DIR)
 
     # Linux only operations
     if LINUX:
@@ -96,11 +105,6 @@ def main():
             (SETUP_DIR, "examples/kivy-select-boxes/")
         ]
         perform_copy_operations(copy_operations_linux)
-
-    # Create empty debug.log files so that package uninstalls cleanly
-    # in case examples or CEF tests were launched. See Issue #149.
-    create_empty_log_file(os.path.join(PKG_DIR, "debug.log"))
-    create_empty_log_file(os.path.join(PKG_DIR, "examples/debug.log"))
 
     copy_cpp_extension_dependencies_issue359(PKG_DIR)
 
@@ -125,6 +129,61 @@ def main():
         assert len(files) == 1
         print("[make_installer.py] Done. Wheel package created: {0}"
               .format(files[0]))
+
+
+def prepare_macos_app_bundle(pkg_dir):
+    """Place CEF in Chromium's required sandbox-compatible app layout."""
+    bundle_name = "cefpython3.app"
+    bundle_dir = os.path.join(pkg_dir, bundle_name)
+    contents_dir = os.path.join(bundle_dir, "Contents")
+    frameworks_dir = os.path.join(contents_dir, "Frameworks")
+    macos_dir = os.path.join(contents_dir, "MacOS")
+    os.makedirs(frameworks_dir)
+    os.makedirs(macos_dir)
+
+    nested_bundles = [
+        "Chromium Embedded Framework.framework",
+        "cefpython3 Helper.app",
+        "cefpython3 Helper (GPU).app",
+        "cefpython3 Helper (Renderer).app",
+        "cefpython3 Helper (Plugin).app",
+        "cefpython3 Helper (Alerts).app",
+    ]
+    for nested_bundle in nested_bundles:
+        source = os.path.join(pkg_dir, nested_bundle)
+        if not os.path.exists(source):
+            raise Exception("Missing macOS bundle: {0}".format(source))
+        shutil.move(source, frameworks_dir)
+
+    # A valid main bundle is required even when Python itself was launched
+    # from a terminal or another host application. This executable is only a
+    # bundle anchor; CEF launches the dedicated helpers above.
+    main_executable = os.path.join(macos_dir, "cefpython3")
+    shutil.copy(os.path.join(pkg_dir, "subprocess"), main_executable)
+    os.chmod(main_executable, 0o755)
+
+    info_plist = {
+        "CFBundleDevelopmentRegion": "en",
+        "CFBundleDisplayName": "CEF Python 3",
+        "CFBundleExecutable": "cefpython3",
+        "CFBundleIdentifier": "org.cefpython.cefpython3",
+        "CFBundleInfoDictionaryVersion": "6.0",
+        "CFBundleName": "cefpython3",
+        "CFBundlePackageType": "APPL",
+        "CFBundleShortVersionString": VERSION,
+        "CFBundleVersion": VERSION,
+        "LSMinimumSystemVersion": "12.0",
+        "LSUIElement": True,
+        "NSHighResolutionCapable": True,
+    }
+    with open(os.path.join(contents_dir, "Info.plist"), "wb") as plist_file:
+        plistlib.dump(info_plist, plist_file)
+
+    # Local development uses an ad-hoc recursive signature. Distributors can
+    # replace it with a Developer ID signature during their manual release.
+    subprocess.check_call([
+        "codesign", "--force", "--deep", "--sign", "-", bundle_dir,
+    ])
 
 
 def command_line_args():
@@ -164,6 +223,10 @@ def copy_tools_installer_files(setup_dir, pkg_dir):
         os.path.join(INSTALLER_DIR, "cefpython3.__init__.py"),
         os.path.join(pkg_dir, "__init__.py"),
         variables)
+
+    shutil.copy(
+        os.path.join(INSTALLER_DIR, "cefpython3.cx_freeze.py"),
+        os.path.join(pkg_dir, "cx_freeze.py"))
 
 
 def copy_template_file(src, dst, variables):
@@ -319,23 +382,6 @@ def delete_files_by_pattern(pattern):
         os.remove(f)
 
 
-def create_empty_log_file(log_file):
-    # Normalize unix slashes on Windows
-    log_file = log_file.replace("/", os.path.sep)
-    print("[make_installer.py] Create: {file}"
-          .format(file=short_dst_path(log_file)))
-    with open(log_file, "wb") as fo:
-        fo.write("".encode("utf-8"))
-    # On Linux and Mac chmod so that for cases when package is
-    # installed using sudo. When wheel package is created it
-    # will remember file permissions set.
-    if LINUX or MAC:
-        command = "chmod 666 {file}".format(file=log_file)
-        print("[make_installer.py] {command}"
-              .format(command=command.replace(SETUP_DIR, "")))
-        subprocess.check_call(command, shell=True)
-
-
 def copy_cpp_extension_dependencies_issue359(pkg_dir):
     """CEF Python module is written in Cython and is a Python C++
     extension and depends on msvcpXX.dll. For Python 3.5 / 3.6 / 3.7
@@ -365,10 +411,18 @@ def copy_cpp_extension_dependencies_issue359(pkg_dir):
     # in the package. Thus if included, msvcpxx.dll dependency is
     # required as well.
 
-    # Python 3.5 / 3.6 / 3.7
+
+    # Python 3.5 / 3.6 / 3.7 / 3.8 / 3.9 / 3.10 / 3.11
     if os.path.exists(os.path.join(pkg_dir, "cefpython_py35.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py36.pyd")) \
-            or os.path.exists(os.path.join(pkg_dir, "cefpython_py37.pyd")):
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py37.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py38.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py39.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py310.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py311.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py312.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py313.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py314.pyd")):
         search_paths = [
             # This is where Microsoft Visual C++ 2015 Update 3 installs
             # (14.00.24212).
